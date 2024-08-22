@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 )
 
 type Pos struct {
@@ -85,8 +84,8 @@ func (trk *Trk) setVitesse(v float64) {
 
 func (trk *Trk) calcDuration() {
 	(*trk).Duration = (*trk).DistanceEffort / (*trk).Vitesse
-	(*trk).DurationHour = math.Floor((*trk).Duration)
-	(*trk).DurationMin = ((*trk).Duration - (*trk).DurationHour) * 60
+	(*trk).DurationHour, (*trk).DurationMin = floatToHourMin((*trk).Duration)
+	// (*trk).DurationMin = ((*trk).Duration - (*trk).DurationHour) * 60
 }
 
 func (trk *Trk) calcAll() {
@@ -110,6 +109,6 @@ func (trk Trk) Info() {
 	fmt.Printf("Distance effort:        %.1f km\n", trk.DistanceEffort)
 
 	fmt.Printf("Vitesse sur plat:       %.0f km/h\n", trk.Vitesse)
-	fmt.Printf("Temps parcours estimé:  %.0fh%.0f\n", trk.DurationHour, trk.DurationMin)
+	fmt.Printf("Temps parcours estimé:  %vh%v\n", trk.DurationHour, trk.DurationMin)
 
 }

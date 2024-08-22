@@ -10,8 +10,8 @@ type Trk struct {
 	DenivNegEffort float64 "Conversion du denivele negatif en km effort"
 	DistanceEffort float64 "Distance équivalente sur plat en incluant le dénivelé"
 	Duration float64       "Estimation de temps de marche"
-	DurationHour float64
-	DurationMin  float64
+	DurationHour int8
+	DurationMin  int8
 
 	Vitesse float64 	   "Vitesse de marche sur plat (km/h)"
 

@@ -34,6 +34,12 @@ func diffElevation(p1 Pos, p2 Pos) float64 {
 	return p2.Ele - p1.Ele
 }
 
+func floatToHourMin(f float64) (int8, int8) {
+	hour := math.Floor(f)
+	minute := math.Floor((f - hour) * 60)
+	return int8(hour), int8(minute)
+}
+
 func calcDistanceEffort(distance float64, denivPos float64, denivNeg float64) float64 {
 	denivPosEffort := denivPos / 100.0  // 100m D+ = 1km plat
 	denivNegEffort := denivNeg / 300.0  // 300m D- = 1km plat

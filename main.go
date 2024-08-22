@@ -30,7 +30,8 @@ func main() {
 
 			km_effort := km + (denivPos / 100.0) + math.Abs(denivNeg / 300.0)
 			duration := km_effort / vitessePlat
-			fmt.Println(duration, "heures")
+			h, m := floatToHourMin(duration) 
+			fmt.Println(h, "h", m, "m")
 			os.Exit(0)
 		}
 
