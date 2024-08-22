@@ -3,5 +3,6 @@
 *.txt
 
 .envrc
+*.save
 
 note.md
