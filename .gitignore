@@ -2,4 +2,6 @@
 *.gpx
 *.txt
 
+.envrc
+
 note.md
