@@ -94,10 +94,17 @@ func (trk *Trk) calcAll() {
 	(*trk).calcDuration()
 }
 
-func (trk Trk) Info() {
-	// fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", trk.Name)
-	fmt.Printf("Track name: %v\n", trk.Name)
-	// fmt.Printf("Track name: %v\n", trk.Name)
+func (trk Trk) Info(ascii_format ...bool) {
+	if len(ascii_format) > 0 {
+		if ascii_format[0] {
+			fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", trk.Name)
+		} else {
+			fmt.Printf("Track name: %v\n", trk.Name)
+		}
+	} else {
+		fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", trk.Name)
+	}
+
 	fmt.Println("Number of points: ", len(trk.Trkseg.Trkpt))
 
 	fmt.Printf("Distance:               %.1f km\n", trk.Distance)

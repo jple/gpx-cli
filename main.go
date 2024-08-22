@@ -55,6 +55,12 @@ func main() {
 
 		}
 		if os.Args[1] == "info" {
+			var ascii_format bool
+			if len(os.Args) > 2 {
+				ascii_format, _ = strconv.ParseBool(os.Args[2])
+			} else {
+				ascii_format = true
+			}
 
 			var gpx Gpx
 			gpx.ParseFile(gpxFilename)
@@ -63,7 +69,7 @@ func main() {
 				trk.setVitesse(4.0)
 
 				trk.calcAll()
-				trk.Info()
+				trk.Info(ascii_format)
 
 				fmt.Println()
 			}
