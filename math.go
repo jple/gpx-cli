@@ -33,3 +33,9 @@ func dist(p1 Pos, p2 Pos) float64 {
 func diffElevation(p1 Pos, p2 Pos) float64 {
 	return p2.Ele - p1.Ele
 }
+
+func calcDistanceEffort(distance float64, denivPos float64, denivNeg float64) float64 {
+	denivPosEffort := denivPos / 100.0  // 100m D+ = 1km plat
+	denivNegEffort := denivNeg / 300.0  // 300m D- = 1km plat
+	return distance + denivPosEffort + math.Abs(denivNegEffort)
+}

@@ -65,13 +65,18 @@ func (trk *Trk) calcDistance() float64 {
 
 }
 
-func (trk *Trk) calcDenivEffort() {
-	(*trk).DenivPosEffort = (*trk).DenivPos / 100 // 100m D+ = 1km plat
-	(*trk).DenivNegEffort = (*trk).DenivNeg / 300 // 300m D- = 1km plat
-}
+// func (trk *Trk) calcDenivEffort() {
+// 	(*trk).DenivPosEffort = (*trk).DenivPos / 100 // 100m D+ = 1km plat
+// 	(*trk).DenivNegEffort = (*trk).DenivNeg / 300 // 300m D- = 1km plat
+// }
 
 func (trk *Trk) calcDistanceEffort() {
-	(*trk).DistanceEffort = (*trk).Distance + (*trk).DenivPosEffort + math.Abs((*trk).DenivNegEffort)
+	// (*trk).DistanceEffort = (*trk).Distance + (*trk).DenivPosEffort + math.Abs((*trk).DenivNegEffort)
+	(*trk).DistanceEffort = calcDistanceEffort(
+		(*trk).Distance,
+		(*trk).DenivPos,
+		(*trk).DenivNeg,
+	)
 }
 
 func (trk *Trk) setVitesse(v float64) {
@@ -87,13 +92,14 @@ func (trk *Trk) calcDuration() {
 func (trk *Trk) calcAll() {
 	(*trk).calcDistance()
 	(*trk).calcDeniv()
-	(*trk).calcDenivEffort()
+	// (*trk).calcDenivEffort()
 	(*trk).calcDistanceEffort()
 	(*trk).calcDuration()
 }
 
 func (trk Trk) Info() {
-	fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", trk.Name)
+	// fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", trk.Name)
+	fmt.Printf("Track name: %v\n", trk.Name)
 	// fmt.Printf("Track name: %v\n", trk.Name)
 	fmt.Println("Number of points: ", len(trk.Trkseg.Trkpt))
 

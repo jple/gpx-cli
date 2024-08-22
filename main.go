@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"math"
+	"strconv"
 )
 
 func main() {
-	gpxFilename := "./my.gpx"
+	gpxFilename := "./src/my.gpx"
 	_, err := os.Open(gpxFilename)
 	if err != nil {
 		log.Fatal(err)
@@ -16,6 +18,19 @@ func main() {
 	if len(os.Args) > 1 {
 		if os.Args[1] == "dist" {
 			fmt.Println(cli_dist())
+			os.Exit(0)
+		}
+
+		if os.Args[1] == "calc_effort" {
+			// WIP
+			km, _ := strconv.ParseFloat(os.Args[2], 64)
+			denivPos, _ := strconv.ParseFloat(os.Args[3], 64)
+			denivNeg, _ := strconv.ParseFloat(os.Args[4], 64)
+			vitessePlat := 4.0
+
+			km_effort := km + (denivPos / 100.0) + math.Abs(denivNeg / 300.0)
+			duration := km_effort / vitessePlat
+			fmt.Println(duration, "heures")
 			os.Exit(0)
 		}
 
