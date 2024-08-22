@@ -70,7 +70,6 @@ func (trk *Trk) calcDistance() float64 {
 // }
 
 func (trk *Trk) calcDistanceEffort() {
-	// (*trk).DistanceEffort = (*trk).Distance + (*trk).DenivPosEffort + math.Abs((*trk).DenivNegEffort)
 	(*trk).DistanceEffort = calcDistanceEffort(
 		(*trk).Distance,
 		(*trk).DenivPos,
@@ -85,7 +84,6 @@ func (trk *Trk) setVitesse(v float64) {
 func (trk *Trk) calcDuration() {
 	(*trk).Duration = (*trk).DistanceEffort / (*trk).Vitesse
 	(*trk).DurationHour, (*trk).DurationMin = floatToHourMin((*trk).Duration)
-	// (*trk).DurationMin = ((*trk).Duration - (*trk).DurationHour) * 60
 }
 
 func (trk *Trk) calcAll() {
