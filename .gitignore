@@ -3,6 +3,8 @@
 *.txt
 
 .envrc
+
+out/
 *.save
 
 note.md
