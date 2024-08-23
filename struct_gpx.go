@@ -3,25 +3,25 @@
 package main
 
 type Trk struct {
-	DenivPos float64
-	DenivNeg float64
-	Distance float64
+	DenivPos       float64
+	DenivNeg       float64
+	Distance       float64
 	DenivPosEffort float64 "Conversion du denivele positif en km effort"
 	DenivNegEffort float64 "Conversion du denivele negatif en km effort"
 	DistanceEffort float64 "Distance équivalente sur plat en incluant le dénivelé"
-	Duration float64       "Estimation de temps de marche"
-	DurationHour int8
-	DurationMin  int8
+	Duration       float64 "Estimation de temps de marche"
+	DurationHour   int8
+	DurationMin    int8
 
-	Vitesse float64 	   "Vitesse de marche sur plat (km/h)"
+	Vitesse float64 "Vitesse de marche sur plat (km/h)"
 
-	Name   string `xml:"name"`
+	Name string `xml:"name"`
 
 	Trkseg struct {
 		Trkpt []struct {
-			Lat        float64 `xml:"lat,attr"`
-			Lon        float64 `xml:"lon,attr"`
-			Ele        float64 `xml:"ele"`
+			Lat float64 `xml:"lat,attr"`
+			Lon float64 `xml:"lon,attr"`
+			Ele float64 `xml:"ele"`
 
 			Name *string `xml:"name"`
 			Type *string `xml:"type"`
@@ -50,7 +50,6 @@ type Trk struct {
 	} `xml:"extensions"`
 }
 
-
 type Wpt struct {
 	Lat  float64 `xml:"lat,attr"`
 	Lon  float64 `xml:"lon,attr"`
@@ -61,10 +60,12 @@ type Wpt struct {
 }
 
 type Gpx struct {
+	XMLName string `xml:"gpx"`
+
 	Metadata struct {
 		Desc string `xml:"desc"`
 		Name string `xml:"name"`
 	} `xml:"metadata"`
-	Trk []Trk  `xml:"trk"`
-	Wpt []Wpt  `xml:"wpt"`
+	Trk []Trk `xml:"trk"`
+	Wpt []Wpt `xml:"wpt"`
 }
