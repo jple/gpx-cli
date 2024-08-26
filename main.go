@@ -118,13 +118,22 @@ func main() {
 				pointName_prev := "start"
 
 				var l []struct {
-					from     string
-					to       string
-					distance float64
+					from           string
+					to             string
+					distance       float64
+					denivPos       float64
+					denivNeg       float64
+					distanceEffort float64
+					durationH      int8
+					durationM      int8
 				}
 
 				var p_prev Pos
 				var d float64 = 0
+				var denivPos float64 = 0
+				var denivNeg float64 = 0
+				vitessePlat := 4.0
+
 				for i, trkpt := range trk.Trkseg.Trkpt {
 					p := Pos{
 						Lat: trkpt.Lat,
@@ -136,28 +145,54 @@ func main() {
 					}
 
 					d += dist(p_prev, p)
+					eleDiff := diffElevation(p_prev, p)
+					if eleDiff > 1 {
+						denivPos += eleDiff
+					} else if eleDiff < -1 {
+						denivNeg += eleDiff
+					}
+
 					p_prev = p
 
 					if trkpt.Name != nil {
 						x := struct {
-							from     string
-							to       string
-							distance float64
+							from           string
+							to             string
+							distance       float64
+							denivPos       float64
+							denivNeg       float64
+							distanceEffort float64
+							durationH      int8
+							durationM      int8
 						}{
-							from:     pointName_prev,
-							to:       *trkpt.Name,
-							distance: d,
+							from:           pointName_prev,
+							to:             *trkpt.Name,
+							distance:       d,
+							denivPos:       denivPos,
+							denivNeg:       denivNeg,
+							distanceEffort: calcDistanceEffort(d, denivPos, denivNeg),
+							durationH:      0,
+							durationM:      0,
 						}
+						duration := x.distanceEffort / vitessePlat
+						x.durationH, x.durationM = floatToHourMin(duration)
+
 						l = append(l, x)
 
 						pointName_prev = *trkpt.Name
 						d = 0
+						denivPos = 0
+						denivNeg = 0
 					}
 				}
 
 				for _, p := range l {
 					// fmt.Printf("from: %v \nto: %v \ndistance: %.1f", p.from, p.to, p.distance)
-					fmt.Printf("%v \u2192 %v \ndistance: %.1f", p.from, p.to, p.distance)
+					fmt.Printf("%v \u2192 %v \ndistance: %.1f km\n", p.from, p.to, p.distance)
+					fmt.Printf("deniv: +%.0f / -%.0f\n", p.denivPos, math.Abs(p.denivNeg))
+					fmt.Printf("distance effort: %.1f km\n", p.distanceEffort)
+					fmt.Printf("Durée: %vh%v", p.durationH, p.durationM)
+
 					fmt.Println()
 					fmt.Println()
 				}
