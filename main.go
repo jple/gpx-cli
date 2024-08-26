@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	gpxFilename := "./src/my.gpx"
-	// gpxFilename := "./out/toto.xml"
+	// gpxFilename := "./src/my.gpx"
+	gpxFilename := "./out/toto.xml"
 	// gpxFilename := "./src/toto_inverse.gpx"
 	_, err := os.Open(gpxFilename)
 	if err != nil {
@@ -81,9 +81,9 @@ func main() {
 					if err := encoder.Encode(gpx); err != nil {
 						fmt.Printf("error: %v\n", err)
 					}
-					
+
 					os.Exit(0)
-				} 
+				}
 
 				if i, err := strconv.ParseInt(os.Args[2], 0, 0); err != nil {
 					fmt.Printf("Error: %v\n", err)
@@ -102,57 +102,65 @@ func main() {
 		}
 
 		if os.Args[1] == "info-detail" {
+			if len(os.Args) < 2 {
+				fmt.Printf("Error, int missing parameter to select trk")
+				os.Exit(1)
+			}
+
 			var gpx Gpx
 			gpx.ParseFile(gpxFilename)
 
-			trk := gpx.Trk[0]
-			fmt.Printf("\u001b[1;32m%v\u001b[22;0m\n", trk.Name)
-			pointName_prev := "start"
+			if i, err := strconv.ParseInt(os.Args[2], 0, 0); err != nil {
+				fmt.Printf("Error: %v\n", err)
+			} else {
+				trk := gpx.Trk[i]
+				fmt.Printf("\u001b[1;32m%v\u001b[22;0m\n", trk.Name)
+				pointName_prev := "start"
 
-			var l []struct {
-				from     string
-				to       string
-				distance float64
-			}
-
-			var p_prev Pos
-			var d float64 = 0
-			for i, trkpt := range trk.Trkseg.Trkpt {
-				p := Pos{
-					Lat: trkpt.Lat,
-					Lon: trkpt.Lon,
-					Ele: trkpt.Ele,
-				}
-				if i == 0 {
-					p_prev = p
+				var l []struct {
+					from     string
+					to       string
+					distance float64
 				}
 
-				d += dist(p_prev, p)
-				p_prev = p
-
-				if trkpt.Name != nil {
-					x := struct {
-						from     string
-						to       string
-						distance float64
-					}{
-						from:     pointName_prev,
-						to:       *trkpt.Name,
-						distance: d,
+				var p_prev Pos
+				var d float64 = 0
+				for i, trkpt := range trk.Trkseg.Trkpt {
+					p := Pos{
+						Lat: trkpt.Lat,
+						Lon: trkpt.Lon,
+						Ele: trkpt.Ele,
 					}
-					l = append(l, x)
+					if i == 0 {
+						p_prev = p
+					}
 
-					pointName_prev = *trkpt.Name
-					d = 0
+					d += dist(p_prev, p)
+					p_prev = p
+
+					if trkpt.Name != nil {
+						x := struct {
+							from     string
+							to       string
+							distance float64
+						}{
+							from:     pointName_prev,
+							to:       *trkpt.Name,
+							distance: d,
+						}
+						l = append(l, x)
+
+						pointName_prev = *trkpt.Name
+						d = 0
+					}
 				}
 
-			}
-
-			for _, p := range l {
-				// fmt.Printf("from: %v \nto: %v \ndistance: %.1f", p.from, p.to, p.distance)
-				fmt.Printf("%v \u2192 %v \ndistance: %.1f", p.from, p.to, p.distance)
-				fmt.Println()
-				fmt.Println()
+				for _, p := range l {
+					// fmt.Printf("from: %v \nto: %v \ndistance: %.1f", p.from, p.to, p.distance)
+					fmt.Printf("%v \u2192 %v \ndistance: %.1f", p.from, p.to, p.distance)
+					fmt.Println()
+					fmt.Println()
+				}
 			}
 		}
 
