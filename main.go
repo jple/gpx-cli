@@ -175,10 +175,11 @@ func main() {
 			var gpx Gpx
 			gpx.ParseFile(gpxFilename)
 
-			for _, trk := range gpx.Trk {
+			for i, trk := range gpx.Trk {
 				trk.setVitesse(4.0)
 
 				trk.calcAll()
+				fmt.Printf("%v- ", i)
 				trk.Info(ascii_format)
 
 				fmt.Println()
