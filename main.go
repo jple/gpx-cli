@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	// gpxFilename := "./src/my.gpx"
-	gpxFilename := "./out/toto.xml"
+	gpxFilename := "./src/my.gpx"
+	// gpxFilename := "./out/toto.xml"
 	// gpxFilename := "./src/toto_inverse.gpx"
 	_, err := os.Open(gpxFilename)
 	if err != nil {
