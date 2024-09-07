@@ -4,27 +4,22 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
-	"strconv"
 )
-
-func cli_dist() float64 {
-	// Usage : go run . dist 45.23 15.18 45.42 15.26
-	l1, _ := strconv.ParseFloat(os.Args[2], 8)
-	L1, _ := strconv.ParseFloat(os.Args[3], 8)
-	l2, _ := strconv.ParseFloat(os.Args[4], 8)
-	L2, _ := strconv.ParseFloat(os.Args[5], 8)
-
-	fmt.Printf("l1: %v \n L1: %v \n l2: %v \n L2: %v \n", l1, L1, l2, L2)
-	p1 := Pos{Lat: l1, Lon: L1, Ele: float64(0)}
-	p2 := Pos{Lat: l2, Lon: L2, Ele: float64(0)}
-	return dist(p1, p2)
-}
 
 func (gpx *Gpx) ParseFile(gpxFilename string) {
 	data, _ := os.ReadFile(gpxFilename)
 	if err := xml.Unmarshal(data, &gpx); err != nil {
 		fmt.Println(err)
 	}
+}
+
+func cli_dist(l1 float64, L1 float64, l2 float64, L2 float64) float64 {
+	// Usage : go run . dist 45.23 15.18 45.42 15.26
+
+	p1 := Pos{Lat: l1, Lon: L1, Ele: float64(0)}
+	p2 := Pos{Lat: l2, Lon: L2, Ele: float64(0)}
+	fmt.Printf("%.2f km\n", dist(p1, p2))
+	return dist(p1, p2)
 }
 
 func ls(gpxFilename string) []string {

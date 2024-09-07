@@ -22,7 +22,12 @@ func main() {
 	vitessePlat := 4.5
 	if len(os.Args) > 1 {
 		if os.Args[1] == "dist" {
-			fmt.Println(cli_dist())
+			l1, _ := strconv.ParseFloat(os.Args[2], 8)
+			L1, _ := strconv.ParseFloat(os.Args[3], 8)
+			l2, _ := strconv.ParseFloat(os.Args[4], 8)
+			L2, _ := strconv.ParseFloat(os.Args[5], 8)
+
+			cli_dist(l1, L1, l2, L2)
 			os.Exit(0)
 		}
 
