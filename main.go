@@ -19,6 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	vitessePlat := 4.5
 	if len(os.Args) > 1 {
 		if os.Args[1] == "dist" {
 			fmt.Println(cli_dist())
@@ -29,7 +30,6 @@ func main() {
 			km, _ := strconv.ParseFloat(os.Args[2], 64)
 			denivPos, _ := strconv.ParseFloat(os.Args[3], 64)
 			denivNeg, _ := strconv.ParseFloat(os.Args[4], 64)
-			vitessePlat := 4.0
 
 			km_effort := km + (denivPos / 100.0) + math.Abs(denivNeg/300.0)
 			duration := km_effort / vitessePlat
@@ -132,7 +132,6 @@ func main() {
 				var d float64 = 0
 				var denivPos float64 = 0
 				var denivNeg float64 = 0
-				vitessePlat := 4.0
 
 				for i, trkpt := range trk.Trkseg.Trkpt {
 					p := Pos{
@@ -211,7 +210,7 @@ func main() {
 			gpx.ParseFile(gpxFilename)
 
 			for i, trk := range gpx.Trk {
-				trk.setVitesse(4.0)
+				trk.setVitesse(vitessePlat)
 
 				trk.calcAll()
 				fmt.Printf("%v- ", i)
@@ -241,7 +240,7 @@ func main() {
 		// }
 		// trk := gpx.Trk[0]
 		for _, trk := range gpx.Trk {
-			trk.setVitesse(4.0)
+			trk.setVitesse(vitessePlat)
 
 			trk.calcAll()
 			trk.Info()
