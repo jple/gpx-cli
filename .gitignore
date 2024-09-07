@@ -8,3 +8,5 @@ out/
 *.save
 
 note.md
+
+main.save.go

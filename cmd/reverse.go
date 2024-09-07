@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -8,12 +10,24 @@ import (
 func CreateReverseCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "reverse",
-		Short: "Reverse whole GPX elements",
-		Long:  "Reverse all trk and trkwpt in GPX file",
+		Short: "Reverse GPX elements",
+		Long:  "Reverse trk and trkwpt in GPX file.",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("hello")
+		},
 	}
 
-	cmd.Flags().StringP("trk_id", "t", "all", "Trk Id to reverse. Defaults to all")
-	viper.BindPFlag("trk_id", cmd.Flags().Lookup("trk_id"))
+	flags := []FlagConfig{
+		{
+			Name: "trk_id", Shortname: "t", DefaultValue: "all",
+			Description: "Trk id to reverse. (example: -t 2)",
+		},
+	}
+
+	for _, f := range flags {
+		cmd.Flags().StringP(f.Name, f.Shortname, f.DefaultValue.(string), f.Description)
+		viper.BindPFlag(f.Name, cmd.Flags().Lookup(f.Name))
+	}
 
 	return cmd
 }
