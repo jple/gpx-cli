@@ -23,6 +23,7 @@ func init() {
 	rootCmd.AddCommand(CreateCalcEffortCmd())
 	rootCmd.AddCommand(CreateDistCmd())
 	rootCmd.AddCommand(CreateInfoCmd())
+	rootCmd.AddCommand(CreateLsCmd())
 }
 
 func Execute() error {
