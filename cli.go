@@ -22,6 +22,13 @@ func cli_dist(l1 float64, L1 float64, l2 float64, L2 float64) float64 {
 	return dist(p1, p2)
 }
 
+func cli_calc_effort(km float64, denivPos float64, denivNeg float64, vitessePlat float64) {
+	km_effort := calcDistanceEffort(km, denivPos, denivNeg)
+	duration := km_effort / vitessePlat
+	h, m := floatToHourMin(duration)
+	fmt.Println(h, "h", m, "m")
+}
+
 func ls(gpxFilename string) []string {
 	var gpx Gpx
 	gpx.ParseFile(gpxFilename)

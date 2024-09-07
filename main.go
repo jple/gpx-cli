@@ -36,13 +36,9 @@ func main() {
 			denivPos, _ := strconv.ParseFloat(os.Args[3], 64)
 			denivNeg, _ := strconv.ParseFloat(os.Args[4], 64)
 
-			km_effort := km + (denivPos / 100.0) + math.Abs(denivNeg/300.0)
-			duration := km_effort / vitessePlat
-			h, m := floatToHourMin(duration)
-			fmt.Println(h, "h", m, "m")
+			cli_calc_effort(km, denivPos, denivNeg, vitessePlat)
 			os.Exit(0)
 		}
-
 		if os.Args[1] == "ls" {
 			if len(os.Args) > 2 {
 				if os.Args[2] == "-a" {
