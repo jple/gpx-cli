@@ -39,6 +39,7 @@ func main() {
 			cli_calc_effort(km, denivPos, denivNeg, vitessePlat)
 			os.Exit(0)
 		}
+
 		if os.Args[1] == "ls" {
 			if len(os.Args) > 2 {
 				if os.Args[2] == "-a" {
