@@ -16,18 +16,12 @@ func CreateLsCmd() *cobra.Command {
 		},
 	}
 
-	flags := []FlagConfig{
+	initFlags(cmd, []FlagConfig{
 		{
 			Name: "all", Shortname: "a", DefaultValue: false,
 			Description: "Include trkpt names",
 		},
-	}
-
-	for _, f := range flags {
-		cmd.Flags().BoolP(f.Name, f.Shortname, f.DefaultValue.(bool), f.Description)
-		cmd.Flags().Lookup(f.Name).NoOptDefVal = "true"
-		viper.BindPFlag(f.Name, cmd.Flags().Lookup(f.Name))
-	}
+	})
 
 	return cmd
 }

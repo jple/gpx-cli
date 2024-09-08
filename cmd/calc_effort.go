@@ -13,10 +13,11 @@ func CreateCalcEffortCmd() *cobra.Command {
 		Short: "Calculate duration based input (distance, denivPos, denivNeg)",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("hello")
+			fmt.Println("Value: ", viper.Get("distance"))
 		},
 	}
 
-	flags := []FlagConfig{
+	initFlags(cmd, []FlagConfig{
 		{
 			Name: "distance", Shortname: "d", DefaultValue: 0.0,
 			Description: "Distance in km",
@@ -29,12 +30,7 @@ func CreateCalcEffortCmd() *cobra.Command {
 			Name: "deniv_neg", Shortname: "n", DefaultValue: 0.0,
 			Description: "Negative elevation",
 		},
-	}
-
-	for _, f := range flags {
-		cmd.Flags().Float64P(f.Name, f.Shortname, f.DefaultValue.(float64), f.Description)
-		viper.BindPFlag(f.Name, cmd.Flags().Lookup(f.Name))
-	}
+	})
 
 	return cmd
 }
