@@ -73,12 +73,10 @@ type TrkSummary struct {
 	DurationMin    int8
 }
 
-func (trk *Trk) CalcAll() TrkSummary {
-	(*trk).calcTopograph()
-	// (*trk).Distance()
-	// (*trk).calcDeniv()
-	(*trk).convertToEffortMetrics()
-	(*trk).calcDuration()
+func (trk Trk) CalcAll() TrkSummary {
+	trk.calcTopograph()
+	trk.convertToEffortMetrics()
+	trk.calcDuration()
 
 	return TrkSummary{
 		From:    trk.Name,
