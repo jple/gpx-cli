@@ -10,8 +10,8 @@ type Pos struct {
 	Ele float64
 }
 
-func (trk *Trk) calcDeniv() (float64, float64) {
-	var denivPos, denivNeg float64 = 0, 0
+func (trk *Trk) calcTopograph() (float64, float64, float64) {
+	var distance, denivPos, denivNeg float64 = 0, 0, 0
 
 	var p_prev Pos
 	for i, trkpt := range (*trk).Trkseg.Trkpt {
@@ -32,44 +32,18 @@ func (trk *Trk) calcDeniv() (float64, float64) {
 			denivNeg += eleDiff
 		}
 
+		distance += Dist(p_prev, p)
 		p_prev = p
 	}
 
 	(*trk).DenivPos = denivPos
 	(*trk).DenivNeg = denivNeg
+	(*trk).Distance = distance
 
-	return denivPos, denivNeg
+	return distance, denivPos, denivNeg
 }
 
-func (trk *Trk) calcDistance() float64 {
-	var d float64 = 0
-
-	var p_prev Pos
-	for i, trkpt := range (*trk).Trkseg.Trkpt {
-		p := Pos{
-			Lat: trkpt.Lat,
-			Lon: trkpt.Lon,
-			Ele: trkpt.Ele,
-		}
-		if i == 0 {
-			p_prev = p
-		}
-
-		d += Dist(p_prev, p)
-		p_prev = p
-	}
-
-	(*trk).Distance = d
-	return d
-
-}
-
-// func (trk *Trk) calcDenivEffort() {
-// 	(*trk).DenivPosEffort = (*trk).DenivPos / 100 // 100m D+ = 1km plat
-// 	(*trk).DenivNegEffort = (*trk).DenivNeg / 300 // 300m D- = 1km plat
-// }
-
-func (trk *Trk) CalcDistanceEffort() {
+func (trk *Trk) convertToEffortMetrics() {
 	(*trk).DistanceEffort = CalcDistanceEffort(
 		(*trk).Distance,
 		(*trk).DenivPos,
@@ -77,7 +51,7 @@ func (trk *Trk) CalcDistanceEffort() {
 	)
 }
 
-func (trk *Trk) setVitesse(v float64) {
+func (trk *Trk) SetVitesse(v float64) {
 	(*trk).Vitesse = v
 }
 
@@ -86,15 +60,65 @@ func (trk *Trk) calcDuration() {
 	(*trk).DurationHour, (*trk).DurationMin = FloatToHourMin((*trk).Duration)
 }
 
-func (trk *Trk) calcAll() {
-	(*trk).calcDistance()
-	(*trk).calcDeniv()
-	// (*trk).calcDenivEffort()
-	(*trk).CalcDistanceEffort()
-	(*trk).calcDuration()
+type TrkSummary struct {
+	From           string
+	To             string
+	NPoints        int
+	VitessePlat    float64
+	Distance       float64
+	DenivPos       float64
+	DenivNeg       float64
+	DistanceEffort float64
+	DurationHour   int8
+	DurationMin    int8
 }
 
-func (trk Trk) Info(ascii_format ...bool) {
+func (trk *Trk) CalcAll() TrkSummary {
+	(*trk).calcTopograph()
+	// (*trk).Distance()
+	// (*trk).calcDeniv()
+	(*trk).convertToEffortMetrics()
+	(*trk).calcDuration()
+
+	return TrkSummary{
+		From:    trk.Name,
+		To:      "",
+		NPoints: len(trk.Trkseg.Trkpt),
+
+		VitessePlat:    trk.Vitesse,
+		Distance:       trk.Distance,
+		DenivPos:       trk.DenivPos,
+		DenivNeg:       trk.DenivNeg,
+		DistanceEffort: trk.DistanceEffort,
+		DurationHour:   trk.DurationHour,
+		DurationMin:    trk.DurationMin,
+	}
+}
+
+func (summary TrkSummary) Print(ascii_format ...bool) {
+	if len(ascii_format) > 0 {
+		if ascii_format[0] {
+			fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", summary.From)
+		} else {
+			fmt.Printf("Track name: %v\n", summary.From)
+		}
+	} else {
+		fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", summary.From)
+	}
+
+	fmt.Printf("Number of points:       %v\n", summary.NPoints)
+
+	fmt.Printf("Distance:               %.1f km\n", summary.Distance)
+
+	fmt.Printf("D+/D-:                  %.0f m / %.0f m\n", summary.DenivPos, summary.DenivNeg)
+
+	fmt.Printf("Distance effort:        %.1f km\n", summary.DistanceEffort)
+
+	fmt.Printf("Vitesse sur plat:       %.0f km/h\n", summary.VitessePlat)
+	fmt.Printf("Temps parcours estimé:  %vh%v\n", summary.DurationHour, summary.DurationMin)
+}
+
+func (trk Trk) PrintInfo(ascii_format ...bool) {
 	if len(ascii_format) > 0 {
 		if ascii_format[0] {
 			fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", trk.Name)
