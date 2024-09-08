@@ -9,16 +9,28 @@ import (
 	. "github.com/jple/gpx-cli/core"
 )
 
+func StringPointer(s string) *string {
+	return &s
+}
+
 func CreateInfoCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "info",
 		Short: "General info on the track",
 		Run: func(cmd *cobra.Command, args []string) {
 			Info(
-				viper.GetString("filename"), 4.5, false, true,
+				viper.GetString("filename"), 4.5, viper.GetBool("detail"), true,
 			)
 		},
 	}
+
+	initFlags(cmd, []FlagConfig{
+		{
+			Name: "detail", Shortname: "d", DefaultValue: false,
+			Description: "Details info for each portion having name in trkpt",
+			NoOptDefVal: StringPointer("true"),
+		},
+	})
 
 	cmd.AddCommand(CreateInfoDetailCmd())
 
@@ -32,9 +44,12 @@ func Info(gpxFilename string, vitessePlat float64, detail bool, ascii_format boo
 	for i, trk := range gpx.Trk {
 		trk.SetVitesse(vitessePlat)
 
-		summary := trk.CalcAll()
-		fmt.Printf("[%v] ", i)
-		summary.Print()
+		summary := trk.CalcAll(detail)
+		for _, s := range summary {
+
+			fmt.Printf("[%v] ", i)
+			s.Print()
+		}
 		// trk.PrintInfo(ascii_format)
 
 		fmt.Println()

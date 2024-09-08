@@ -46,6 +46,7 @@ func CalcDistanceEffort(distance float64, denivPos float64, denivNeg float64) fl
 	return distance + denivPosEffort + math.Abs(denivNegEffort)
 }
 
+
 func CalcDuration(distance_plat float64, vitesse_plat float64) (float64, int8, int8) {
 
 	duration := distance_plat / vitesse_plat

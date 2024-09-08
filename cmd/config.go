@@ -15,6 +15,7 @@ type FlagConfig struct {
 	Description  string
 
 	PersistentFlag *bool
+	NoOptDefVal    *string
 }
 
 func BoolPointer(b bool) *bool {
@@ -27,46 +28,48 @@ func initFlags(cmd *cobra.Command, flags []FlagConfig) {
 		// Create flags
 		switch f.DefaultValue.(type) {
 		case string:
-			if f.PersistentFlag != nil {
-				if *f.PersistentFlag {
-					cmd.PersistentFlags().StringP(
-						f.Name, f.Shortname, f.DefaultValue.(string), f.Description)
-					break
-				}
+			if f.PersistentFlag != nil && *f.PersistentFlag {
+				cmd.PersistentFlags().StringP(
+					f.Name, f.Shortname, f.DefaultValue.(string), f.Description)
+			} else {
+				cmd.Flags().StringP(
+					f.Name, f.Shortname, f.DefaultValue.(string), f.Description)
 			}
-
-			cmd.Flags().StringP(f.Name, f.Shortname, f.DefaultValue.(string), f.Description)
 			break
 		case float64:
-			if f.PersistentFlag != nil {
-				if *f.PersistentFlag {
-					cmd.PersistentFlags().Float64P(
-						f.Name, f.Shortname, f.DefaultValue.(float64), f.Description)
-					break
-				}
+			if f.PersistentFlag != nil && *f.PersistentFlag {
+				cmd.PersistentFlags().Float64P(
+					f.Name, f.Shortname, f.DefaultValue.(float64), f.Description)
+			} else {
+				cmd.Flags().Float64P(
+					f.Name, f.Shortname, f.DefaultValue.(float64), f.Description)
 			}
-			cmd.Flags().Float64P(f.Name, f.Shortname, f.DefaultValue.(float64), f.Description)
 			break
 		case bool:
-			if f.PersistentFlag != nil {
-				if *f.PersistentFlag {
-					cmd.PersistentFlags().BoolP(
-						f.Name, f.Shortname, f.DefaultValue.(bool), f.Description)
-					break
-				}
+			if f.PersistentFlag != nil && *f.PersistentFlag {
+				cmd.PersistentFlags().BoolP(
+					f.Name, f.Shortname, f.DefaultValue.(bool), f.Description)
+			} else {
+				cmd.Flags().BoolP(
+					f.Name, f.Shortname, f.DefaultValue.(bool), f.Description)
 			}
-			cmd.Flags().BoolP(f.Name, f.Shortname, f.DefaultValue.(bool), f.Description)
 			break
+		}
+
+		if f.NoOptDefVal != nil {
+			if f.PersistentFlag != nil && *f.PersistentFlag {
+				cmd.PersistentFlags().Lookup(f.Name).NoOptDefVal = *f.NoOptDefVal
+			} else {
+				cmd.Flags().Lookup(f.Name).NoOptDefVal = *f.NoOptDefVal
+			}
 		}
 
 		// Bind flags to viper
-		if f.PersistentFlag != nil {
-			if *f.PersistentFlag {
-				viper.BindPFlag(f.Name, cmd.PersistentFlags().Lookup(f.Name))
-				continue
-			}
+		if f.PersistentFlag != nil && *f.PersistentFlag {
+			viper.BindPFlag(f.Name, cmd.PersistentFlags().Lookup(f.Name))
+		} else {
+			viper.BindPFlag(f.Name, cmd.Flags().Lookup(f.Name))
 		}
-		viper.BindPFlag(f.Name, cmd.Flags().Lookup(f.Name))
 	}
 
 }

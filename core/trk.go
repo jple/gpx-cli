@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"math"
 )
 
 type Pos struct {
@@ -10,10 +11,28 @@ type Pos struct {
 	Ele float64
 }
 
-func (trk *Trk) calcTopograph() (float64, float64, float64) {
+type TrkSummary struct {
+	From           string
+	To             string
+	NPoints        int
+	VitessePlat    float64
+	Distance       float64
+	DenivPos       float64
+	DenivNeg       float64
+	DistanceEffort float64
+	DurationHour   int8
+	DurationMin    int8
+	Toto           string
+}
+
+func (trk *Trk) calcTopograph(detail bool) []TrkSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
 
 	var p_prev Pos
+	pointName_prev := "start"
+	n := 0
+	var trkSummary []TrkSummary
+
 	for i, trkpt := range (*trk).Trkseg.Trkpt {
 		p := Pos{
 			Lat: trkpt.Lat,
@@ -22,25 +41,68 @@ func (trk *Trk) calcTopograph() (float64, float64, float64) {
 		}
 		if i == 0 {
 			p_prev = p
+			if trkpt.Name != nil {
+				pointName_prev = *trkpt.Name
+			}
 			continue
 		}
 
 		eleDiff := DiffElevation(p_prev, p)
-		if eleDiff > 1 {
-			denivPos += eleDiff
-		} else if eleDiff < -1 {
-			denivNeg += eleDiff
-		}
+		denivPos += math.Max(eleDiff, 1)
+		denivNeg += math.Min(eleDiff, -1)
 
 		distance += Dist(p_prev, p)
+		n += 1
 		p_prev = p
+
+		if detail {
+			if trkpt.Name != nil {
+				x := TrkSummary{
+					From:           pointName_prev,
+					To:             *trkpt.Name,
+					NPoints:        n,
+					VitessePlat:    trk.Vitesse,
+					Distance:       distance,
+					DenivPos:       denivPos,
+					DenivNeg:       denivNeg,
+					DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
+				}
+				_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, trk.Vitesse)
+
+				trkSummary = append(trkSummary, x)
+
+				pointName_prev = *trkpt.Name
+
+				distance = 0
+				denivPos = 0
+				denivNeg = 0
+				n = 0
+			}
+		}
+
+		if i == len((*trk).Trkseg.Trkpt)-1 {
+			x := TrkSummary{
+				From:           pointName_prev,
+				To:             "end",
+				NPoints:        n,
+				VitessePlat:    trk.Vitesse,
+				Distance:       distance,
+				DenivPos:       denivPos,
+				DenivNeg:       denivNeg,
+				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
+			}
+			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, trk.Vitesse)
+
+			trkSummary = append(trkSummary, x)
+		}
+
 	}
 
 	(*trk).DenivPos = denivPos
 	(*trk).DenivNeg = denivNeg
 	(*trk).Distance = distance
 
-	return distance, denivPos, denivNeg
+	return trkSummary
 }
 
 func (trk *Trk) convertToEffortMetrics() {
@@ -56,41 +118,19 @@ func (trk *Trk) SetVitesse(v float64) {
 }
 
 func (trk *Trk) calcDuration() {
-	(*trk).Duration = (*trk).DistanceEffort / (*trk).Vitesse
-	(*trk).DurationHour, (*trk).DurationMin = FloatToHourMin((*trk).Duration)
+	// (*trk).Duration = (*trk).DistanceEffort / (*trk).Vitesse
+	// (*trk).DurationHour, (*trk).DurationMin = FloatToHourMin((*trk).Duration)
+	(*trk).Duration, (*trk).DurationHour, (*trk).DurationMin = CalcDuration(
+		(*trk).DistanceEffort, (*trk).Vitesse,
+	)
 }
 
-type TrkSummary struct {
-	From           string
-	To             string
-	NPoints        int
-	VitessePlat    float64
-	Distance       float64
-	DenivPos       float64
-	DenivNeg       float64
-	DistanceEffort float64
-	DurationHour   int8
-	DurationMin    int8
-}
-
-func (trk Trk) CalcAll() TrkSummary {
-	trk.calcTopograph()
+func (trk Trk) CalcAll(detail bool) []TrkSummary {
+	trkSummary := trk.calcTopograph(detail)
 	trk.convertToEffortMetrics()
 	trk.calcDuration()
 
-	return TrkSummary{
-		From:    trk.Name,
-		To:      "",
-		NPoints: len(trk.Trkseg.Trkpt),
-
-		VitessePlat:    trk.Vitesse,
-		Distance:       trk.Distance,
-		DenivPos:       trk.DenivPos,
-		DenivNeg:       trk.DenivNeg,
-		DistanceEffort: trk.DistanceEffort,
-		DurationHour:   trk.DurationHour,
-		DurationMin:    trk.DurationMin,
-	}
+	return trkSummary
 }
 
 func (summary TrkSummary) Print(ascii_format ...bool) {
@@ -112,7 +152,7 @@ func (summary TrkSummary) Print(ascii_format ...bool) {
 
 	fmt.Printf("Distance effort:        %.1f km\n", summary.DistanceEffort)
 
-	fmt.Printf("Vitesse sur plat:       %.0f km/h\n", summary.VitessePlat)
+	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", summary.VitessePlat)
 	fmt.Printf("Temps parcours estimé:  %vh%v\n", summary.DurationHour, summary.DurationMin)
 }
 
@@ -135,7 +175,7 @@ func (trk Trk) PrintInfo(ascii_format ...bool) {
 
 	fmt.Printf("Distance effort:        %.1f km\n", trk.DistanceEffort)
 
-	fmt.Printf("Vitesse sur plat:       %.0f km/h\n", trk.Vitesse)
+	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", trk.Vitesse)
 	fmt.Printf("Temps parcours estimé:  %vh%v\n", trk.DurationHour, trk.DurationMin)
 
 }
