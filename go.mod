@@ -4,7 +4,12 @@ go 1.22.0
 
 replace github.com/jple/gpx-cli/cmd => ./cmd
 
-require github.com/jple/gpx-cli/cmd v0.0.0-00010101000000-000000000000
+replace github.com/jple/gpx-cli/core => ./core
+
+require (
+	github.com/jple/gpx-cli/cmd v0.0.0-00010101000000-000000000000
+	github.com/jple/gpx-cli/core v0.0.0-00010101000000-000000000000
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect

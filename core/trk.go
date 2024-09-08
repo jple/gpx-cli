@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func (trk *Trk) calcDeniv() (float64, float64) {
 			continue
 		}
 
-		eleDiff := diffElevation(p_prev, p)
+		eleDiff := DiffElevation(p_prev, p)
 		if eleDiff > 1 {
 			denivPos += eleDiff
 		} else if eleDiff < -1 {
@@ -55,7 +55,7 @@ func (trk *Trk) calcDistance() float64 {
 			p_prev = p
 		}
 
-		d += dist(p_prev, p)
+		d += Dist(p_prev, p)
 		p_prev = p
 	}
 
@@ -69,8 +69,8 @@ func (trk *Trk) calcDistance() float64 {
 // 	(*trk).DenivNegEffort = (*trk).DenivNeg / 300 // 300m D- = 1km plat
 // }
 
-func (trk *Trk) calcDistanceEffort() {
-	(*trk).DistanceEffort = calcDistanceEffort(
+func (trk *Trk) CalcDistanceEffort() {
+	(*trk).DistanceEffort = CalcDistanceEffort(
 		(*trk).Distance,
 		(*trk).DenivPos,
 		(*trk).DenivNeg,
@@ -83,14 +83,14 @@ func (trk *Trk) setVitesse(v float64) {
 
 func (trk *Trk) calcDuration() {
 	(*trk).Duration = (*trk).DistanceEffort / (*trk).Vitesse
-	(*trk).DurationHour, (*trk).DurationMin = floatToHourMin((*trk).Duration)
+	(*trk).DurationHour, (*trk).DurationMin = FloatToHourMin((*trk).Duration)
 }
 
 func (trk *Trk) calcAll() {
 	(*trk).calcDistance()
 	(*trk).calcDeniv()
 	// (*trk).calcDenivEffort()
-	(*trk).calcDistanceEffort()
+	(*trk).CalcDistanceEffort()
 	(*trk).calcDuration()
 }
 
