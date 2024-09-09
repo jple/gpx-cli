@@ -26,7 +26,7 @@ type TrkSummary struct {
 	Toto           string
 }
 
-func (trk *Trk) calcTopograph(detail bool) []TrkSummary {
+func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) []TrkSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
 
 	var p_prev Pos
@@ -63,13 +63,13 @@ func (trk *Trk) calcTopograph(detail bool) []TrkSummary {
 					From:           pointName_prev,
 					To:             *trkpt.Name,
 					NPoints:        n,
-					VitessePlat:    trk.Extensions.Vitesse,
+					VitessePlat:    vitessePlat,
 					Distance:       distance,
 					DenivPos:       denivPos,
 					DenivNeg:       denivNeg,
 					DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
 				}
-				_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, trk.Extensions.Vitesse)
+				_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
 
 				trkSummary = append(trkSummary, x)
 
@@ -87,13 +87,13 @@ func (trk *Trk) calcTopograph(detail bool) []TrkSummary {
 				From:           pointName_prev,
 				To:             "end",
 				NPoints:        n,
-				VitessePlat:    trk.Extensions.Vitesse,
+				VitessePlat:    vitessePlat,
 				Distance:       distance,
 				DenivPos:       denivPos,
 				DenivNeg:       denivNeg,
 				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
 			}
-			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, trk.Extensions.Vitesse)
+			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
 
 			trkSummary = append(trkSummary, x)
 		}
@@ -115,22 +115,16 @@ func (trk *Trk) convertToEffortMetrics() {
 	)
 }
 
-func (trk *Trk) SetVitesse(v float64) {
-	(*trk).Extensions.Vitesse = v
-}
-
-func (trk *Trk) calcDuration() {
-	// (*trk).Extensions.Duration = (*trk).Extensions.DistanceEffort / (*trk).Extensions.Vitesse
-	// (*trk).Extensions.DurationHour, (*trk).Extensions.DurationMin = FloatToHourMin((*trk).Extensions.Duration)
+func (trk *Trk) calcDuration(vitessePlat float64) {
 	(*trk).Extensions.Duration, (*trk).Extensions.DurationHour, (*trk).Extensions.DurationMin = CalcDuration(
-		(*trk).Extensions.DistanceEffort, (*trk).Extensions.Vitesse,
+		(*trk).Extensions.DistanceEffort, vitessePlat,
 	)
 }
 
-func (trk Trk) CalcAll(detail bool) []TrkSummary {
-	trkSummary := trk.calcTopograph(detail)
+func (trk Trk) CalcAll(vitessePlat float64, detail bool) []TrkSummary {
+	trkSummary := trk.calcTopograph(vitessePlat, detail)
 	trk.convertToEffortMetrics()
-	trk.calcDuration()
+	trk.calcDuration(vitessePlat)
 
 	return trkSummary
 }
@@ -158,7 +152,7 @@ func (summary TrkSummary) Print(ascii_format ...bool) {
 	fmt.Printf("Temps parcours estimé:  %vh%v\n", summary.DurationHour, summary.DurationMin)
 }
 
-func (trk Trk) PrintInfo(ascii_format ...bool) {
+func (trk Trk) PrintInfo(vitessePlat float64, ascii_format ...bool) {
 	if len(ascii_format) > 0 {
 		if ascii_format[0] {
 			fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", trk.Name)
@@ -178,7 +172,7 @@ func (trk Trk) PrintInfo(ascii_format ...bool) {
 
 	fmt.Printf("Distance effort:        %.1f km\n", trk.Extensions.DistanceEffort)
 
-	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", trk.Extensions.Vitesse)
+	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", vitessePlat)
 	fmt.Printf("Temps parcours estimé:  %vh%v\n", trk.Extensions.DurationHour, trk.Extensions.DurationMin)
 
 }

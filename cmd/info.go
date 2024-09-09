@@ -18,7 +18,8 @@ func CreateInfoCmd() *cobra.Command {
 		Use:   "info",
 		Short: "General info on the track",
 		Run: func(cmd *cobra.Command, args []string) {
-			Info(
+			var gpx Gpx
+			gpx.Info(
 				viper.GetString("filename"), 4.5, viper.GetBool("detail"), true,
 			)
 		},
@@ -35,26 +36,6 @@ func CreateInfoCmd() *cobra.Command {
 	cmd.AddCommand(CreateInfoDetailCmd())
 
 	return cmd
-}
-
-func Info(gpxFilename string, vitessePlat float64, detail bool, ascii_format bool) {
-	var gpx Gpx
-	gpx.ParseFile(gpxFilename)
-
-	for i, trk := range gpx.Trk {
-		trk.SetVitesse(vitessePlat)
-
-		summary := trk.CalcAll(detail)
-		for _, s := range summary {
-
-			fmt.Printf("[%v] ", i)
-			s.Print()
-		}
-		// trk.PrintInfo(ascii_format)
-
-		fmt.Println()
-	}
-
 }
 
 func CreateInfoDetailCmd() *cobra.Command {

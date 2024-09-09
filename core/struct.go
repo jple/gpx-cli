@@ -6,7 +6,6 @@ type Trk struct {
 	Name string `xml:"name"`
 	// Should be optional
 	Extensions struct {
-		Vitesse        float64 "Vitesse de marche sur plat (km/h)"
 		DenivPos       float64
 		DenivNeg       float64
 		Distance       float64
@@ -67,4 +66,8 @@ type Gpx struct {
 	} `xml:"metadata"`
 	Trk []Trk `xml:"trk"`
 	Wpt []Wpt `xml:"wpt"`
+
+	Extensions struct {
+		Vitesse float64 "Vitesse de marche sur plat (km/h)"
+	} `xml:"extensions"`
 }
