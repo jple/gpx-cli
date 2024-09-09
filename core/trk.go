@@ -63,13 +63,13 @@ func (trk *Trk) calcTopograph(detail bool) []TrkSummary {
 					From:           pointName_prev,
 					To:             *trkpt.Name,
 					NPoints:        n,
-					VitessePlat:    trk.Vitesse,
+					VitessePlat:    trk.Extensions.Vitesse,
 					Distance:       distance,
 					DenivPos:       denivPos,
 					DenivNeg:       denivNeg,
 					DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
 				}
-				_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, trk.Vitesse)
+				_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, trk.Extensions.Vitesse)
 
 				trkSummary = append(trkSummary, x)
 
@@ -87,43 +87,43 @@ func (trk *Trk) calcTopograph(detail bool) []TrkSummary {
 				From:           pointName_prev,
 				To:             "end",
 				NPoints:        n,
-				VitessePlat:    trk.Vitesse,
+				VitessePlat:    trk.Extensions.Vitesse,
 				Distance:       distance,
 				DenivPos:       denivPos,
 				DenivNeg:       denivNeg,
 				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
 			}
-			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, trk.Vitesse)
+			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, trk.Extensions.Vitesse)
 
 			trkSummary = append(trkSummary, x)
 		}
 
 	}
 
-	(*trk).DenivPos = denivPos
-	(*trk).DenivNeg = denivNeg
-	(*trk).Distance = distance
+	(*trk).Extensions.DenivPos = denivPos
+	(*trk).Extensions.DenivNeg = denivNeg
+	(*trk).Extensions.Distance = distance
 
 	return trkSummary
 }
 
 func (trk *Trk) convertToEffortMetrics() {
-	(*trk).DistanceEffort = CalcDistanceEffort(
-		(*trk).Distance,
-		(*trk).DenivPos,
-		(*trk).DenivNeg,
+	(*trk).Extensions.DistanceEffort = CalcDistanceEffort(
+		(*trk).Extensions.Distance,
+		(*trk).Extensions.DenivPos,
+		(*trk).Extensions.DenivNeg,
 	)
 }
 
 func (trk *Trk) SetVitesse(v float64) {
-	(*trk).Vitesse = v
+	(*trk).Extensions.Vitesse = v
 }
 
 func (trk *Trk) calcDuration() {
-	// (*trk).Duration = (*trk).DistanceEffort / (*trk).Vitesse
-	// (*trk).DurationHour, (*trk).DurationMin = FloatToHourMin((*trk).Duration)
-	(*trk).Duration, (*trk).DurationHour, (*trk).DurationMin = CalcDuration(
-		(*trk).DistanceEffort, (*trk).Vitesse,
+	// (*trk).Extensions.Duration = (*trk).Extensions.DistanceEffort / (*trk).Extensions.Vitesse
+	// (*trk).Extensions.DurationHour, (*trk).Extensions.DurationMin = FloatToHourMin((*trk).Extensions.Duration)
+	(*trk).Extensions.Duration, (*trk).Extensions.DurationHour, (*trk).Extensions.DurationMin = CalcDuration(
+		(*trk).Extensions.DistanceEffort, (*trk).Extensions.Vitesse,
 	)
 }
 
@@ -172,13 +172,13 @@ func (trk Trk) PrintInfo(ascii_format ...bool) {
 	trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
 	fmt.Println("Number of points: ", len(trkpts))
 
-	fmt.Printf("Distance:               %.1f km\n", trk.Distance)
+	fmt.Printf("Distance:               %.1f km\n", trk.Extensions.Distance)
 
-	fmt.Printf("D+/D-:                  %.0f m / %.0f m\n", trk.DenivPos, trk.DenivNeg)
+	fmt.Printf("D+/D-:                  %.0f m / %.0f m\n", trk.Extensions.DenivPos, trk.Extensions.DenivNeg)
 
-	fmt.Printf("Distance effort:        %.1f km\n", trk.DistanceEffort)
+	fmt.Printf("Distance effort:        %.1f km\n", trk.Extensions.DistanceEffort)
 
-	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", trk.Vitesse)
-	fmt.Printf("Temps parcours estimé:  %vh%v\n", trk.DurationHour, trk.DurationMin)
+	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", trk.Extensions.Vitesse)
+	fmt.Printf("Temps parcours estimé:  %vh%v\n", trk.Extensions.DurationHour, trk.Extensions.DurationMin)
 
 }
