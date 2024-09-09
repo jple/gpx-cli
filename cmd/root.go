@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -12,9 +9,9 @@ var (
 	rootCmd    = &cobra.Command{
 		Use:   "gpx-cli",
 		Short: "GPX File utility",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("test: ", viper.Get("filename"))
-		},
+		// Run: func(cmd *cobra.Command, args []string) {
+		// 	fmt.Println("test: ", viper.Get("filename"))
+		// },
 	}
 )
 

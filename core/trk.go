@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"math"
+	"slices"
 )
 
 type Pos struct {
@@ -33,7 +34,8 @@ func (trk *Trk) calcTopograph(detail bool) []TrkSummary {
 	n := 0
 	var trkSummary []TrkSummary
 
-	for i, trkpt := range (*trk).Trkseg.Trkpt {
+	trkpts := slices.Concat((*trk).Trkseg)[0].Trkpt
+	for i, trkpt := range trkpts {
 		p := Pos{
 			Lat: trkpt.Lat,
 			Lon: trkpt.Lon,
@@ -80,7 +82,7 @@ func (trk *Trk) calcTopograph(detail bool) []TrkSummary {
 			}
 		}
 
-		if i == len((*trk).Trkseg.Trkpt)-1 {
+		if i == len(trkpts)-1 {
 			x := TrkSummary{
 				From:           pointName_prev,
 				To:             "end",
@@ -167,7 +169,8 @@ func (trk Trk) PrintInfo(ascii_format ...bool) {
 		fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", trk.Name)
 	}
 
-	fmt.Println("Number of points: ", len(trk.Trkseg.Trkpt))
+	trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+	fmt.Println("Number of points: ", len(trkpts))
 
 	fmt.Printf("Distance:               %.1f km\n", trk.Distance)
 

@@ -1,6 +1,4 @@
 # Todo
-- [ ] modifier struct_gpx.go pour suivre la spec (eg. TrkSeg est un array)
-
 - modifier en CLI
     * gpx test
     * gpx trk 

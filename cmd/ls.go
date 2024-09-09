@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"slices"
 
 	. "github.com/jple/gpx-cli/core"
 	"github.com/spf13/cobra"
@@ -44,7 +45,8 @@ func ls(gpxFilename string, all bool) []string {
 		fmt.Printf(s)
 
 		if all {
-			for _, trkpt := range trk.Trkseg.Trkpt {
+			trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+			for _, trkpt := range trkpts {
 				if trkpt.Name != nil {
 					s := *trkpt.Name
 					out = append(out, s)
