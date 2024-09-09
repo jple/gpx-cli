@@ -30,7 +30,13 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) []TrkSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
 
 	var p_prev Pos
-	pointName_prev := "start"
+	var pointName_prev string
+	if detail {
+		pointName_prev = "start"
+	} else {
+		pointName_prev = (*trk).Name
+	}
+
 	n := 0
 	var trkSummary []TrkSummary
 
@@ -43,7 +49,7 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) []TrkSummary {
 		}
 		if i == 0 {
 			p_prev = p
-			if trkpt.Name != nil {
+			if detail && trkpt.Name != nil {
 				pointName_prev = *trkpt.Name
 			}
 			continue
@@ -57,29 +63,27 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) []TrkSummary {
 		n += 1
 		p_prev = p
 
-		if detail {
-			if trkpt.Name != nil {
-				x := TrkSummary{
-					From:           pointName_prev,
-					To:             *trkpt.Name,
-					NPoints:        n,
-					VitessePlat:    vitessePlat,
-					Distance:       distance,
-					DenivPos:       denivPos,
-					DenivNeg:       denivNeg,
-					DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
-				}
-				_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
-
-				trkSummary = append(trkSummary, x)
-
-				pointName_prev = *trkpt.Name
-
-				distance = 0
-				denivPos = 0
-				denivNeg = 0
-				n = 0
+		if detail && trkpt.Name != nil {
+			x := TrkSummary{
+				From:           pointName_prev,
+				To:             *trkpt.Name,
+				NPoints:        n,
+				VitessePlat:    vitessePlat,
+				Distance:       distance,
+				DenivPos:       denivPos,
+				DenivNeg:       denivNeg,
+				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
 			}
+			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
+
+			trkSummary = append(trkSummary, x)
+
+			pointName_prev = *trkpt.Name
+
+			distance = 0
+			denivPos = 0
+			denivNeg = 0
+			n = 0
 		}
 
 		if i == len(trkpts)-1 {
