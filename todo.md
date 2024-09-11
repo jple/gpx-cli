@@ -1,4 +1,9 @@
 # Todo
+- modif calcTopo pour seulement faire le calcul
+    - on mettre les valeurs cumules au trkpt qui possède un nom
+    - on créera une func qui fera le calcul pour otenir info -detail
+
+
 - modifier en CLI
     * gpx test
     * gpx trk 
