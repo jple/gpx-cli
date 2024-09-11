@@ -58,7 +58,8 @@ type Wpt struct {
 }
 
 type Gpx struct {
-	XMLName string `xml:"gpx"`
+	XMLName  string `xml:"gpx"`
+	Filepath string `xlm:-` // ok for json, but xml ?
 
 	Metadata struct {
 		Desc string `xml:"desc"`

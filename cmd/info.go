@@ -18,10 +18,8 @@ func CreateInfoCmd() *cobra.Command {
 		Use:   "info",
 		Short: "General info on the track",
 		Run: func(cmd *cobra.Command, args []string) {
-			var gpx Gpx
-			gpx.Info(
-				viper.GetString("filename"), 4.5, viper.GetBool("detail"), true,
-			)
+			gpx := Gpx{Filepath: viper.GetString("filename")}
+			gpx.Info(4.5, viper.GetBool("detail"), true)
 		},
 	}
 
