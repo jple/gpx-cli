@@ -18,10 +18,8 @@ func (gpx *Gpx) SetVitesse(v float64) {
 	(*gpx).Extensions.Vitesse = v
 }
 
-func (p_gpx *Gpx) Info(vitessePlat float64, detail bool, ascii_format bool) {
-	gpx := *p_gpx
+func (gpx Gpx) Info(detail bool, ascii_format bool) {
 	gpx.ParseFile(gpx.Filepath)
-	gpx.SetVitesse(vitessePlat)
 
 	for i, trk := range gpx.Trk {
 		summary := trk.CalcAll(gpx.Extensions.Vitesse, detail)
@@ -30,8 +28,6 @@ func (p_gpx *Gpx) Info(vitessePlat float64, detail bool, ascii_format bool) {
 			fmt.Printf("[%v] ", i)
 			s.Print()
 		}
-		// trk.PrintInfo(ascii_format)
-
 		fmt.Println()
 	}
 

@@ -19,7 +19,8 @@ func CreateInfoCmd() *cobra.Command {
 		Short: "General info on the track",
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{Filepath: viper.GetString("filename")}
-			gpx.Info(4.5, viper.GetBool("detail"), true)
+			gpx.SetVitesse(4.5)
+			gpx.Info(viper.GetBool("detail"), true)
 		},
 	}
 
