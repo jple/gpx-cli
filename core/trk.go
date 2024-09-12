@@ -26,7 +26,15 @@ type TrkSummary struct {
 	Toto           string
 }
 
-func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) []TrkSummary {
+type GpxSummary []TrkSummary
+
+func (gpxSummary GpxSummary) Print() {
+	for _, trkSummary := range gpxSummary {
+		trkSummary.Print()
+	}
+}
+
+func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) GpxSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
 
 	var p_prev Pos
@@ -38,7 +46,7 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) []TrkSummary {
 	}
 
 	n := 0
-	var trkSummary []TrkSummary
+	var trkSummary GpxSummary
 
 	trkpts := slices.Concat((*trk).Trkseg)[0].Trkpt
 	for i, trkpt := range trkpts {
@@ -125,7 +133,7 @@ func (trk *Trk) calcDuration(vitessePlat float64) {
 	)
 }
 
-func (trk Trk) CalcAll(vitessePlat float64, detail bool) []TrkSummary {
+func (trk Trk) CalcAll(vitessePlat float64, detail bool) GpxSummary {
 	trkSummary := trk.calcTopograph(vitessePlat, detail)
 	trk.convertToEffortMetrics()
 	trk.calcDuration(vitessePlat)
