@@ -29,23 +29,25 @@ type Trk struct {
 	} `xml:"extensions"`
 
 	Trkseg []struct {
-		Trkpt []struct {
-			Lat float64 `xml:"lat,attr"`
-			Lon float64 `xml:"lon,attr"`
-			Ele float64 `xml:"ele"`
-
-			Name *string `xml:"name"`
-			Type *string `xml:"type"`
-			Cmt  *string `xml:"cmt"`
-
-			Extensions *struct {
-				TrkExtension struct {
-					Visugpx string `xml:"visugpx,attr"`
-					Node    int    `xml:"node"`
-				} `xml:"TrkExtension"`
-			} `xml:"extensions"`
-		} `xml:"trkpt"`
+		Trkpt []Trkpt `xml:"trkpt"`
 	} `xml:"trkseg"`
+}
+
+type Trkpt struct {
+	Lat float64 `xml:"lat,attr"`
+	Lon float64 `xml:"lon,attr"`
+	Ele float64 `xml:"ele"`
+
+	Name *string `xml:"name"`
+	Type *string `xml:"type"`
+	Cmt  *string `xml:"cmt"`
+
+	Extensions *struct {
+		TrkExtension struct {
+			Visugpx string `xml:"visugpx,attr"`
+			Node    int    `xml:"node"`
+		} `xml:"TrkExtension"`
+	} `xml:"extensions"`
 }
 
 type Wpt struct {
