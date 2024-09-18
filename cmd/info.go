@@ -20,8 +20,8 @@ func CreateInfoCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{Filepath: viper.GetString("filename")}
 			gpx.SetVitesse(4.5)
-			gpxSummary := gpx.GetInfo(viper.GetBool("detail"), true)
-			gpxSummary.Print()
+			trkSummary := gpx.GetInfo(viper.GetBool("detail"), true)
+			trkSummary.Print()
 		},
 	}
 

@@ -12,7 +12,7 @@ type Pos struct {
 	Ele float64
 }
 
-type TrkSummary struct {
+type SectionInfo struct {
 	From           string
 	To             string
 	NPoints        int
@@ -26,15 +26,9 @@ type TrkSummary struct {
 	Toto           string
 }
 
-type GpxSummary []TrkSummary
+type TrkSummary []SectionInfo
 
-func (gpxSummary GpxSummary) Print() {
-	for _, trkSummary := range gpxSummary {
-		trkSummary.Print()
-	}
-}
-
-func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) GpxSummary {
+func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) TrkSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
 
 	var p_prev Pos
@@ -46,7 +40,7 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) GpxSummary {
 	}
 
 	n := 0
-	var trkSummary GpxSummary
+	var trkSummary TrkSummary
 
 	trkpts := slices.Concat((*trk).Trkseg)[0].Trkpt
 	for i, trkpt := range trkpts {
@@ -72,7 +66,7 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) GpxSummary {
 		p_prev = p
 
 		if detail && trkpt.Name != nil {
-			x := TrkSummary{
+			x := SectionInfo{
 				From:           pointName_prev,
 				To:             *trkpt.Name,
 				NPoints:        n,
@@ -95,7 +89,7 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) GpxSummary {
 		}
 
 		if i == len(trkpts)-1 {
-			x := TrkSummary{
+			x := SectionInfo{
 				From:           pointName_prev,
 				To:             "end",
 				NPoints:        n,
@@ -133,7 +127,7 @@ func (trk *Trk) calcDuration(vitessePlat float64) {
 	)
 }
 
-func (trk Trk) CalcAll(vitessePlat float64, detail bool) GpxSummary {
+func (trk Trk) CalcAll(vitessePlat float64, detail bool) TrkSummary {
 	trkSummary := trk.calcTopograph(vitessePlat, detail)
 	trk.convertToEffortMetrics()
 	trk.calcDuration(vitessePlat)
@@ -141,27 +135,27 @@ func (trk Trk) CalcAll(vitessePlat float64, detail bool) GpxSummary {
 	return trkSummary
 }
 
-func (summary TrkSummary) Print(ascii_format ...bool) {
+func (s SectionInfo) Print(ascii_format ...bool) {
 	if len(ascii_format) > 0 {
 		if ascii_format[0] {
-			fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", summary.From)
+			fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", s.From)
 		} else {
-			fmt.Printf("Track name: %v\n", summary.From)
+			fmt.Printf("Track name: %v\n", s.From)
 		}
 	} else {
-		fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", summary.From)
+		fmt.Printf("\u001b[4mTrack name:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", s.From)
 	}
 
-	fmt.Printf("Number of points:       %v\n", summary.NPoints)
+	fmt.Printf("Number of points:       %v\n", s.NPoints)
 
-	fmt.Printf("Distance:               %.1f km\n", summary.Distance)
+	fmt.Printf("Distance:               %.1f km\n", s.Distance)
 
-	fmt.Printf("D+/D-:                  %.0f m / %.0f m\n", summary.DenivPos, summary.DenivNeg)
+	fmt.Printf("D+/D-:                  %.0f m / %.0f m\n", s.DenivPos, s.DenivNeg)
 
-	fmt.Printf("Distance effort:        %.1f km\n", summary.DistanceEffort)
+	fmt.Printf("Distance effort:        %.1f km\n", s.DistanceEffort)
 
-	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", summary.VitessePlat)
-	fmt.Printf("Temps parcours estimé:  %vh%v\n", summary.DurationHour, summary.DurationMin)
+	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", s.VitessePlat)
+	fmt.Printf("Temps parcours estimé:  %vh%v\n", s.DurationHour, s.DurationMin)
 }
 
 func (trk Trk) PrintInfo(vitessePlat float64, ascii_format ...bool) {
@@ -187,4 +181,10 @@ func (trk Trk) PrintInfo(vitessePlat float64, ascii_format ...bool) {
 	fmt.Printf("Vitesse sur plat:       %.1f km/h\n", vitessePlat)
 	fmt.Printf("Temps parcours estimé:  %vh%v\n", trk.Extensions.DurationHour, trk.Extensions.DurationMin)
 
+}
+
+func (trkSummary TrkSummary) Print() {
+	for _, trkSummary := range trkSummary {
+		trkSummary.Print()
+	}
 }

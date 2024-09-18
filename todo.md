@@ -1,6 +1,4 @@
 # Todo
-- RENOMMER TrkSummary, GpxSummary, car ne conviennent pas
-    - []TrkSummary est en fait un résumé du Trk, qui est sur plusieurs points...
 
 - modif calcTopo pour seulement faire le calcul
     - on mettre les valeurs cumules au trkpt qui possède un nom
