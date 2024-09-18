@@ -18,12 +18,11 @@ func (gpx *Gpx) SetVitesse(v float64) {
 	(*gpx).Extensions.Vitesse = v
 }
 
-func (gpx Gpx) GetInfo(detail bool, ascii_format bool) TrkSummary {
-	gpx.ParseFile(gpx.Filepath)
+func (gpx Gpx) GetInfo(ascii_format bool) TrkSummary {
 
 	var trkSummary TrkSummary
 	for _, trk := range gpx.Trk {
-		summary := trk.CalcAll(gpx.Extensions.Vitesse, detail)
+		summary := trk.GetInfo(gpx.Extensions.Vitesse, false)
 		trkSummary = slices.Concat(trkSummary, summary)
 		// for _, s := range summary {
 

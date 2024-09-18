@@ -45,6 +45,15 @@ func initFlags(cmd *cobra.Command, flags []FlagConfig) {
 					f.Name, f.Shortname, f.DefaultValue.(float64), f.Description)
 			}
 			break
+		case int8:
+			if f.PersistentFlag != nil && *f.PersistentFlag {
+				cmd.PersistentFlags().Int8P(
+					f.Name, f.Shortname, f.DefaultValue.(int8), f.Description)
+			} else {
+				cmd.Flags().Int8P(
+					f.Name, f.Shortname, f.DefaultValue.(int8), f.Description)
+			}
+			break
 		case bool:
 			if f.PersistentFlag != nil && *f.PersistentFlag {
 				cmd.PersistentFlags().BoolP(

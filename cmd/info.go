@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -20,8 +18,16 @@ func CreateInfoCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{Filepath: viper.GetString("filename")}
 			gpx.SetVitesse(4.5)
-			trkSummary := gpx.GetInfo(viper.GetBool("detail"), true)
-			trkSummary.Print()
+			gpx.ParseFile(gpx.Filepath)
+
+			var summary TrkSummary
+			if viper.Get("trk-id") != -1 {
+				summary = gpx.Trk[viper.GetInt("trk-id")].GetInfo(gpx.Extensions.Vitesse, true)
+			} else {
+				summary = gpx.GetInfo(true)
+			}
+
+			summary.Print()
 		},
 	}
 
@@ -31,26 +37,9 @@ func CreateInfoCmd() *cobra.Command {
 			Description: "Details info for each portion having name in trkpt",
 			NoOptDefVal: StringPointer("true"),
 		},
-	})
-
-	cmd.AddCommand(CreateInfoDetailCmd())
-
-	return cmd
-}
-
-func CreateInfoDetailCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "detail",
-		Short: "Detailed info on the selected track",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("hello")
-		},
-	}
-
-	initFlags(cmd, []FlagConfig{
 		{
-			Name: "trk_id", Shortname: "t", DefaultValue: int8(0),
-			Description: "Trk id to reverse. (example: -t 2)",
+			Name: "trk-id", Shortname: "i", DefaultValue: int8(-1),
+			Description: "Details about i-th trk",
 		},
 	})
 
