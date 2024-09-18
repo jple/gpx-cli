@@ -28,7 +28,7 @@ type SectionInfo struct {
 
 type TrkSummary []SectionInfo
 
-func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) TrkSummary {
+func (trk Trk) calcTopograph(vitessePlat float64, detail bool) TrkSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
 
 	var p_prev Pos
@@ -36,19 +36,20 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) TrkSummary {
 	if detail {
 		pointName_prev = "start"
 	} else {
-		pointName_prev = (*trk).Name
+		pointName_prev = trk.Name
 	}
 
 	n := 0
 	var trkSummary TrkSummary
 
-	trkpts := slices.Concat((*trk).Trkseg)[0].Trkpt
+	trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
 	for i, trkpt := range trkpts {
 		p := Pos{
 			Lat: trkpt.Lat,
 			Lon: trkpt.Lon,
 			Ele: trkpt.Ele,
 		}
+
 		if i == 0 {
 			p_prev = p
 			if detail && trkpt.Name != nil {
@@ -65,10 +66,10 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) TrkSummary {
 		n += 1
 		p_prev = p
 
-		if detail && trkpt.Name != nil {
-			x := SectionInfo{
+		var x SectionInfo
+		if (detail && trkpt.Name != nil) || (i == len(trkpts)-1) {
+			x = SectionInfo{
 				From:           pointName_prev,
-				To:             *trkpt.Name,
 				NPoints:        n,
 				VitessePlat:    vitessePlat,
 				Distance:       distance,
@@ -77,9 +78,10 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) TrkSummary {
 				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
 			}
 			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
+		}
 
-			trkSummary = append(trkSummary, x)
-
+		if detail && trkpt.Name != nil {
+			x.To = *trkpt.Name
 			pointName_prev = *trkpt.Name
 
 			distance = 0
@@ -89,48 +91,40 @@ func (trk *Trk) calcTopograph(vitessePlat float64, detail bool) TrkSummary {
 		}
 
 		if i == len(trkpts)-1 {
-			x := SectionInfo{
-				From:           pointName_prev,
-				To:             "end",
-				NPoints:        n,
-				VitessePlat:    vitessePlat,
-				Distance:       distance,
-				DenivPos:       denivPos,
-				DenivNeg:       denivNeg,
-				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
-			}
-			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
+			x.To = "end"
+		}
 
+		if (detail && trkpt.Name != nil) || (i == len(trkpts)-1) {
 			trkSummary = append(trkSummary, x)
 		}
 
 	}
 
-	(*trk).Extensions.DenivPos = denivPos
-	(*trk).Extensions.DenivNeg = denivNeg
-	(*trk).Extensions.Distance = distance
+	// trk.Extensions.DenivPos = denivPos
+	// trk.Extensions.DenivNeg = denivNeg
+	// trk.Extensions.Distance = distance
 
 	return trkSummary
 }
 
-func (trk *Trk) convertToEffortMetrics() {
-	(*trk).Extensions.DistanceEffort = CalcDistanceEffort(
-		(*trk).Extensions.Distance,
-		(*trk).Extensions.DenivPos,
-		(*trk).Extensions.DenivNeg,
-	)
-}
+// func (trk *Trk) convertToEffortMetrics() {
+// 	trk.Extensions.DistanceEffort = CalcDistanceEffort(
+// 		trk.Extensions.Distance,
+// 		trk.Extensions.DenivPos,
+// 		trk.Extensions.DenivNeg,
+// 	)
+// }
 
-func (trk *Trk) calcDuration(vitessePlat float64) {
-	(*trk).Extensions.Duration, (*trk).Extensions.DurationHour, (*trk).Extensions.DurationMin = CalcDuration(
-		(*trk).Extensions.DistanceEffort, vitessePlat,
-	)
-}
+// func (trk *Trk) calcDuration(vitessePlat float64) {
+// 	trk.Extensions.Duration, trk.Extensions.DurationHour, trk.Extensions.DurationMin = CalcDuration(
+// 		trk.Extensions.DistanceEffort, vitessePlat,
+// 	)
+// }
 
 func (trk Trk) CalcAll(vitessePlat float64, detail bool) TrkSummary {
 	trkSummary := trk.calcTopograph(vitessePlat, detail)
-	trk.convertToEffortMetrics()
-	trk.calcDuration(vitessePlat)
+	// trk.convertToEffortMetrics()
+	// trk.calcDuration(vitessePlat)
 
 	return trkSummary
 }
