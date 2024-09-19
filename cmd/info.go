@@ -20,14 +20,19 @@ func CreateInfoCmd() *cobra.Command {
 			gpx.SetVitesse(4.5)
 			gpx.ParseFile(gpx.Filepath)
 
-			var summary TrkSummary
+			var summary GpxSummary
+			var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
 			if viper.Get("trk-id") != -1 {
-				summary = gpx.Trk[viper.GetInt("trk-id")].GetInfo(gpx.Extensions.Vitesse, true)
+				summary = append(summary, gpx.Trk[viper.GetInt("trk-id")].GetInfo(gpx.Extensions.Vitesse, true))
+				printArgs.PrintFrom = true
 			} else {
 				summary = gpx.GetInfo(true)
+				printArgs.PrintFrom = false
 			}
 
-			summary.Print()
+			for _, s := range summary {
+				s.Print(printArgs)
+			}
 		},
 	}
 
