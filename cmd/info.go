@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -20,19 +22,23 @@ func CreateInfoCmd() *cobra.Command {
 			gpx.SetVitesse(4.5)
 			gpx.ParseFile(gpx.Filepath)
 
-			var summary GpxSummary
 			var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
 			if viper.Get("trk-id") != -1 {
-				summary = append(summary, gpx.Trk[viper.GetInt("trk-id")].GetInfo(gpx.Extensions.Vitesse, true))
 				printArgs.PrintFrom = true
+
+				fmt.Printf("[%v] ", viper.Get("trk-id"))
+				gpx.
+					Trk[viper.GetInt("trk-id")].
+					GetInfo(gpx.Extensions.Vitesse, true).
+					Print(printArgs)
 			} else {
-				summary = gpx.GetInfo(true)
 				printArgs.PrintFrom = false
+
+				gpx.
+					GetInfo(true).
+					Print(printArgs)
 			}
 
-			for _, s := range summary {
-				s.Print(printArgs)
-			}
 		},
 	}
 

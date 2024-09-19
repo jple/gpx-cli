@@ -69,3 +69,10 @@ func (trkSummary TrkSummary) Print(args PrintArgs) {
 		fmt.Println()
 	}
 }
+
+func (gpxSummary GpxSummary) Print(printArgs PrintArgs) {
+	for i, trkSummary := range gpxSummary {
+		fmt.Printf("[%v] ", i)
+		trkSummary.Print(printArgs)
+	}
+}
