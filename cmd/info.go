@@ -14,7 +14,7 @@ func StringPointer(s string) *string {
 func CreateInfoCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "info",
-		Short: "General info on the track",
+		Short: "General info on the tracks",
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{Filepath: viper.GetString("filename")}
 			gpx.SetVitesse(4.5)
@@ -38,13 +38,8 @@ func CreateInfoCmd() *cobra.Command {
 
 	initFlags(cmd, []FlagConfig{
 		{
-			Name: "detail", Shortname: "d", DefaultValue: false,
-			Description: "Details info for each portion having name in trkpt",
-			NoOptDefVal: StringPointer("true"),
-		},
-		{
 			Name: "trk-id", Shortname: "i", DefaultValue: int8(-1),
-			Description: "Details about i-th trk",
+			Description: "Details about i-th trk. Value -1 will display all trk summary",
 		},
 	})
 
