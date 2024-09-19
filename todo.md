@@ -1,9 +1,5 @@
 # Todo
 
-- modif calcTopo pour seulement faire le calcul
-    - on mettre les valeurs cumules au trkpt qui possède un nom
-    - on créera une func qui fera le calcul pour otenir info -detail
-
 
 - modifier en CLI
     * gpx test
@@ -19,10 +15,6 @@
       ----> https://www.visugpx.com/api/documentation_api.php 
     * Créer soi-même avec html + js  
       ----> https://wiki.openstreetmap.org/wiki/Openlayers_Track_example
-
-- On peut ajouter des noms dans trkpt  
-(trkpt est de type wptType, et contient donc `name`, `cmt`, `desc`)
-On les utiliserait pour afficher les étapes de la rando
 
 
 # Documentation gpx
