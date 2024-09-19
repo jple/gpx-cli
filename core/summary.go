@@ -39,18 +39,11 @@ type PrintArgs struct {
 func (s SectionInfo) Print(args PrintArgs) {
 	if args.PrintFrom {
 		if args.AsciiFormat {
-			fmt.Printf("\u001b[4mFrom:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", s.From)
+			fmt.Printf("\u001b[4mSection:\u001b[24m \u001b[1;32m%v --> %v\u001b[22;0m\n", s.From, s.To)
 		} else {
-			fmt.Printf("From: %v\n", s.From)
+			fmt.Printf("Section: %v --> %v\n", s.From, s.To)
 		}
 	}
-	// if len(print_from) == 0 || print_from[0] {
-	// 	if len(ascii_format) == 0 || ascii_format[0] {
-	// 		fmt.Printf("\u001b[4mFrom:\u001b[24m \u001b[1;32m%v\u001b[22;0m\n", s.From)
-	// 	} else {
-	// 		fmt.Printf("From: %v\n", s.From)
-	// 	}
-	// }
 
 	fmt.Printf("Number of points:       %v\n", s.NPoints)
 	fmt.Printf("Distance:               %.1f km\n", s.Distance)
