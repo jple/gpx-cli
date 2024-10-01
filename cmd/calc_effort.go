@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 
+	. "github.com/jple/gpx-cli/core"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func CreateCalcEffortCmd() *cobra.Command {
@@ -12,25 +13,31 @@ func CreateCalcEffortCmd() *cobra.Command {
 		Use:   "calc_effort",
 		Short: "Calculate duration based input (distance, denivPos, denivNeg)",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("hello")
-			fmt.Println("Value: ", viper.Get("distance"))
+			dist, _ := strconv.ParseFloat(args[0], 64)
+			dPos, _ := strconv.ParseFloat(args[1], 64)
+			dNeg, _ := strconv.ParseFloat(args[2], 64)
+			var vitessePlat float64
+			if len(args) > 3 {
+				v, _ := strconv.ParseFloat(args[3], 64)
+				vitessePlat = v
+			} else {
+				vitessePlat = 6.0
+			}
+
+			fmt.Println("Input:")
+			fmt.Println("distance", dist, "km")
+			fmt.Println("denivele positif: ", dPos, "m")
+			fmt.Println("denivele negatif:", dNeg, "m")
+			fmt.Println("vitesse plat", vitessePlat, "km/h")
+			fmt.Println("")
+
+			fmt.Println("Output:")
+			distEffort := CalcDistanceEffort(dist, dPos, dNeg)
+			fmt.Println("Distance effort : ", distEffort, "km")
+			_, h, m := CalcDuration(distEffort, vitessePlat)
+			fmt.Println("Duration : ", h, "h", m)
 		},
 	}
-
-	initFlags(cmd, []FlagConfig{
-		{
-			Name: "distance", Shortname: "d", DefaultValue: 0.0,
-			Description: "Distance in km",
-		},
-		{
-			Name: "deniv_pos", Shortname: "p", DefaultValue: 0.0,
-			Description: "Positive elevation",
-		},
-		{
-			Name: "deniv_neg", Shortname: "n", DefaultValue: 0.0,
-			Description: "Negative elevation",
-		},
-	})
 
 	return cmd
 }
