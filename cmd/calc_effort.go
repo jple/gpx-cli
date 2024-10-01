@@ -10,8 +10,8 @@ import (
 
 func CreateCalcEffortCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "calc_effort",
-		Short: "Calculate duration based input (distance, denivPos, denivNeg)",
+		Use:   "calc_effort [dist] [denivPos] [denivNeg] [[vitessePlat]]",
+		Short: "Calculate duration based input (distance, denivPos, denivNegvitessePlat). vitessePlat is 6 km/h if not set",
 		Run: func(cmd *cobra.Command, args []string) {
 			dist, _ := strconv.ParseFloat(args[0], 64)
 			dPos, _ := strconv.ParseFloat(args[1], 64)
