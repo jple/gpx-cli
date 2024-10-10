@@ -86,3 +86,13 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 
 	return trkSummary
 }
+
+func (p_trk *Trk) Reverse() Trk {
+	trk := *p_trk
+
+	slices.Reverse(trk.Trkseg)
+	for _, trkseg := range trk.Trkseg {
+		slices.Reverse(trkseg.Trkpt)
+	}
+	return trk
+}

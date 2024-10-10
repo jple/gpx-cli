@@ -15,7 +15,7 @@ func (gpx *Gpx) ParseFile(gpxFilename string) {
 }
 
 func (gpx *Gpx) SetVitesse(v float64) {
-	(*gpx).Extensions.Vitesse = v
+	gpx.Extensions.Vitesse = v
 }
 
 func (gpx Gpx) GetInfo(ascii_format bool) GpxSummary {
@@ -32,6 +32,39 @@ func (gpx Gpx) GetInfo(ascii_format bool) GpxSummary {
 		// fmt.Println()
 	}
 	return trkSummary
+}
+
+func (p_gpx *Gpx) Reverse() Gpx {
+	gpx := *p_gpx
+
+	slices.Reverse(gpx.Trk)
+	for _, trk := range gpx.Trk {
+		trk.Reverse()
+	}
+
+	return gpx
+}
+
+func (gpx Gpx) Save(filepath string) {
+	xmlFile, err := os.Create(filepath)
+	if err != nil {
+		fmt.Println("Error creating XML file:", err)
+		return
+	}
+	_, err = xmlFile.Write([]byte(xml.Header)) // write xml header
+	if err != nil {
+		fmt.Println("Error writing to XML file:", err)
+		return
+	}
+
+	encoder := xml.NewEncoder(xmlFile)
+	encoder.Indent("", "\t")
+
+	// write gpx
+	if err = encoder.Encode(gpx); err != nil {
+		fmt.Printf("error: %v\n", err)
+		return
+	}
 }
 
 type TrkName struct {
