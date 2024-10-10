@@ -1,5 +1,7 @@
 # Todo
 
+- gpx.Save : effectuer une calcul des infos pour set denivPos, ...
+- créer cmd save : pour sauvegarder gpx avec metadata calculé
 
 - modifier en CLI
     * gpx test
