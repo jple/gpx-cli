@@ -24,12 +24,6 @@ func (gpx Gpx) GetInfo(ascii_format bool) GpxSummary {
 	for _, trk := range gpx.Trk {
 		summary := trk.GetInfo(gpx.Extensions.Vitesse, false)
 		trkSummary = append(trkSummary, summary)
-		// for _, s := range summary {
-
-		// 	fmt.Printf("[%v] ", i)
-		// 	s.Print()
-		// }
-		// fmt.Println()
 	}
 	return trkSummary
 }
@@ -46,12 +40,15 @@ func (p_gpx *Gpx) Reverse() Gpx {
 }
 
 func (gpx Gpx) Save(filepath string) {
+	// Create xml file
 	xmlFile, err := os.Create(filepath)
 	if err != nil {
 		fmt.Println("Error creating XML file:", err)
 		return
 	}
-	_, err = xmlFile.Write([]byte(xml.Header)) // write xml header
+
+	// Write xml header
+	_, err = xmlFile.Write([]byte(xml.Header))
 	if err != nil {
 		fmt.Println("Error writing to XML file:", err)
 		return
@@ -60,7 +57,7 @@ func (gpx Gpx) Save(filepath string) {
 	encoder := xml.NewEncoder(xmlFile)
 	encoder.Indent("", "\t")
 
-	// write gpx
+	// Write gpx
 	if err = encoder.Encode(gpx); err != nil {
 		fmt.Printf("error: %v\n", err)
 		return
