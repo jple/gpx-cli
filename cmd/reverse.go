@@ -16,6 +16,7 @@ func CreateReverseCmd() *cobra.Command {
 		Long:  "Reverse trk and trkwpt in GPX file.",
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{Filepath: viper.GetString("filename")}
+			gpx.SetVitesse(4.5)
 			gpx.ParseFile(gpx.Filepath)
 
 			trkId := viper.GetInt("trk_id")
@@ -32,14 +33,16 @@ func CreateReverseCmd() *cobra.Command {
 		},
 	}
 
+	var output StringValue = "out.gpx"
+	var trkId IntValue = -1
 	initFlags(cmd, []FlagConfig{
 		{
-			Name: "output", Shortname: "o", DefaultValue: "out.gpx",
+			Name: "output", Shortname: "o", DefaultValue: &output,
 			Description:    "Output filename (default: out.gpx)",
 			PersistentFlag: BoolPointer(true),
 		},
 		{
-			Name: "trk_id", Shortname: "t", DefaultValue: "-1",
+			Name: "trk_id", Shortname: "t", DefaultValue: &trkId,
 			Description: "Trk id to reverse. If -1, applies to all trk. (example: -t 2)",
 		},
 	})

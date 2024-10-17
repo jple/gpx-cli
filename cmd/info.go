@@ -23,10 +23,11 @@ func CreateInfoCmd() *cobra.Command {
 			gpx.ParseFile(gpx.Filepath)
 
 			var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
-			if viper.Get("trk-id") != -1 {
+
+			if viper.GetInt("trk-id") != -1 {
 				printArgs.PrintFrom = true
 
-				fmt.Printf("[%v] ", viper.Get("trk-id"))
+				fmt.Printf("[%v] ", viper.GetInt("trk-id"))
 				gpx.
 					Trk[viper.GetInt("trk-id")].
 					GetInfo(gpx.Extensions.Vitesse, true).
@@ -42,9 +43,10 @@ func CreateInfoCmd() *cobra.Command {
 		},
 	}
 
+	var trkId IntValue = -1
 	initFlags(cmd, []FlagConfig{
 		{
-			Name: "trk-id", Shortname: "i", DefaultValue: int8(-1),
+			Name: "trk-id", Shortname: "i", DefaultValue: &trkId,
 			Description: "Details about i-th trk. Value -1 will display all trk summary",
 		},
 	})

@@ -1,5 +1,9 @@
 # Todo
 
+- add check when no args in
+    * dist
+    * calc_effort
+
 - gpx.Save : effectuer une calcul des infos pour set denivPos, ...
 - créer cmd save : pour sauvegarder gpx avec metadata calculé
 

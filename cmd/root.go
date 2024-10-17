@@ -18,9 +18,12 @@ var (
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	var s StringValue = ""
 	initFlags(rootCmd, []FlagConfig{
 		{
-			Name: "filename", Shortname: "f", DefaultValue: "",
+			Name: "filename", Shortname: "f",
+			// DefaultValue: "",
+			DefaultValue:   &s,
 			Description:    "GPX filename to load",
 			PersistentFlag: BoolPointer(true),
 		},

@@ -22,10 +22,12 @@ func CreateLsCmd() *cobra.Command {
 		},
 	}
 
+	var all BoolValue = false
 	initFlags(cmd, []FlagConfig{
 		{
-			Name: "all", Shortname: "a", DefaultValue: false,
+			Name: "all", Shortname: "a", DefaultValue: &all,
 			Description: "Include trkpt names",
+			NoOptDefVal: StringPointer("true"),
 		},
 	})
 
