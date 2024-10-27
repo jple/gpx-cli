@@ -24,32 +24,25 @@ func BoolPointer(b bool) *bool {
 }
 
 func createFlag(cmd *cobra.Command, f FlagConfig) {
-	// Create PersistentFlag
+	var flags *pflag.FlagSet
+
 	if f.PersistentFlag != nil && *f.PersistentFlag {
-		cmd.PersistentFlags().VarP(
-			f.DefaultValue, f.Name, f.Shortname, f.Description)
-
-		// Set flag without value (eg. --verbose)
-		if f.NoOptDefVal != nil {
-			cmd.PersistentFlags().Lookup(f.Name).NoOptDefVal = *f.NoOptDefVal
-		}
-
-		// Bind Flag
-		viper.BindPFlag(f.Name, cmd.PersistentFlags().Lookup(f.Name))
-	} else
-	// Create "local" flag
-	{
-		cmd.Flags().VarP(
-			f.DefaultValue, f.Name, f.Shortname, f.Description)
-
-		// Set flag without value (eg. --verbose)
-		if f.NoOptDefVal != nil {
-			cmd.Flags().Lookup(f.Name).NoOptDefVal = *f.NoOptDefVal
-		}
-
-		// Bind Flag
-		viper.BindPFlag(f.Name, cmd.Flags().Lookup(f.Name))
+		flags = cmd.PersistentFlags()
+	} else {
+		flags = cmd.Flags()
 	}
+
+	// Create Flag or PersistentFlag
+	flags.VarP(
+		f.DefaultValue, f.Name, f.Shortname, f.Description)
+
+	// Set flag without value (eg. --verbose)
+	if f.NoOptDefVal != nil {
+		flags.Lookup(f.Name).NoOptDefVal = *f.NoOptDefVal
+	}
+
+	// Bind Flag
+	viper.BindPFlag(f.Name, flags.Lookup(f.Name))
 }
 
 func initFlags(cmd *cobra.Command, flags []FlagConfig) {
