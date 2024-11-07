@@ -1,6 +1,8 @@
 package core
 
-import "math"
+import (
+	"math"
+)
 
 func Haversin(t float64) float64 {
 	return math.Pow(math.Sin(t/2), 2)
@@ -52,4 +54,79 @@ func CalcDuration(distance_plat float64, vitesse_plat float64) (float64, int8, i
 	durationHour, durationMin := FloatToHourMin(duration)
 
 	return duration, durationHour, durationMin
+}
+
+type rolling_calc func([]float64) float64
+
+func Mean(v []float64) float64 {
+	var out float64 = 0
+	for _, e := range v {
+		out += e
+	}
+	return out / float64(len(v))
+}
+
+func Rolling(v []float64, w_size int, calc rolling_calc) []float64 {
+	var out []float64
+
+	n := len(v)
+	// if n < w_size ?
+
+	for i, _ := range v {
+		var s []float64
+		for j := 0; j < w_size; j++ {
+			s = append(s, v[i+j])
+		}
+		out = append(out, calc(s))
+
+		if i == n-w_size {
+			break
+		}
+	}
+
+	return out
+}
+
+type IndexValue struct {
+	Index int
+	Value float64
+}
+
+func VariationSummary(s []float64) []IndexValue {
+	var lasthigher bool
+	var last float64
+	var out []IndexValue
+
+	for i, v := range s {
+		if i == 0 {
+			last = v
+			out = append(out, IndexValue{Index: i, Value: v})
+			continue
+		}
+		if i == 1 {
+			lasthigher = v >= last
+			last = v
+			continue
+		}
+		if i == len(s)-1 {
+			out = append(out, IndexValue{Index: len(s), Value: v})
+			break
+		}
+
+		diff := math.Round(v - last)
+		if math.Abs(diff) < 3 {
+			last = v
+			continue
+		}
+
+		higher := (diff >= 0)
+		if (higher && !lasthigher) || (!higher && lasthigher) {
+			out = append(out, IndexValue{Index: i, Value: last})
+			lasthigher = higher
+		}
+		last = v
+
+	}
+
+	return out
 }

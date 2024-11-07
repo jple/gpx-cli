@@ -34,6 +34,8 @@ func init() {
 	rootCmd.AddCommand(CreateDistCmd())
 	rootCmd.AddCommand(CreateInfoCmd())
 	rootCmd.AddCommand(CreateLsCmd())
+
+	rootCmd.AddCommand(CreateTestCmd())
 }
 
 func Execute() error {
