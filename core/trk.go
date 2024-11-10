@@ -96,3 +96,75 @@ func (p_trk *Trk) Reverse() Trk {
 	}
 	return trk
 }
+
+func (trk Trk) GetElevations() []float64 {
+	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	var elevs []float64
+	for _, trkpt := range trkpts {
+		elevs = append(elevs, trkpt.Ele)
+	}
+	return elevs
+}
+func (trk Trk) GetDistances() []float64 {
+	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	var dists []float64
+	posInit := Pos{
+		Lon: trkpts[0].Lon,
+		Lat: trkpts[0].Lat,
+		Ele: trkpts[0].Ele,
+	}
+	var pos Pos
+	for _, trkpt := range trkpts {
+		pos = Pos{
+			Lon: trkpt.Lon,
+			Lat: trkpt.Lat,
+			Ele: trkpt.Ele,
+		}
+		dists = append(dists,
+			Dist(posInit, pos))
+	}
+	return dists
+}
+
+func (trk Trk) GetRollElevations(winSize int, calc RollCalc) []float64 {
+	return Rolling(trk.GetElevations(), winSize, calc)
+}
+func (trk Trk) GetRollDistances(winSize int, calc RollCalc) []float64 {
+	return Rolling(trk.GetDistances(), winSize, calc)
+}
+
+// func (trk Trk) Plot(filename string) {
+// 	var elevs []float64 = trk.GetElevations()
+// 	var rollmean []float64 = Rolling(elevs, 5, Mean)
+
+// 	var elevsSummary []float64
+// 	for _, v := range VariationSummary(rollmean) {
+// 		elevsSummary = append(elevsSummary, v.Value)
+// 	}
+
+// 	var xys [][2][]float64
+// 	var xs, ys []float64
+// 	for i, v := range rollmean {
+// 		ys = append(ys, v)
+// 		xs = append(xs, float64(i))
+// 	}
+// 	xys = append(xys, [2][]float64{xs, ys})
+// 	xs, ys = nil, nil
+// 	for _, v := range VariationSummary(rollmean) {
+// 		ys = append(ys, v.Value)
+// 		xs = append(xs, float64(v.Index))
+// 	}
+// 	xys = append(xys, [2][]float64{xs, ys})
+
+// 	// ==============
+
+// 	// ys := [][]float64{elevsSummary, rollmean}
+// 	// names := []string{"Estimation", "rollmean"}
+// 	names := []string{"rollmean", "estimation"}
+// 	colors := []color.RGBA{
+// 		color.RGBA{R: 255, A: 255},
+// 		color.RGBA{B: 255, A: 255},
+// 	}
+// 	// Plot(xys, names, colors)
+
+// }

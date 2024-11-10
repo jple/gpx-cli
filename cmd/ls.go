@@ -7,29 +7,31 @@ import (
 )
 
 func CreateLsCmd() *cobra.Command {
+	var all BoolValue = false
+	flagsConf := []FlagConfig{
+		{
+			Name: "all", Shortname: "a", DefaultValue: &all,
+			Description: "Include trkpt names",
+			NoOptDefVal: StringPointer("true"),
+		},
+	}
+
 	cmd := &cobra.Command{
 		Use:   "ls",
 		Short: "List all trk names",
+		// TraverseChildren: true,
 
-		TraverseChildren: true,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			bindFlags(cmd, flagsConf)
+		},
 		Run: func(cmd *cobra.Command, args []string) {
-
-			// ascii_format, _ := strconv.ParseBool(args[0])
-			// trkNames := ls(viper.GetString("filename"), viper.GetBool("all"))
 			Gpx{Filepath: viper.GetString("filename")}.
 				Ls(viper.GetBool("all")).
 				Print(viper.GetBool("all"))
 		},
 	}
 
-	var all BoolValue = false
-	initFlags(cmd, []FlagConfig{
-		{
-			Name: "all", Shortname: "a", DefaultValue: &all,
-			Description: "Include trkpt names",
-			NoOptDefVal: StringPointer("true"),
-		},
-	})
+	initFlags(cmd, flagsConf)
 
 	return cmd
 }

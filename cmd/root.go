@@ -9,9 +9,6 @@ var (
 	rootCmd    = &cobra.Command{
 		Use:   "gpx-cli",
 		Short: "GPX File utility",
-		// Run: func(cmd *cobra.Command, args []string) {
-		// 	fmt.Println("test: ", viper.Get("filename"))
-		// },
 	}
 )
 
@@ -19,7 +16,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	var s StringValue = ""
-	initFlags(rootCmd, []FlagConfig{
+	flagsConf := []FlagConfig{
 		{
 			Name: "filename", Shortname: "f",
 			// DefaultValue: "",
@@ -27,14 +24,16 @@ func init() {
 			Description:    "GPX filename to load",
 			PersistentFlag: BoolPointer(true),
 		},
-	})
+	}
+	initFlags(rootCmd, flagsConf)
+	bindFlags(rootCmd, flagsConf)
 
 	rootCmd.AddCommand(CreateReverseCmd())
 	rootCmd.AddCommand(CreateCalcEffortCmd())
 	rootCmd.AddCommand(CreateDistCmd())
 	rootCmd.AddCommand(CreateInfoCmd())
 	rootCmd.AddCommand(CreateLsCmd())
-
+	rootCmd.AddCommand(CreatePlotCmd())
 	rootCmd.AddCommand(CreateTestCmd())
 }
 

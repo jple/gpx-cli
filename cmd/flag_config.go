@@ -40,9 +40,19 @@ func createFlag(cmd *cobra.Command, f FlagConfig) {
 	if f.NoOptDefVal != nil {
 		flags.Lookup(f.Name).NoOptDefVal = *f.NoOptDefVal
 	}
+}
 
-	// Bind Flag
-	viper.BindPFlag(f.Name, flags.Lookup(f.Name))
+func bindFlag(cmd *cobra.Command, f FlagConfig) {
+	if f.PersistentFlag != nil && *f.PersistentFlag {
+		viper.BindPFlag(f.Name, cmd.PersistentFlags().Lookup(f.Name))
+	} else {
+		viper.BindPFlag(f.Name, cmd.Flags().Lookup(f.Name))
+	}
+}
+func bindFlags(cmd *cobra.Command, flagsConf []FlagConfig) {
+	for _, f := range flagsConf {
+		bindFlag(cmd, f)
+	}
 }
 
 func initFlags(cmd *cobra.Command, flags []FlagConfig) {

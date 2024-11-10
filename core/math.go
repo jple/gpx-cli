@@ -1,7 +1,10 @@
 package core
 
 import (
+	"fmt"
 	"math"
+	"slices"
+	"strconv"
 )
 
 func Haversin(t float64) float64 {
@@ -56,7 +59,7 @@ func CalcDuration(distance_plat float64, vitesse_plat float64) (float64, int8, i
 	return duration, durationHour, durationMin
 }
 
-type rolling_calc func([]float64) float64
+type RollCalc func([]float64) float64
 
 func Mean(v []float64) float64 {
 	var out float64 = 0
@@ -66,20 +69,20 @@ func Mean(v []float64) float64 {
 	return out / float64(len(v))
 }
 
-func Rolling(v []float64, w_size int, calc rolling_calc) []float64 {
+func Rolling(v []float64, winSize int, calc RollCalc) []float64 {
 	var out []float64
 
 	n := len(v)
-	// if n < w_size ?
+	// if n < winSize ?
 
 	for i, _ := range v {
 		var s []float64
-		for j := 0; j < w_size; j++ {
+		for j := 0; j < winSize; j++ {
 			s = append(s, v[i+j])
 		}
 		out = append(out, calc(s))
 
-		if i == n-w_size {
+		if i == n-winSize {
 			break
 		}
 	}
@@ -92,41 +95,104 @@ type IndexValue struct {
 	Value float64
 }
 
-func VariationSummary(s []float64) []IndexValue {
+type IndexValues []IndexValue
+
+func VariationSummary(s []float64) IndexValues {
 	var lasthigher bool
 	var last float64
-	var out []IndexValue
+	var out IndexValues
 
 	for i, v := range s {
+		// Append first value
 		if i == 0 {
 			last = v
 			out = append(out, IndexValue{Index: i, Value: v})
 			continue
 		}
+
+		diff := math.Round(v - last)
+
+		// Init "last" (previous) values
 		if i == 1 {
-			lasthigher = v >= last
 			last = v
+			lasthigher = diff > 0
 			continue
 		}
+		// Append last value
 		if i == len(s)-1 {
-			out = append(out, IndexValue{Index: len(s), Value: v})
+			out = append(out, IndexValue{Index: i, Value: v})
 			break
 		}
 
-		diff := math.Round(v - last)
-		if math.Abs(diff) < 3 {
-			last = v
-			continue
-		}
+		higher := (diff > 0)
+		if higher != lasthigher {
 
-		higher := (diff >= 0)
-		if (higher && !lasthigher) || (!higher && lasthigher) {
-			out = append(out, IndexValue{Index: i, Value: last})
-			lasthigher = higher
+			if math.Abs(out[len(out)-1].Value-last) < 30 && len(out) > 1 {
+				if (higher && v > out[len(out)-1].Value) ||
+					(!higher && v < out[len(out)-1].Value) {
+					out[len(out)-1] = IndexValue{Index: i, Value: v}
+				}
+			} else {
+				out = append(out, IndexValue{Index: i - 1, Value: last})
+				lasthigher = higher
+			}
+
 		}
 		last = v
 
 	}
 
 	return out
+}
+
+func (s IndexValues) MinMax() (float64, float64) {
+	var l []float64
+	for _, v := range s {
+		l = append(l, v.Value)
+	}
+	return slices.Min(l), slices.Max(l)
+}
+func (s IndexValues) Min() float64 {
+	var l []float64
+	for _, v := range s {
+		l = append(l, v.Value)
+	}
+	return slices.Min(l)
+}
+
+func Printer(s IndexValues) {
+	m, M := s.MinMax()
+
+	var lines [5]string
+	var space string = "    "
+
+	var prev float64
+	for i, v := range s {
+		linenum := len(lines) - 1 - int((v.Value-m)/(M-m)*float64(len(lines)-1))
+		for j, _ := range lines {
+			lines[j] = lines[j] + space
+			if j == linenum {
+				lines[j] = lines[j] + strconv.Itoa(int(v.Value))
+			} else {
+				lines[j] = lines[j] + space
+			}
+		}
+		fmt.Printf("[%v]", linenum)
+		if i > 0 {
+			if v.Value > prev {
+				fmt.Printf("/")
+			} else {
+				fmt.Printf("\\")
+			}
+		}
+		prev = v.Value
+		fmt.Printf(" %.0f m ", v.Value)
+	}
+
+	fmt.Println()
+	fmt.Println("============")
+	for _, line := range lines {
+		fmt.Println(line)
+	}
+	fmt.Println("============")
 }
