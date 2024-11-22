@@ -1,5 +1,9 @@
 # Todo
 
+- BUG: Ele = nb point when Ele missing
+- **add func to withdraw Ele, if missing**
+    * https://data.geopf.fr/altimetrie/swagger-ui/index.html#/Resources/get_resources_1_0_resources__get
+
 - add check when no args in
     * dist
     * calc_effort
