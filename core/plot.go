@@ -44,7 +44,7 @@ func CreateGraph(series any, name string, color color.RGBA) Graph {
 		for k, v := range s {
 			xys = append(xys, plotter.XY{float64(k), v})
 		}
-	case IndexValues:
+	case Series:
 		for _, v := range s {
 			xys = append(xys, plotter.XY{float64(v.Index), v.Value})
 		}

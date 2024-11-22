@@ -61,7 +61,7 @@ func CreatePlotCmd() *cobra.Command {
 					"rollmean",
 					color.RGBA{R: 255, A: 255}),
 				CreateGraph(
-					VariationSummary(rollElev),
+					TrendSummary(rollElev),
 					"estimation",
 					color.RGBA{B: 255, A: 255}),
 			)

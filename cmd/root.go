@@ -34,7 +34,7 @@ func init() {
 	rootCmd.AddCommand(CreateInfoCmd())
 	rootCmd.AddCommand(CreateLsCmd())
 	rootCmd.AddCommand(CreatePlotCmd())
-	rootCmd.AddCommand(CreateTestCmd())
+	rootCmd.AddCommand(CreateTermPlotCmd())
 }
 
 func Execute() error {
