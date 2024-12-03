@@ -1,6 +1,7 @@
 # Todo
 
-- BUG: Ele = nb point when Ele missing
+- use rolling calcultion in info, etc. (improve elevation estimation)
+
 - **add func to withdraw Ele, if missing**
     * https://data.geopf.fr/altimetrie/swagger-ui/index.html#/Resources/get_resources_1_0_resources__get
 

@@ -38,8 +38,8 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 		}
 
 		eleDiff := DiffElevation(p_prev, p)
-		denivPos += math.Max(eleDiff, 1)
-		denivNeg += math.Min(eleDiff, -1)
+		denivPos += math.Max(eleDiff, 0)
+		denivNeg += math.Min(eleDiff, 0)
 
 		distance += Dist(p_prev, p)
 		n += 1
