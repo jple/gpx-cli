@@ -3,6 +3,7 @@ package core
 import (
 	"math"
 	"slices"
+	"strconv"
 )
 
 func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
@@ -85,6 +86,18 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 	// trk.Extensions.Distance = distance
 
 	return trkSummary
+}
+
+func (trk Trk) GetLonLat() ([]string, []string) {
+	var lons, lats []string
+
+	trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+	for _, trkpt := range trkpts {
+		lons = append(lons, strconv.FormatFloat(trkpt.Lon, 'f', -1, 64))
+		lats = append(lats, strconv.FormatFloat(trkpt.Lat, 'f', -1, 64))
+	}
+
+	return lons, lats
 }
 
 func (p_trk *Trk) Reverse() Trk {
