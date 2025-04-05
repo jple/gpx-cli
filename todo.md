@@ -1,5 +1,18 @@
 # Todo
 
+- create function
+    * add name to specific trkpt
+    * add name to closest trkpts
+    
+    * split trk at specific trkpt
+    * merge 2 following trk
+
+    * check distance between trk[t].trkpt[-1] and trk[t+1].trkp[0]
+        + try reverse (4 cases). If better, keep it
+
+    * info -a : shows names in trkpt
+    * merge ls / info
+
 - use rolling calcultion in info, etc. (improve elevation estimation)
 
 - **add func to withdraw Ele, if missing**

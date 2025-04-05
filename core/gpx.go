@@ -28,6 +28,40 @@ func (gpx Gpx) GetInfo(ascii_format bool) GpxSummary {
 	return trkSummary
 }
 
+func (gpx *Gpx) GetClosestTrkpts(p Pos) []*Trkpt {
+	var trkpts []*Trkpt
+	// var ind struct{ i, j, k int }
+
+	seg := gpx.Trk[0].Trkseg[0]
+	p0 := seg.Trkpt[0]
+	minDist := Dist(
+		// TODO: add elevation ?
+		Pos{Lat: p.Lat, Lon: p.Lon},
+		Pos{Lat: p0.Lat, Lon: p0.Lon},
+	)
+
+	for i, _ := range gpx.Trk {
+		for j, _ := range gpx.Trk[i].Trkseg {
+			for k, trkpt := range gpx.Trk[i].Trkseg[j].Trkpt {
+				d := Dist(
+					Pos{Lat: p.Lat, Lon: p.Lon},
+					Pos{Lat: trkpt.Lat, Lon: trkpt.Lon},
+				)
+
+				if d == minDist {
+					trkpts = append(trkpts, &trkpt)
+				} else if d < minDist {
+					// Using index to prevent copy value to keep correct address
+					trkpts = []*Trkpt{&gpx.Trk[i].Trkseg[j].Trkpt[k]}
+					// ind = struct{ i, j, k int }{i, j, k}
+				}
+			}
+		}
+	}
+
+	return trkpts
+}
+
 func (p_gpx *Gpx) Reverse() Gpx {
 	gpx := *p_gpx
 
