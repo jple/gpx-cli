@@ -1,7 +1,9 @@
 package ign
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -26,9 +28,9 @@ type (
 		Lon       string `json:"lon"`
 		Resource  string `json:"resource"`
 		Delimiter string `json:"delimiter"`
-		Measures  bool   `json:"measures"`
-		Zonly     bool   `json:"zonly"`
-		Indent    bool   `json:"indent"`
+		Measures  string `json:"measures"`
+		Zonly     string `json:"zonly"`
+		Indent    string `json:"indent"`
 	}
 
 	Point struct {
@@ -65,7 +67,7 @@ func (v Values) ToString() string {
 	return out
 }
 
-func GetElevations(pts Points) IgnOutput {
+func GetElevations(pts Points) []float64 {
 	// Prepare request
 	req, _ := http.NewRequest("GET", apiUrl, nil)
 	lats, lons := pts.getLatLonFormated(defaultDelimiter)
@@ -80,14 +82,68 @@ func GetElevations(pts Points) IgnOutput {
 
 	// Query
 	client := &http.Client{}
-	resp, _ := client.Do(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// Format
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
 	var ignResp IgnOutput
-	json.Unmarshal(body, &ignResp)
+	err = json.Unmarshal(body, &ignResp)
+	if err != nil {
+		fmt.Println("Query failed")
+		fmt.Println(string(body))
+	}
 
-	return ignResp
+	return ignResp.Elevations
+}
+func PostElevations(pts Points) []float64 {
+	// Prepare body request to query
+	lats, lons := pts.getLatLonFormated(defaultDelimiter)
+	ignReq := IgnRequest{
+		Lat:       lats,
+		Lon:       lons,
+		Delimiter: defaultDelimiter,
+		Resource:  defaultResource,
+		Zonly:     "true",
+		Measures:  "false",
+		Indent:    "false",
+	}
+	j, _ := json.Marshal(ignReq)
+	reqbody := bytes.NewBuffer(j)
+
+	// Prepare request
+	req, _ := http.NewRequest("POST", apiUrl, reqbody)
+
+	// Query
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Format
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(resp.StatusCode)
+	if resp.StatusCode != 200 {
+		fmt.Println(string(body))
+	}
+
+	var ignResp IgnOutput
+	err = json.Unmarshal(body, &ignResp)
+	if err != nil {
+		fmt.Println("Query failed")
+		fmt.Println(string(body))
+	}
+
+	return ignResp.Elevations
 }
 
 func F() {
@@ -95,5 +151,9 @@ func F() {
 		Point{Lat: 44.4, Lon: 3.2},
 		Point{Lat: 43.2, Lon: 1.3},
 	}
-	GetElevations(pts)
+	// elevations := GetElevations(pts)
+	// fmt.Println(elevations)
+
+	elevations := PostElevations(pts)
+	fmt.Println(elevations)
 }

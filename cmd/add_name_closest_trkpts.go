@@ -13,7 +13,7 @@ import (
 
 func CreateAddNameCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add_name [name] [lat] [lon]",
+		Use:   "add-name [name] [lat] [lon]",
 		Short: "Add name to closest trkpts",
 		Long:  `Add name to closest trkpts`,
 		Run: func(cmd *cobra.Command, args []string) {
