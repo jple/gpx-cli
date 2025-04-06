@@ -1,10 +1,7 @@
 # Todo
 
 - create function
-    * add name to specific trkpt
-    * add name to closest trkpts
-    
-    * split trk at specific trkpt
+    * split trk at specific trkpt (trk name/id + trkpt name/id)
     * merge 2 following trk
 
     * check distance between trk[t].trkpt[-1] and trk[t+1].trkp[0]
