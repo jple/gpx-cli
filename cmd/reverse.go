@@ -10,14 +10,8 @@ import (
 )
 
 func CreateReverseCmd() *cobra.Command {
-	var output StringValue = "out.gpx"
 	var trkId IntValue = -1
 	flagsConf := []FlagConfig{
-		{
-			Name: "output", Shortname: "o", DefaultValue: &output,
-			Description:    "Output filename (default: out.gpx)",
-			PersistentFlag: BoolPointer(true),
-		},
 		{
 			Name: "trk_id", Shortname: "t", DefaultValue: &trkId,
 			Description: "Trk id to reverse. If -1, applies to all trk. (example: -t 2)",

@@ -24,6 +24,7 @@ func CreatePlotCmd() *cobra.Command {
 		Short: "Plot Trk into png file",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			bindFlags(cmd, flagsConf)
+			viper.Set("output", "plot.png")
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{Filepath: viper.GetString("filename")}
@@ -35,6 +36,7 @@ func CreatePlotCmd() *cobra.Command {
 
 			xys := ToPlotterXYs(rollDist, rollElev)
 
+			// TODO: one plot per cmd !
 			// =============
 			var plotCt PlotContent
 			plotCt.Title = trk.Name
@@ -65,7 +67,7 @@ func CreatePlotCmd() *cobra.Command {
 					"estimation",
 					color.RGBA{B: 255, A: 255}),
 			)
-			Plot2(plotCt, "points.png")
+			Plot2(plotCt, viper.GetString("output"))
 		},
 	}
 	initFlags(cmd, flagsConf)

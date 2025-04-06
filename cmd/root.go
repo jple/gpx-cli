@@ -15,14 +15,27 @@ var (
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	var s StringValue = ""
+	var infile, outfile StringValue = "", "out.gpx"
+	var inplace BoolValue = false
 	flagsConf := []FlagConfig{
 		{
 			Name: "filename", Shortname: "f",
-			// DefaultValue: "",
-			DefaultValue:   &s,
+			DefaultValue:   &infile,
 			Description:    "GPX filename to load",
 			PersistentFlag: BoolPointer(true),
+		},
+		// TODO: these params are not always useful. Must move
+		{
+			Name: "output", Shortname: "o",
+			DefaultValue:   &outfile,
+			Description:    "Path to save GPX",
+			PersistentFlag: BoolPointer(true),
+		}, {
+			Name: "inplace", Shortname: "x",
+			DefaultValue:   &inplace,
+			Description:    "Save inplace",
+			PersistentFlag: BoolPointer(true),
+			NoOptDefVal:    StringPointer("true"),
 		},
 	}
 	initFlags(rootCmd, flagsConf)
@@ -35,7 +48,7 @@ func init() {
 	rootCmd.AddCommand(CreateLsCmd())
 	rootCmd.AddCommand(CreatePlotCmd())
 	rootCmd.AddCommand(CreateTermPlotCmd())
-	rootCmd.AddCommand(CreateClosestTrkptsCmd())
+	rootCmd.AddCommand(CreateAddNameCmd())
 }
 
 func Execute() error {

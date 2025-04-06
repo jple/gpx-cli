@@ -15,15 +15,17 @@
 
 - use rolling calcultion in info, etc. (improve elevation estimation)
 
-- **add func to withdraw Ele, if missing**
+- make gpx.Filepath unexported (need SetFilepath, GetFilepath instead), to prevent save
+
+- **add func to get Ele, if missing**
     * https://data.geopf.fr/altimetrie/swagger-ui/index.html#/Resources/get_resources_1_0_resources__get
+
+- gpx.Save : ajouter un calcul avant save pour obtenir les infos pour set denivPos, ...
 
 - add check when no args in
     * dist
     * calc_effort
 
-- gpx.Save : effectuer une calcul des infos pour set denivPos, ...
-- créer cmd save : pour sauvegarder gpx avec metadata calculé
 
 - modifier en CLI
     * gpx test
@@ -34,6 +36,7 @@
     * gpx utils
         + dist : calculate distance from gpx to km 
 
+## someday, maybe
 - afficher carte + GPX 
     * trouver une API sur laquelle transmettre le GPX, et nous retourne la carte sur un URL ?  
       ----> https://www.visugpx.com/api/documentation_api.php 

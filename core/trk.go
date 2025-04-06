@@ -146,6 +146,18 @@ func (trk Trk) GetRollDistances(winSize int, calc RollCalc) []float64 {
 	return Rolling(trk.GetDistances(), winSize, calc)
 }
 
+func (trk *Trk) AddName(name string) {
+	trk.Name = name
+}
+
+// TODO: create generics for AddName
+func (trkpt *Trkpt) AddName(name string) {
+	trkpt.Name = &name
+}
+func (trkpt *Trkpt) AddElevation(ele float64) {
+	trkpt.Ele = ele
+}
+
 // func (trk Trk) Plot(filename string) {
 // 	var elevs []float64 = trk.GetElevations()
 // 	var rollmean []float64 = Rolling(elevs, 5, Mean)

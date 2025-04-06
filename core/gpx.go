@@ -92,6 +92,7 @@ func (gpx Gpx) Save(filepath string) {
 	encoder.Indent("", "\t")
 
 	// Write gpx
+	gpx.Filepath = ""
 	if err = encoder.Encode(gpx); err != nil {
 		fmt.Printf("error: %v\n", err)
 		return
