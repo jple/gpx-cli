@@ -49,6 +49,8 @@ func init() {
 	rootCmd.AddCommand(CreatePlotCmd())
 	rootCmd.AddCommand(CreateTermPlotCmd())
 	rootCmd.AddCommand(CreateAddNameCmd())
+
+	rootCmd.AddCommand(CreateTestCmd())
 }
 
 func Execute() error {

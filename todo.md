@@ -15,6 +15,7 @@
 - make gpx.Filepath unexported (need SetFilepath, GetFilepath instead), to prevent save
 
 - **add func to get Ele, if missing**
+    * https://geoservices.ign.fr/documentation/services/services-geoplateforme/altimetrie#72671
     * https://data.geopf.fr/altimetrie/swagger-ui/index.html#/Resources/get_resources_1_0_resources__get
 
 - gpx.Save : ajouter un calcul avant save pour obtenir les infos pour set denivPos, ...
