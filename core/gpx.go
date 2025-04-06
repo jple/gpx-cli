@@ -51,11 +51,12 @@ func (gpx *Gpx) GetClosestTrkpts(p Pos) []*Trkpt {
 				)
 
 				if d == minDist {
-					trkpts = append(trkpts, &trkpt)
+					trkpts = append(trkpts, &gpx.Trk[i].Trkseg[j].Trkpt[k])
 				} else if d < minDist {
 					// Using index to prevent copy value to keep correct address
 					trkpts = []*Trkpt{&gpx.Trk[i].Trkseg[j].Trkpt[k]}
 					// ind = struct{ i, j, k int }{i, j, k}
+					minDist = d
 				}
 			}
 		}
