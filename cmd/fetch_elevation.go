@@ -17,8 +17,8 @@ func CreateFetchElevationCmd() *cobra.Command {
 		Use:   "fetch-elevation",
 		Short: "Fetch elevation from IGN API, and fill GPX",
 		Run: func(cmd *cobra.Command, args []string) {
-			gpx := Gpx{Filepath: viper.GetString("filename")}
-			gpx.ParseFile(gpx.Filepath)
+			gpx := Gpx{}
+			gpx.ParseFile(viper.GetString("filename"))
 
 			var pts ign.Points
 			// for _, trk := range gpx.Trk {

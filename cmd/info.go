@@ -29,9 +29,9 @@ func CreateInfoCmd() *cobra.Command {
 			bindFlags(cmd, flagsConf)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			gpx := Gpx{Filepath: viper.GetString("filename")}
+			gpx := Gpx{}
 			gpx.SetVitesse(4.5)
-			gpx.ParseFile(gpx.Filepath)
+			gpx.ParseFile(viper.GetString("filename"))
 
 			var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
 

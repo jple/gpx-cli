@@ -23,8 +23,8 @@ func CreateTermPlotCmd() *cobra.Command {
 			bindFlags(cmd, flagsConf)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			gpx := Gpx{Filepath: viper.GetString("filename")}
-			gpx.ParseFile(gpx.Filepath)
+			gpx := Gpx{}
+			gpx.ParseFile(viper.GetString("filename"))
 			trk := gpx.Trk[viper.GetInt("trk-id")]
 
 			rollmean := trk.GetRollElevations(5, Mean)

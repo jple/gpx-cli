@@ -17,16 +17,21 @@ func CreateAddNameCmd() *cobra.Command {
 		Short: "Add name to closest trkpts",
 		Long:  `Add name to closest trkpts`,
 		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 3 {
+				fmt.Printf("Expected 3 args, got %v\n", len(args))
+				for _, a := range args {
+					fmt.Println(a)
+				}
+			}
 			name := args[0]
 			lat, _ := strconv.ParseFloat(args[1], 64)
 			lon, _ := strconv.ParseFloat(args[2], 64)
 
-			gpx := Gpx{Filepath: viper.GetString("filename")}
-			gpx.ParseFile(gpx.Filepath)
+			gpx := Gpx{}
+			gpx.ParseFile(viper.GetString("filename"))
 
 			closest := gpx.GetClosestTrkpts(Pos{Lat: lat, Lon: lon})
 
-			// Add name to matches trkpts
 			for i, _ := range closest {
 				// Confirmation if existing name
 				if n := closest[i].Name; n != nil {
