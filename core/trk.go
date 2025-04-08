@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"math"
 	"slices"
 	"strconv"
@@ -118,7 +119,42 @@ func (trk Trk) GetElevations() []float64 {
 	}
 	return elevs
 }
-func (trk Trk) GetDistances() []float64 {
+
+// Calculate cumulated distance between two index of trk
+func (trk Trk) GetDistanceFromTo(i, j int) float64 {
+	if i >= j {
+		fmt.Println("i must be < j")
+		return 0.0
+	}
+	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	var dist float64
+	posPrev := Pos{
+		Lon: trkpts[i].Lon,
+		Lat: trkpts[i].Lat,
+		Ele: trkpts[i].Ele,
+	}
+	for k, trkpt := range trkpts {
+		if k <= i {
+			continue
+		}
+		if k >= j {
+			break
+		}
+
+		pos := Pos{
+			Lon: trkpt.Lon,
+			Lat: trkpt.Lat,
+			Ele: trkpt.Ele,
+		}
+		dist += Dist(posPrev, pos)
+		posPrev = pos
+	}
+	return dist
+}
+
+// Caculate cumulated distance for each trkpt
+// (distance between trkpt[0] and trkpt[i])
+func (trk Trk) GetDistanceEachTrkpts() []float64 {
 	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
 	var dists []float64
 	posInit := Pos{
@@ -143,7 +179,7 @@ func (trk Trk) GetRollElevations(winSize int, calc RollCalc) []float64 {
 	return Rolling(trk.GetElevations(), winSize, calc)
 }
 func (trk Trk) GetRollDistances(winSize int, calc RollCalc) []float64 {
-	return Rolling(trk.GetDistances(), winSize, calc)
+	return Rolling(trk.GetDistanceEachTrkpts(), winSize, calc)
 }
 
 func (trk *Trk) AddName(name string) {

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -11,7 +13,7 @@ func CreateTermPlotCmd() *cobra.Command {
 	var trkId IntValue = 0
 	flagsConf := []FlagConfig{
 		{
-			Name: "trk-id", Shortname: "i", DefaultValue: &trkId,
+			Name: "trk-id", Shortname: "t", DefaultValue: &trkId,
 			Description: "Details about i-th trk. Value 0 will display all trk summary",
 		},
 	}
@@ -30,8 +32,23 @@ func CreateTermPlotCmd() *cobra.Command {
 			rollmean := trk.GetRollElevations(5, Mean)
 			varSum := TrendSummary(rollmean)
 
-			// Printer(varSum)
+			var prevInd int
+			var prevVal float64
+			for k, v := range varSum {
+				ind := v.Index
+				val := v.Value
+				dist := trk.GetDistanceFromTo(prevInd, ind)
+				pct := (val - prevVal) / (dist * 1000) * 100
+				if k > 0 {
+					fmt.Printf("%.0f m\t--(%0.2f km)-->\t%.0f m \t(%.0f %%)\n", prevVal, dist, val, pct)
+				}
+				prevInd = ind
+				prevVal = val
+
+			}
+
 			varSum.PrintTrends()
+
 		},
 	}
 
