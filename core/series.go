@@ -119,6 +119,10 @@ func replaceAtIndex(str string, replacement rune, index int) string {
 // Prints on 5 lines, index 0 for highest values, 4 for lowest ones
 func (s Series) PrintTrends() {
 	m, M := s.MinMax()
+	if m == M {
+		fmt.Println("No variations in this series: min = max =", m)
+		return
+	}
 
 	var space string = strings.Repeat(" ", floor(M))
 	var lines [5]string
