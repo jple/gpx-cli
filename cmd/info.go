@@ -17,7 +17,7 @@ func CreateInfoCmd() *cobra.Command {
 	var trkId IntValue = -1
 	flagsConf := []FlagConfig{
 		{
-			Name: "trk-id", Shortname: "i", DefaultValue: &trkId,
+			Name: "trk-id", Shortname: "t", DefaultValue: &trkId,
 			Description: "Details about i-th trk. Value -1 will display all trk summary",
 		},
 	}

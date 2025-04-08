@@ -14,7 +14,7 @@ func CreatePlotCmd() *cobra.Command {
 	var trkId IntValue = 0
 	flagsConf := []FlagConfig{
 		{
-			Name: "trk-id", Shortname: "i", DefaultValue: &trkId,
+			Name: "trk-id", Shortname: "t", DefaultValue: &trkId,
 			Description: "Plot elevations about i-th trk.",
 		},
 	}
