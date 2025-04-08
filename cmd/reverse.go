@@ -27,8 +27,8 @@ func CreateReverseCmd() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{}
-			gpx.SetVitesse(4.5)
 			gpx.ParseFile(viper.GetString("filename"))
+			// gpx.SetVitesse(4.5)
 
 			trkId := viper.GetInt("trk_id")
 			if trkId == -1 {
