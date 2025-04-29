@@ -29,38 +29,37 @@ func CreateSplitCmd() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{}
-			fmt.Println(gpx)
-			// gpx.ParseFile(viper.GetString("filename"))
+			gpx.ParseFile(viper.GetString("filename"))
 
+			fmt.Println("Before split")
+			gpx.Ls(true).Print(true)
+
+			// Split on name input
 			if name := viper.GetString("name"); name != "" {
-				found := false
-			out:
-				for i, trk := range gpx.Trk {
-					for j, trkseg := range trk.Trkseg {
-						for k, trkpt := range trkseg.Trkpt {
-							if *trkpt.Name == name {
-								found = true
-
-								// TODO: create this
-								fmt.Println(i, j, k)
-								// gpx.Split(i, j, k)
-								break out
-							}
-						}
-					}
-				}
-
-				if !found {
-					fmt.Println("Name (", name, ") not found in gpx")
-				}
-				fmt.Println("ok")
-				return
+				gpx = gpx.SplitAtName(name)
 			}
+
+			// Split on closest point (lat, lon) input
 			if point := viper.GetString("point"); point != "" {
 				// TODO: rework gpx.GetClosestTrkpts to output i, j, k
 				fmt.Println("ok")
 				return
 			}
+
+			// TODO: to remove. For test only
+			fmt.Println("====================")
+			fmt.Println("After split")
+			gpx.Ls(true).Print(true)
+
+			// Save
+			fmt.Println("====================")
+			fmt.Println("Save to", viper.GetString("output"))
+			if outputFile := viper.GetString("output"); outputFile != "" {
+				gpx.Save(outputFile)
+			} else {
+				gpx.Save("out.gpx")
+			}
+
 		},
 	}
 

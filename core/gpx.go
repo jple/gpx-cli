@@ -76,6 +76,61 @@ func (p_gpx *Gpx) Reverse() Gpx {
 	return gpx
 }
 
+func (gpx Gpx) SplitAtName(name string) Gpx {
+	found := false
+
+out:
+	for i, trk := range gpx.Trk {
+		for j, trkseg := range trk.Trkseg {
+			for k, trkpt := range trkseg.Trkpt {
+				if trkpt.Name != nil && *trkpt.Name == name {
+					found = true
+
+					fmt.Printf("Split at trk %v, trkseg %v, trkpt %v\n", i, j, k)
+					gpx = gpx.Split(i, j, k)
+
+					break out
+				}
+			}
+		}
+	}
+
+	if !found {
+		fmt.Println("Name (", name, ") not found in gpx")
+	}
+	return gpx
+}
+func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
+	filterTrkpt := func(gpx Gpx, trkId, trksegId, trkptStart, trkptEnd int, name string) Trk {
+		// return gpx.Trk[trkId] where Trkseg[trkSeg] is filter on Trkpt[trkptStart:trkptEnd]
+
+		trk := gpx.Trk[trkId]
+		trk.AddName(name)
+
+		trk.Trkseg = slices.Concat(
+			trk.Trkseg[:trksegId],
+			[]Trkseg{
+				Trkseg{trk.Trkseg[trksegId].Trkpt[trkptStart:trkptEnd]},
+			},
+			trk.Trkseg[trksegId:],
+		)
+		return trk
+	}
+
+	bef := filterTrkpt(gpx, trkId, trksegId,
+		0, trkptId, "New name")
+	aft := filterTrkpt(gpx, trkId, trksegId,
+		trkptId, len(gpx.Trk[trkId].Trkseg[trksegId].Trkpt), *gpx.Trk[trkId].Trkseg[trksegId].Trkpt[trkptId].Name)
+
+	gpx.Trk = slices.Delete(gpx.Trk, trkId, trkId+1)
+	gpx.Trk = slices.Insert(
+		gpx.Trk, trkId,
+		bef, aft,
+	)
+
+	return gpx
+}
+
 func (gpx Gpx) Save(filepath string) {
 	// Create xml file
 	xmlFile, err := os.Create(filepath)
