@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"slices"
+
+	"github.com/spf13/viper"
 )
 
 func (gpx *Gpx) ParseFile(gpxFilename string) {
@@ -76,7 +78,73 @@ func (p_gpx *Gpx) Reverse() Gpx {
 	return gpx
 }
 
+func (gpx Gpx) SplitAtName(name string) Gpx {
+	found := false
+
+out:
+	for i, trk := range gpx.Trk {
+		for j, trkseg := range trk.Trkseg {
+			for k, trkpt := range trkseg.Trkpt {
+				if trkpt.Name != nil && *trkpt.Name == name {
+					found = true
+
+					fmt.Printf("Split at trk %v, trkseg %v, trkpt %v\n", i, j, k)
+					gpx = gpx.Split(i, j, k)
+
+					break out
+				}
+			}
+		}
+	}
+
+	if !found {
+		fmt.Println("Name (", name, ") not found in gpx")
+	}
+	return gpx
+}
+func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
+	filterTrkpt := func(gpx Gpx, trkId, trksegId, trkptStart, trkptEnd int, name string) Trk {
+		// return gpx.Trk[trkId] where Trkseg[trkSeg] is filter on Trkpt[trkptStart:trkptEnd]
+
+		trk := gpx.Trk[trkId]
+		trk.AddName(name)
+
+		trk.Trkseg = slices.Concat(
+			trk.Trkseg[:trksegId],
+			[]Trkseg{
+				Trkseg{trk.Trkseg[trksegId].Trkpt[trkptStart:trkptEnd]},
+			},
+			trk.Trkseg[trksegId:],
+		)
+		return trk
+	}
+
+	bef := filterTrkpt(gpx, trkId, trksegId,
+		0, trkptId, "New name")
+	aft := filterTrkpt(gpx, trkId, trksegId,
+		trkptId, len(gpx.Trk[trkId].Trkseg[trksegId].Trkpt), *gpx.Trk[trkId].Trkseg[trksegId].Trkpt[trkptId].Name)
+
+	gpx.Trk = slices.Delete(gpx.Trk, trkId, trkId+1)
+	gpx.Trk = slices.Insert(
+		gpx.Trk, trkId,
+		bef, aft,
+	)
+
+	return gpx
+}
+
+// Merge Trk[trkId2] into Trk[trkId1]
+func (gpx *Gpx) Merge(trkId1, trkId2 int) Gpx {
+	gpx.Trk[trkId1].Trkseg = slices.Concat(gpx.Trk[trkId1].Trkseg, gpx.Trk[trkId2].Trkseg)
+	gpx.Trk = slices.Delete(gpx.Trk, trkId2, trkId2+1)
+	return *gpx
+}
 func (gpx Gpx) Save(filepath string) {
+	if filepath == "" {
+		filepath = "out.gpx"
+	}
+	fmt.Println("Save to", viper.GetString("output"))
+
 	// Create xml file
 	xmlFile, err := os.Create(filepath)
 	if err != nil {
@@ -116,7 +184,10 @@ func (gpx Gpx) Ls(all bool) TrkNames {
 		out = append(out, TrkName{TrkName: trk.Name})
 
 		if all {
-			trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+			var trkpts []Trkpt
+			for _, trkseg := range trk.Trkseg {
+				trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+			}
 			for _, trkpt := range trkpts {
 				if trkpt.Name != nil {
 					out[i].TrkptNames = append(out[i].TrkptNames, *trkpt.Name)

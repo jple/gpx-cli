@@ -39,7 +39,6 @@ func CreateReverseCmd() *cobra.Command {
 				gpx.Trk[trkId].Reverse()
 			}
 
-			fmt.Println("Save to", viper.GetString("output"))
 			gpx.Save(viper.GetString("output"))
 		},
 	}

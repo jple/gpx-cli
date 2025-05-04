@@ -1,9 +1,6 @@
 # Todo
 
 - create function
-    * split trk at specific trkpt (trk name/id + trkpt name/id)
-    * merge 2 following trk
-
     * check distance between trk[t].trkpt[-1] and trk[t+1].trkp[0]
         + try reverse (4 cases). If better, keep it
 

@@ -2,6 +2,22 @@
 
 package core
 
+type Gpx struct {
+	XMLName  string `xml:"gpx"`
+	Filepath string `xlm:-` // ok for json, but xml ?
+
+	Metadata struct {
+		Desc string `xml:"desc"`
+		Name string `xml:"name"`
+	} `xml:"metadata"`
+	Trk []Trk `xml:"trk"`
+	Wpt []Wpt `xml:"wpt"`
+
+	Extensions struct {
+		Vitesse float64 "Vitesse de marche sur plat (km/h)"
+	} `xml:"extensions"`
+}
+
 type Trk struct {
 	Name string `xml:"name"`
 	// Should be optional
@@ -28,9 +44,11 @@ type Trk struct {
 		} `xml:"line"`
 	} `xml:"extensions"`
 
-	Trkseg []struct {
-		Trkpt []Trkpt `xml:"trkpt"`
-	} `xml:"trkseg"`
+	Trkseg []Trkseg `xml:"trkseg"`
+}
+
+type Trkseg struct {
+	Trkpt []Trkpt `xml:"trkpt"`
 }
 
 type Trkpt struct {
@@ -57,20 +75,4 @@ type Wpt struct {
 	Name *string `xml:"name"`
 	Type *string `xml:"type"`
 	Cmt  *string `xml:"cmt"`
-}
-
-type Gpx struct {
-	XMLName  string `xml:"gpx"`
-	Filepath string `xlm:-` // ok for json, but xml ?
-
-	Metadata struct {
-		Desc string `xml:"desc"`
-		Name string `xml:"name"`
-	} `xml:"metadata"`
-	Trk []Trk `xml:"trk"`
-	Wpt []Wpt `xml:"wpt"`
-
-	Extensions struct {
-		Vitesse float64 "Vitesse de marche sur plat (km/h)"
-	} `xml:"extensions"`
 }

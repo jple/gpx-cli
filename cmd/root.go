@@ -50,6 +50,8 @@ func init() {
 	rootCmd.AddCommand(CreateTermPlotCmd())
 	rootCmd.AddCommand(CreateAddNameCmd())
 	rootCmd.AddCommand(CreateFetchElevationCmd())
+	rootCmd.AddCommand(CreateSplitCmd())
+	rootCmd.AddCommand(CreateMergeCmd())
 
 	rootCmd.AddCommand(CreateTestCmd())
 }
