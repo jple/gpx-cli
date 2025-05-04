@@ -53,13 +53,7 @@ func CreateSplitCmd() *cobra.Command {
 
 			// Save
 			fmt.Println("====================")
-			fmt.Println("Save to", viper.GetString("output"))
-			if outputFile := viper.GetString("output"); outputFile != "" {
-				gpx.Save(outputFile)
-			} else {
-				gpx.Save("out.gpx")
-			}
-
+			gpx.Save(viper.GetString("output"))
 		},
 	}
 

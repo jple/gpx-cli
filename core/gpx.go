@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"slices"
+
+	"github.com/spf13/viper"
 )
 
 func (gpx *Gpx) ParseFile(gpxFilename string) {
@@ -131,7 +133,18 @@ func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
 	return gpx
 }
 
+// Merge Trk[trkId2] into Trk[trkId1]
+func (gpx *Gpx) Merge(trkId1, trkId2 int) Gpx {
+	gpx.Trk[trkId1].Trkseg = slices.Concat(gpx.Trk[trkId1].Trkseg, gpx.Trk[trkId2].Trkseg)
+	gpx.Trk = slices.Delete(gpx.Trk, trkId2, trkId2+1)
+	return *gpx
+}
 func (gpx Gpx) Save(filepath string) {
+	if filepath == "" {
+		filepath = "out.gpx"
+	}
+	fmt.Println("Save to", viper.GetString("output"))
+
 	// Create xml file
 	xmlFile, err := os.Create(filepath)
 	if err != nil {
@@ -171,7 +184,10 @@ func (gpx Gpx) Ls(all bool) TrkNames {
 		out = append(out, TrkName{TrkName: trk.Name})
 
 		if all {
-			trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+			var trkpts []Trkpt
+			for _, trkseg := range trk.Trkseg {
+				trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+			}
 			for _, trkpt := range trkpts {
 				if trkpt.Name != nil {
 					out[i].TrkptNames = append(out[i].TrkptNames, *trkpt.Name)
