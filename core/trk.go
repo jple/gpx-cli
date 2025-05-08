@@ -18,7 +18,11 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 	var trkSummary TrkSummary
 	trkSummary.Name = trk.Name
 
-	trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+	// trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+	var trkpts []Trkpt
+	for _, trkseg := range trk.Trkseg {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	}
 	for i, trkpt := range trkpts {
 		p := Pos{
 			Lat: trkpt.Lat,
@@ -92,7 +96,11 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 func (trk Trk) GetLonLat() ([]string, []string) {
 	var lons, lats []string
 
-	trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+	// trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+	var trkpts []Trkpt
+	for _, trkseg := range trk.Trkseg {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	}
 	for _, trkpt := range trkpts {
 		lons = append(lons, strconv.FormatFloat(trkpt.Lon, 'f', -1, 64))
 		lats = append(lats, strconv.FormatFloat(trkpt.Lat, 'f', -1, 64))
@@ -112,7 +120,11 @@ func (p_trk *Trk) Reverse() Trk {
 }
 
 func (trk Trk) GetElevations() []float64 {
-	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	// var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	var trkpts []Trkpt
+	for _, trkseg := range trk.Trkseg {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	}
 	var elevs []float64
 	for _, trkpt := range trkpts {
 		elevs = append(elevs, trkpt.Ele)
@@ -126,7 +138,11 @@ func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 		fmt.Println("i must be < j")
 		return 0.0
 	}
-	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	// var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	var trkpts []Trkpt
+	for _, trkseg := range trk.Trkseg {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	}
 	var dist float64
 	posPrev := Pos{
 		Lon: trkpts[i].Lon,
@@ -155,7 +171,11 @@ func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 // Caculate cumulated distance for each trkpt
 // (distance between trkpt[0] and trkpt[i])
 func (trk Trk) GetDistanceEachTrkpts() []float64 {
-	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	// var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	var trkpts []Trkpt
+	for _, trkseg := range trk.Trkseg {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	}
 	var dists []float64
 	posInit := Pos{
 		Lon: trkpts[0].Lon,
