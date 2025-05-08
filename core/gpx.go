@@ -88,7 +88,8 @@ out:
 				if trkpt.Name != nil && *trkpt.Name == name {
 					found = true
 
-					fmt.Printf("Split at trk %v, trkseg %v, trkpt %v\n", i, j, k)
+					// TODO: this print is a pb in tui module
+					// fmt.Printf("Split at trk %v, trkseg %v, trkpt %v\n", i, j, k)
 					gpx = gpx.Split(i, j, k)
 
 					break out
@@ -102,9 +103,11 @@ out:
 	}
 	return gpx
 }
+
+// TODO: split should put trkptid to the previous trk
 func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
-	filterTrkpt := func(gpx Gpx, trkId, trksegId, trkptStart, trkptEnd int, name string) Trk {
-		// return gpx.Trk[trkId] where Trkseg[trkSeg] is filter on Trkpt[trkptStart:trkptEnd]
+	filterBeforeTrkpt := func(gpx Gpx, trkId, trksegId, trkptId int, name string) Trk {
+		// return gpx.Trk[trkId].Trkseg[:trkseg+1] where Trkseg[trkSeg] is filter on Trkpt[:trkptEnd]
 
 		trk := gpx.Trk[trkId]
 		trk.AddName(name)
@@ -112,17 +115,24 @@ func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
 		trk.Trkseg = slices.Concat(
 			trk.Trkseg[:trksegId],
 			[]Trkseg{
-				Trkseg{trk.Trkseg[trksegId].Trkpt[trkptStart:trkptEnd]},
+				Trkseg{trk.Trkseg[trksegId].Trkpt[:trkptId]},
 			},
-			trk.Trkseg[trksegId:],
 		)
 		return trk
 	}
+	filterAfterTrkpt := func(gpx Gpx, trkId, trksegId, trkptId int, name string) Trk {
+		// return gpx.Trk[trkId].Trkseg[trkseg:] where Trkseg[0] is filter on Trkpt[trkptId:]
 
-	bef := filterTrkpt(gpx, trkId, trksegId,
-		0, trkptId, "New name")
-	aft := filterTrkpt(gpx, trkId, trksegId,
-		trkptId, len(gpx.Trk[trkId].Trkseg[trksegId].Trkpt), *gpx.Trk[trkId].Trkseg[trksegId].Trkpt[trkptId].Name)
+		trk := gpx.Trk[trkId]
+		trk.AddName(name)
+
+		trk.Trkseg = trk.Trkseg[trksegId:]
+		trk.Trkseg[0] = Trkseg{trk.Trkseg[0].Trkpt[trkptId:]}
+		return trk
+	}
+
+	bef := filterBeforeTrkpt(gpx, trkId, trksegId, trkptId, gpx.Trk[trkId].Name)
+	aft := filterAfterTrkpt(gpx, trkId, trksegId, trkptId, *gpx.Trk[trkId].Trkseg[trksegId].Trkpt[trkptId].Name)
 
 	gpx.Trk = slices.Delete(gpx.Trk, trkId, trkId+1)
 	gpx.Trk = slices.Insert(
@@ -170,71 +180,71 @@ func (gpx Gpx) Save(filepath string) {
 	}
 }
 
+// ================= Ls and Print ===========================
 type (
-	TrkName struct {
+	Trkname struct {
 		Id        int
 		Name      string
-		TrkptList []TrkptName
+		TrksegId  *int
+		TrkptId   *int
+		TrkptName *string
 	}
-	TrkptName struct {
-		Id       int
-		TrksegId int
-		Name     string
-	}
-
-	TrkList []TrkName
+	TrknameList []Trkname
 )
 
-func (gpx Gpx) Ls(all bool) TrkList {
+func (tn Trkname) IsTrkpt() bool {
+	if tn.TrkptName != nil {
+		return true
+	}
+	return false
+}
+func (tn Trkname) IsTrk() bool {
+	return !tn.IsTrkpt()
+}
+
+func (gpx Gpx) Ls(all bool) TrknameList {
 	gpx.ParseFile(gpx.Filepath)
 
-	var out TrkList
+	var out TrknameList
 	for i, trk := range gpx.Trk {
-		out = append(out, TrkName{Id: i, Name: trk.Name})
+		out = append(out, Trkname{Id: i, Name: trk.Name})
 
 		if all {
 			for j, trkseg := range trk.Trkseg {
 				for k, trkpt := range trkseg.Trkpt {
 					if trkpt.Name != nil {
-						out[i].TrkptList = append(out[i].TrkptList,
-							TrkptName{
-								Id:       k,
-								Name:     *trkpt.Name,
-								TrksegId: j,
+						out = append(out,
+							Trkname{
+								Id:        i,
+								Name:      trk.Name,
+								TrksegId:  &j,
+								TrkptId:   &k,
+								TrkptName: trkpt.Name,
 							})
 					}
 				}
 			}
-
-			// var trkpts []Trkpt
-			// for _, trkseg := range trk.Trkseg {
-			// 	trkpts = slices.Concat(trkpts, trkseg.Trkpt)
-			// }
-			// for _, trkpt := range trkpts {
-			// 	if trkpt.Name != nil {
-			// 		out[i].TrkptList = append(out[i].TrkptList, *trkpt.Name)
-			// 	}
-			// }
 		}
 	}
 
 	return out
 }
 
-func (trkList TrkList) Print(all bool, ascii_format ...bool) {
+func (tnList TrknameList) Print(all bool, ascii_format ...bool) {
 
-	for i, trkName := range trkList {
-		if len(ascii_format) > 0 && !ascii_format[0] {
-			fmt.Printf("[%v] %v\n", i, trkName.Name)
-		} else {
-			fmt.Printf("[%v] \u001b[1;32m%v\u001b[22;0m\n", i, trkName.Name)
+	for _, trkname := range tnList {
+		if trkname.IsTrk() {
+			if len(ascii_format) > 0 && !ascii_format[0] {
+				fmt.Printf("[%v] %v\n", trkname.Id, trkname.Name)
+			} else {
+				fmt.Printf("[%v] \u001b[1;32m%v\u001b[22;0m\n", trkname.Id, trkname.Name)
+			}
 		}
 		if all {
-			for _, pt := range trkName.TrkptList {
-				// fmt.Printf("(seg:%v, pt:%v) %v\n", pt.TrksegId, pt.Id, pt.Name)
-				fmt.Println(pt.Name)
+			// fmt.Printf("(seg:%v, pt:%v) %v\n", pt.TrksegId, pt.Id, pt.Name)
+			if trkname.IsTrkpt() {
+				fmt.Println("\t" + *trkname.TrkptName)
 			}
-			fmt.Println()
 		}
 	}
 }
