@@ -170,46 +170,69 @@ func (gpx Gpx) Save(filepath string) {
 	}
 }
 
-type TrkName struct {
-	TrkName    string
-	TrkptNames []string
-}
-type TrkNames []TrkName
+type (
+	TrkName struct {
+		Id        int
+		Name      string
+		TrkptList []TrkptName
+	}
+	TrkptName struct {
+		Id       int
+		TrksegId int
+		Name     string
+	}
 
-func (gpx Gpx) Ls(all bool) TrkNames {
+	TrkList []TrkName
+)
+
+func (gpx Gpx) Ls(all bool) TrkList {
 	gpx.ParseFile(gpx.Filepath)
 
-	var out TrkNames
+	var out TrkList
 	for i, trk := range gpx.Trk {
-		out = append(out, TrkName{TrkName: trk.Name})
+		out = append(out, TrkName{Id: i, Name: trk.Name})
 
 		if all {
-			var trkpts []Trkpt
-			for _, trkseg := range trk.Trkseg {
-				trkpts = slices.Concat(trkpts, trkseg.Trkpt)
-			}
-			for _, trkpt := range trkpts {
-				if trkpt.Name != nil {
-					out[i].TrkptNames = append(out[i].TrkptNames, *trkpt.Name)
+			for j, trkseg := range trk.Trkseg {
+				for k, trkpt := range trkseg.Trkpt {
+					if trkpt.Name != nil {
+						out[i].TrkptList = append(out[i].TrkptList,
+							TrkptName{
+								Id:       k,
+								Name:     *trkpt.Name,
+								TrksegId: j,
+							})
+					}
 				}
 			}
+
+			// var trkpts []Trkpt
+			// for _, trkseg := range trk.Trkseg {
+			// 	trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+			// }
+			// for _, trkpt := range trkpts {
+			// 	if trkpt.Name != nil {
+			// 		out[i].TrkptList = append(out[i].TrkptList, *trkpt.Name)
+			// 	}
+			// }
 		}
 	}
 
 	return out
 }
 
-func (trkNames TrkNames) Print(all bool, ascii_format ...bool) {
+func (trkList TrkList) Print(all bool, ascii_format ...bool) {
 
-	for i, trkName := range trkNames {
+	for i, trkName := range trkList {
 		if len(ascii_format) > 0 && !ascii_format[0] {
-			fmt.Printf("[%v] %v\n", i, trkName.TrkName)
+			fmt.Printf("[%v] %v\n", i, trkName.Name)
 		} else {
-			fmt.Printf("[%v] \u001b[1;32m%v\u001b[22;0m\n", i, trkName.TrkName)
+			fmt.Printf("[%v] \u001b[1;32m%v\u001b[22;0m\n", i, trkName.Name)
 		}
 		if all {
-			for _, trkptName := range trkName.TrkptNames {
-				fmt.Println(trkptName)
+			for _, pt := range trkName.TrkptList {
+				// fmt.Printf("(seg:%v, pt:%v) %v\n", pt.TrksegId, pt.Id, pt.Name)
+				fmt.Println(pt.Name)
 			}
 			fmt.Println()
 		}
