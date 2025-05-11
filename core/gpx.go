@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"slices"
-
-	"github.com/spf13/viper"
 )
 
 func (gpx *Gpx) ParseFile(gpxFilename string) {
@@ -104,6 +102,11 @@ out:
 	return gpx
 }
 
+func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
+	gpx.Wpt = append(gpx.Wpt, wpt)
+	return *gpx
+}
+
 // TODO: split should put trkptid to the previous trk
 func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
 	filterBeforeTrkpt := func(gpx Gpx, trkId, trksegId, trkptId int, name string) Trk {
@@ -153,7 +156,7 @@ func (gpx Gpx) Save(filepath string) {
 	if filepath == "" {
 		filepath = "out.gpx"
 	}
-	fmt.Println("Save to", viper.GetString("output"))
+	fmt.Println("Save to", filepath)
 
 	// Create xml file
 	xmlFile, err := os.Create(filepath)
