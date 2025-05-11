@@ -1,24 +1,60 @@
 package main
 
-import "github.com/jple/gpx-cli/cmd"
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"text/tabwriter"
 
-func main() {
-	cmd.Execute()
+	. "github.com/jple/gpx-cli/core"
+)
+
+func prettyStruct(in any) string {
+	j, err := json.MarshalIndent(in, "", "  ")
+	// j, err := json.Marshal(in) // to return as data-raw
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	return string(j)
 }
 
-// fmt.Println(286/3 + 1)
-// s := []int{}
-// l := 286
-// for k := 0; k < l; k++ {
-// 	s = append(s, 0)
-// }
-// fmt.Println(s)
+func test() {
+	gpx := Gpx{}
+	gpx.ParseFile("src/my.gpx")
+	gpx.SetVitesse(4.5)
 
-// chunkSize := 100
-// c := 0
-// for chunk := range slices.Chunk(s, chunkSize) {
-// 	fmt.Println(len(chunk))
-// 	c++
-// }
-// fmt.Println(c)
-// }
+	var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
+	trkid, _ := strconv.ParseInt(os.Args[1], 0, 0)
+
+	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', tabwriter.Debug)
+	if trkid == -1 {
+		printArgs.Silent = true
+		infos := gpx.
+			GetInfo(true).
+			ToString(printArgs)
+		fmt.Fprintln(w, infos)
+		// fmt.Println(str)
+		// fmt.Printf("%+v\n", gpx.GetInfo(true))
+		// fmt.Println(prettyStruct(gpx.GetInfo(true)))
+	} else {
+		printArgs.PrintFrom = true
+		// fmt.Println()
+		// fmt.Println()
+		infos := gpx.
+			Trk[trkid].
+			GetInfo(gpx.Extensions.Vitesse, true).
+			ToString(printArgs)
+			// fmt.Println(str)
+		fmt.Fprintln(w, infos)
+		// fmt.Println(prettyStruct(gpx.Trk[trkid].GetInfo(gpx.Extensions.Vitesse, true)))
+	}
+	w.Flush()
+}
+
+func main() {
+	// cmd.Execute()
+	test()
+	// sym.ShowUnicode()
+}
