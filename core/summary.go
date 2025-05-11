@@ -89,7 +89,8 @@ func (s SectionInfo) ToString(args PrintArgs) string {
 	// fmt.Printf("Vitesse sur plat:       %.1f km/h\n", s.VitessePlat)
 	// fmt.Printf("Temps parcours estimé:  %vh%v\n", s.DurationHour, s.DurationMin)
 
-	str += fmt.Sprintf("\t(%v %.0fkm, %v +%.0fm/%.0fm | %v %.0fkm_e, %v %vh%02d)\n",
+	str += fmt.Sprintf("\t(%v pts, %v %.0fkm, %v +%.0fm/%.0fm | %v %.0fkm_e, %v %vh%02d)\n",
+		s.NPoints,
 		sym.ArrowIconLeftRight(), s.Distance,
 		sym.UpAndDown(), s.DenivPos, s.DenivNeg,
 		sym.ArrowWaveRight(), s.DistanceEffort,

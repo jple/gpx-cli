@@ -15,77 +15,82 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 	from, trkName := "start", trk.Name
 	trkSummary := TrkSummary{Name: trk.Name}
 
-	var trkpts []Trkpt
-	for _, trkseg := range trk.Trkseg {
-		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
-	}
+	// var trkpts []Trkpt
+	// for _, trkseg := range trk.Trkseg {
+	// 	trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	// }
 
-	for j, trkpt := range trkpts {
-		p := Pos{
-			Lat: trkpt.Lat,
-			Lon: trkpt.Lon,
-			Ele: trkpt.Ele,
-		}
+	n_seg := len(trk.Trkseg)
+	for i, trkseg := range trk.Trkseg {
+		n_pt := len(trkseg.Trkpt)
+		for j, trkpt := range trkseg.Trkpt {
+			p := Pos{
+				Lat: trkpt.Lat,
+				Lon: trkpt.Lon,
+				Ele: trkpt.Ele,
+			}
 
-		// Init variables on first trkpt of trk
-		if j == 0 {
-			p_prev = p
-			if detail {
-				if trkpt.Name != nil {
-					from = *trkpt.Name
+			// Init variables on first trkpt of trk
+			if i == 0 && j == 0 {
+				p_prev = p
+				if detail {
+					if trkpt.Name != nil {
+						from = *trkpt.Name
+					}
+				} else {
+					from = trk.Name
 				}
-			} else {
-				from = trk.Name
+				continue
 			}
-			continue
-		}
 
-		// Update cumulative values
-		eleDiff := DiffElevation(p_prev, p)
-		denivPos += math.Max(eleDiff, 0)
-		denivNeg += math.Min(eleDiff, 0)
-		distance += Dist(p_prev, p)
-		n += 1
+			// Update cumulative values
+			eleDiff := DiffElevation(p_prev, p)
+			denivPos += math.Max(eleDiff, 0)
+			denivNeg += math.Min(eleDiff, 0)
+			distance += Dist(p_prev, p)
+			n += 1
 
-		var x SectionInfo
-		// Create section from this iteration, if any of these conditions are fulfilled
-		// - detail is asked, and current trkpt contains a name
-		// - last trkpt of the trk
-		if (detail && trkpt.Name != nil) || (j == len(trkpts)-1) {
-			x = SectionInfo{
-				TrkName:        trkName,
-				From:           from,
-				NPoints:        n,
-				VitessePlat:    vitessePlat,
-				Distance:       distance,
-				DenivPos:       denivPos,
-				DenivNeg:       denivNeg,
-				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
+			var x SectionInfo
+			// Create section from this iteration, if any of these conditions are fulfilled
+			// - detail is asked, and current trkpt contains a name
+			// - last trkpt of the trk
+			isLastTrkpt := (i == n_seg-1) && (j == n_pt-1)
+			if (detail && trkpt.Name != nil) || isLastTrkpt {
+				x = SectionInfo{
+					TrkName:        trkName,
+					From:           from,
+					NPoints:        n,
+					VitessePlat:    vitessePlat,
+					Distance:       distance,
+					DenivPos:       denivPos,
+					DenivNeg:       denivNeg,
+					DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
+				}
+				_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
+
+				// Reset cumulative values
+				distance = 0
+				denivPos = 0
+				denivNeg = 0
+				n = 0
 			}
-			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
 
-			// Reset cumulative values
-			distance = 0
-			denivPos = 0
-			denivNeg = 0
-			n = 0
+			if detail && trkpt.Name != nil {
+				x.To = *trkpt.Name
+				from = *trkpt.Name
+			}
+
+			if isLastTrkpt {
+				x.To = "end"
+			}
+
+			if (detail && trkpt.Name != nil) || isLastTrkpt {
+				trkSummary.Section = append(trkSummary.Section, x)
+			}
+
+			// Reset previous pos
+			p_prev = p
 		}
-
-		if detail && trkpt.Name != nil {
-			x.To = *trkpt.Name
-			from = *trkpt.Name
-		}
-
-		if j == len(trkpts)-1 {
-			x.To = "end"
-		}
-
-		if (detail && trkpt.Name != nil) || (j == len(trkpts)-1) {
-			trkSummary.Section = append(trkSummary.Section, x)
-		}
-
-		// Reset previous pos
-		p_prev = p
 	}
 
 	// trk.Extensions.DenivPos = denivPos
