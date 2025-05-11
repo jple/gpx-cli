@@ -9,30 +9,28 @@ import (
 
 func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
-
 	var p_prev Pos
-	var from string
-	var trkName string = trk.Name
 
 	n := 0
-	var trkSummary TrkSummary
-	trkSummary.Name = trk.Name
+	from, trkName := "start", trk.Name
+	trkSummary := TrkSummary{Name: trk.Name}
 
 	var trkpts []Trkpt
 	for _, trkseg := range trk.Trkseg {
 		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
 	}
-	for i, trkpt := range trkpts {
+
+	for j, trkpt := range trkpts {
 		p := Pos{
 			Lat: trkpt.Lat,
 			Lon: trkpt.Lon,
 			Ele: trkpt.Ele,
 		}
 
-		if i == 0 {
+		// Init variables on first trkpt of trk
+		if j == 0 {
 			p_prev = p
 			if detail {
-				from = "start"
 				if trkpt.Name != nil {
 					from = *trkpt.Name
 				}
@@ -42,15 +40,18 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 			continue
 		}
 
+		// Update cumulative values
 		eleDiff := DiffElevation(p_prev, p)
 		denivPos += math.Max(eleDiff, 0)
 		denivNeg += math.Min(eleDiff, 0)
-
 		distance += Dist(p_prev, p)
 		n += 1
 
 		var x SectionInfo
-		if (detail && trkpt.Name != nil) || (i == len(trkpts)-1) {
+		// Create section from this iteration, if any of these conditions are fulfilled
+		// - detail is asked, and current trkpt contains a name
+		// - last trkpt of the trk
+		if (detail && trkpt.Name != nil) || (j == len(trkpts)-1) {
 			x = SectionInfo{
 				TrkName:        trkName,
 				From:           from,
@@ -62,26 +63,28 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
 			}
 			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
-		}
 
-		if detail && trkpt.Name != nil {
-			x.To = *trkpt.Name
-			from = *trkpt.Name
-
+			// Reset cumulative values
 			distance = 0
 			denivPos = 0
 			denivNeg = 0
 			n = 0
 		}
 
-		if i == len(trkpts)-1 {
+		if detail && trkpt.Name != nil {
+			x.To = *trkpt.Name
+			from = *trkpt.Name
+		}
+
+		if j == len(trkpts)-1 {
 			x.To = "end"
 		}
 
-		if (detail && trkpt.Name != nil) || (i == len(trkpts)-1) {
+		if (detail && trkpt.Name != nil) || (j == len(trkpts)-1) {
 			trkSummary.Section = append(trkSummary.Section, x)
 		}
 
+		// Reset previous pos
 		p_prev = p
 	}
 
