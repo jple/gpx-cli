@@ -30,6 +30,7 @@ func CreateAddNameCmd() *cobra.Command {
 			gpx := Gpx{}
 			gpx.ParseFile(viper.GetString("filename"))
 
+			gpx.AddWpt(Wpt{Name: &name, Lat: lat, Lon: lon})
 			closest := gpx.GetClosestTrkpts(Pos{Lat: lat, Lon: lon})
 
 			for i, _ := range closest {
