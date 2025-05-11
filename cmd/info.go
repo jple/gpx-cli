@@ -42,13 +42,13 @@ func CreateInfoCmd() *cobra.Command {
 				gpx.
 					Trk[viper.GetInt("trk-id")].
 					GetInfo(gpx.Extensions.Vitesse, true).
-					Print(printArgs)
+					ToString(printArgs)
 			} else {
 				printArgs.PrintFrom = false
 
 				gpx.
 					GetInfo(true).
-					Print(printArgs)
+					ToString(printArgs)
 			}
 
 		},
