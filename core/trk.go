@@ -15,11 +15,6 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 	from, trkName := "start", trk.Name
 	trkSummary := TrkSummary{Name: trk.Name}
 
-	// var trkpts []Trkpt
-	// for _, trkseg := range trk.Trkseg {
-	// 	trkpts = slices.Concat(trkpts, trkseg.Trkpt)
-	// }
-
 	n_seg := len(trk.Trkseg)
 	for i, trkseg := range trk.Trkseg {
 		n_pt := len(trkseg.Trkpt)
@@ -57,10 +52,14 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 			isLastTrkpt := (i == n_seg-1) && (j == n_pt-1)
 			if (detail && trkpt.Name != nil) || isLastTrkpt {
 				x = SectionInfo{
-					TrkName:        trkName,
-					From:           from,
+					TrkName:     trkName,
+					VitessePlat: vitessePlat,
+
+					From:         from,
+					FromTrksegId: &i,
+					FromTrkptId:  &j,
+
 					NPoints:        n,
-					VitessePlat:    vitessePlat,
 					Distance:       distance,
 					DenivPos:       denivPos,
 					DenivNeg:       denivNeg,

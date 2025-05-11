@@ -183,6 +183,7 @@ func (gpx Gpx) Save(filepath string) {
 	}
 }
 
+// TODO: To be removed after update tui/model.go
 // ================= Ls and Print ===========================
 type (
 	Trkname struct {

@@ -14,12 +14,23 @@ type Pos struct {
 	Name string
 }
 
+// Section summaries either
+// - the whole trk
+// - a section between a trkpt name and the next one (no matter trkseg)
 type SectionInfo struct {
-	TrkName        string
-	From           string
-	To             string
+
+	// TODO: Dupplicates on TrkSummary
+	TrkName     string
+	VitessePlat float64
+
+	// TrkptName
+	From         string
+	FromTrksegId *int
+	FromTrkptId  *int
+	To           string
+
+	// Cumulative values between "From" and "To"
 	NPoints        int
-	VitessePlat    float64
 	Distance       float64
 	DenivPos       float64
 	DenivNeg       float64
@@ -29,6 +40,7 @@ type SectionInfo struct {
 }
 
 type TrkSummary struct {
+	Id      int
 	Name    string
 	Section []SectionInfo
 }
