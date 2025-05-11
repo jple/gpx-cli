@@ -18,7 +18,6 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 	var trkSummary TrkSummary
 	trkSummary.Name = trk.Name
 
-	// trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
 	var trkpts []Trkpt
 	for _, trkseg := range trk.Trkseg {
 		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
