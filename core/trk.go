@@ -16,6 +16,7 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 	trkSummary := TrkSummary{Name: trk.Name}
 
 	n_seg := len(trk.Trkseg)
+	var trackDuration, sectDuration float64 = 0, 0
 	for i, trkseg := range trk.Trkseg {
 		n_pt := len(trkseg.Trkpt)
 		for j, trkpt := range trkseg.Trkpt {
@@ -56,6 +57,7 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 					VitessePlat: vitessePlat,
 
 					From:         from,
+					To:           "end", // is updated later if required
 					FromTrksegId: &i,
 					FromTrkptId:  &j,
 
@@ -65,26 +67,54 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 					DenivNeg:       denivNeg,
 					DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
 				}
-				_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
+				sectDuration, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
 
 				// Reset cumulative values
 				distance = 0
 				denivPos = 0
 				denivNeg = 0
 				n = 0
+
+				trackDuration += sectDuration
 			}
 
 			if detail && trkpt.Name != nil {
 				x.To = *trkpt.Name
+
+				// Set value for next iteration
 				from = *trkpt.Name
 			}
 
-			if isLastTrkpt {
-				x.To = "end"
-			}
+			// if isLastTrkpt {
+			// 	x.To = "end"
+			// }
+
+			// if (detail && trkpt.Name != nil) || isLastTrkpt {
+			// 	trkSummary.Section = append(trkSummary.Section, x)
+			// }
 
 			if (detail && trkpt.Name != nil) || isLastTrkpt {
+				// Append new section
 				trkSummary.Section = append(trkSummary.Section, x)
+
+				// Update whole track values
+				trkSummary.Track = SectionInfo{
+					TrkName:     trkName,
+					VitessePlat: vitessePlat,
+					From:        trkName,
+					To:          "end",
+
+					NPoints:        trkSummary.Track.NPoints + x.NPoints,
+					Distance:       trkSummary.Track.Distance + x.Distance,
+					DenivPos:       trkSummary.Track.DenivPos + x.DenivPos,
+					DenivNeg:       trkSummary.Track.DenivNeg + x.DenivNeg,
+					DistanceEffort: trkSummary.Track.DistanceEffort + x.DistanceEffort,
+
+					DurationHour: trkSummary.Track.DurationHour + x.DurationHour,
+					DurationMin:  trkSummary.Track.DurationMin + x.DurationMin,
+				}
+
+				trkSummary.Track.DurationHour, trkSummary.Track.DurationMin = FloatToHourMin(trackDuration)
 			}
 
 			// Reset previous pos
