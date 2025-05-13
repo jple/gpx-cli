@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
+func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
 	var p_prev Pos
 
@@ -53,6 +53,7 @@ func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
 			isLastTrkpt := (i == n_seg-1) && (j == n_pt-1)
 			if (detail && trkpt.Name != nil) || isLastTrkpt {
 				x = SectionInfo{
+					TrkId:       trkid,
 					TrkName:     trkName,
 					VitessePlat: vitessePlat,
 

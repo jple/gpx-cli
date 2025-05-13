@@ -3,7 +3,7 @@ package core
 import (
 	"fmt"
 
-	sym "github.com/jple/text_symbol"
+	sym "github.com/jple/text-symbol"
 )
 
 type Pos struct {
@@ -20,6 +20,7 @@ type Pos struct {
 type SectionInfo struct {
 
 	// TODO: Dupplicates on TrkSummary
+	TrkId       int
 	TrkName     string
 	VitessePlat float64
 
@@ -95,7 +96,7 @@ func (s SectionInfo) ToString(args PrintArgs) string {
 	var str string
 	if args.PrintFrom {
 		if args.AsciiFormat {
-			str += fmt.Sprintf("\t--> %v", sym.Green(s.To))
+			str += fmt.Sprintf("      --> %v", sym.Green(s.To))
 		} else {
 			str += fmt.Sprintf("%v --> %v", s.To)
 		}

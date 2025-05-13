@@ -2,10 +2,8 @@ module github.com/jple/gpx-cli/core
 
 go 1.23.4
 
-replace github.com/jple/text_symbol => ../../text_symbol
-
 require (
-	github.com/jple/text_symbol v0.0.0-00010101000000-000000000000
+	github.com/jple/text-symbol v0.0.0-00010101000000-000000000000
 	gonum.org/v1/plot v0.16.0
 )
 
@@ -21,3 +19,5 @@ require (
 	golang.org/x/image v0.25.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 )
+
+replace github.com/jple/text-symbol => ../../text_symbol

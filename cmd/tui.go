@@ -28,8 +28,8 @@ func CreateTuiCmd() *cobra.Command {
 			}
 
 			var m tui.GpxTui = tui.GpxTui{
-				TrknameList: gpx.Ls(true),
-				Gpx:         gpx,
+				GpxSummary: gpx.GetInfo(true),
+				Gpx:        gpx,
 			}
 			p := tea.NewProgram(m)
 			if _, err := p.Run(); err != nil {

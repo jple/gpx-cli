@@ -23,8 +23,8 @@ func (gpx *Gpx) SetVitesse(v float64) {
 func (gpx Gpx) GetInfo(ascii_format bool) GpxSummary {
 
 	var trkSummary GpxSummary
-	for _, trk := range gpx.Trk {
-		summary := trk.GetInfo(gpx.Extensions.Vitesse, false)
+	for i, trk := range gpx.Trk {
+		summary := trk.GetInfo(i, gpx.Extensions.Vitesse, true)
 		trkSummary = append(trkSummary, summary)
 	}
 	return trkSummary
@@ -134,6 +134,7 @@ func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
 		return trk
 	}
 
+	// WIP
 	bef := filterBeforeTrkpt(gpx, trkId, trksegId, trkptId, gpx.Trk[trkId].Name)
 	aft := filterAfterTrkpt(gpx, trkId, trksegId, trkptId, *gpx.Trk[trkId].Trkseg[trksegId].Trkpt[trkptId].Name)
 

@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"text/tabwriter"
 
+	"github.com/jple/gpx-cli/cmd"
 	. "github.com/jple/gpx-cli/core"
 )
 
-func prettyStruct(in any) string {
+func prettyprint(in any) string {
 	j, err := json.MarshalIndent(in, "", "  ")
-	// j, err := json.Marshal(in) // to return as data-raw
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -26,7 +26,9 @@ func test() {
 	gpx.SetVitesse(4.5)
 
 	var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
-	trkid, _ := strconv.ParseInt(os.Args[1], 0, 0)
+	var trkid int
+	i, _ := strconv.ParseInt(os.Args[1], 0, 0)
+	trkid = int(i)
 
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', tabwriter.Debug)
 	if trkid == -1 {
@@ -37,24 +39,24 @@ func test() {
 		fmt.Fprintln(w, infos)
 		// fmt.Println(str)
 		// fmt.Printf("%+v\n", gpx.GetInfo(true))
-		// fmt.Println(prettyStruct(gpx.GetInfo(true)))
+		// fmt.Println(prettyprint(gpx.GetInfo(true)))
 	} else {
 		printArgs.PrintFrom = true
 		// fmt.Println()
 		// fmt.Println()
 		infos := gpx.
 			Trk[trkid].
-			GetInfo(gpx.Extensions.Vitesse, true).
+			GetInfo(trkid, gpx.Extensions.Vitesse, true).
 			ToString(printArgs)
 			// fmt.Println(str)
 		fmt.Fprintln(w, infos)
-		// fmt.Println(prettyStruct(gpx.Trk[trkid].GetInfo(gpx.Extensions.Vitesse, true)))
+		// fmt.Println(prettyprint(gpx.Trk[trkid].GetInfo(gpx.Extensions.Vitesse, true)))
 	}
 	w.Flush()
 }
 
 func main() {
-	// cmd.Execute()
-	test()
+	cmd.Execute()
+	// test()
 	// sym.ShowUnicode()
 }

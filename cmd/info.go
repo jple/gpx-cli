@@ -35,19 +35,17 @@ func CreateInfoCmd() *cobra.Command {
 
 			var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
 
-			if viper.GetInt("trk-id") != -1 {
+			trkid := viper.GetInt("trk-id")
+			if trkid == -1 {
+				printArgs.PrintFrom = false
+				gpx.GetInfo(true).ToString(printArgs)
+			} else {
 				printArgs.PrintFrom = true
 
-				fmt.Printf("[%v] ", viper.GetInt("trk-id"))
+				fmt.Printf("[%v] ", trkid)
 				gpx.
-					Trk[viper.GetInt("trk-id")].
-					GetInfo(gpx.Extensions.Vitesse, true).
-					ToString(printArgs)
-			} else {
-				printArgs.PrintFrom = false
-
-				gpx.
-					GetInfo(true).
+					Trk[trkid].
+					GetInfo(trkid, gpx.Extensions.Vitesse, true).
 					ToString(printArgs)
 			}
 
