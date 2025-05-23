@@ -22,27 +22,32 @@ type Trk struct {
 	Name string `xml:"name"`
 	// Should be optional
 	Extensions struct {
-		DenivPos       float64
-		DenivNeg       float64
-		Distance       float64
-		DenivPosEffort float64 "Conversion du denivele positif en km effort"
-		DenivNegEffort float64 "Conversion du denivele negatif en km effort"
-		DistanceEffort float64 "Distance équivalente sur plat en incluant le dénivelé"
-		Duration       float64 "Estimation de temps de marche"
-		DurationHour   int8
-		DurationMin    int8
+		DenivPos float64 `xml:"DenivPos,omitempty"`
+		DenivNeg float64 `xml:"DenivNeg,omitempty"`
+		Distance float64 `xml:"Distance,omitempty"`
+		// Conversion du denivele positif/negatif en km effort
+		DenivPosEffort float64 `xml:"DenivPosEffort,omitempty"`
+		DenivNegEffort float64 `xml:"DenivNegEffort,omitempty"`
+
+		// Distance équivalente sur plat en incluant le dénivelé 
+		DistanceEffort float64 `xml:"DistanceEffort,omitempty"`
+
+		// Estimation de temps de marche
+		Duration     float64 `xml:"Duration,omitempty"`
+		DurationHour int8    `xml:"DurationHour,omitempty"`
+		DurationMin  int8    `xml:"DurationMin,omitempty"`
 
 		Line struct {
 			Xmlns      string `xml:"xmlns,attr"`
-			Color      string `xml:"color"`
+			Color      string `xml:"color,omitempty"`
 			Dasharray  *int   `xml:"dasharray"`
 			Extensions *struct {
 				Jonction int `xml:"jonction"`
 			} `xml:"extensions"`
 			Opacity *float64 `xml:"opacity"`
-			Width   int      `xml:"width"`
-		} `xml:"line"`
-	} `xml:"extensions"`
+			Width   int      `xml:"width,omitempty"`
+		} `xml:"line,omitempty"`
+	} `xml:"extensions,omitempty"`
 
 	Trkseg []Trkseg `xml:"trkseg"`
 }
