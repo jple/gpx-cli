@@ -96,17 +96,20 @@ func (s SectionInfo) ToString(args PrintArgs) string {
 	var str string
 	if args.PrintFrom {
 		if args.AsciiFormat {
-			str += fmt.Sprintf("      --> %v", sym.Green(s.To))
+			// str += fmt.Sprintf("      --> %v", sym.Green(s.To))
+			str += fmt.Sprintf("      %v --> %v", sym.Green(s.From), sym.Green(s.To))
 		} else {
-			str += fmt.Sprintf("%v --> %v", s.To)
+			str += fmt.Sprintf("      --> %v", s.To)
 		}
 
-		str += fmt.Sprintf("\t(%v pts, %v %.0fkm, %v +%.0fm/%.0fm | %v %.0fkm_e, %v %vh%02d)\n",
-			s.NPoints,
-			sym.ArrowIconLeftRight(), s.Distance,
-			sym.UpAndDown(), s.DenivPos, s.DenivNeg,
-			sym.ArrowWaveRight(), s.DistanceEffort,
+		str += fmt.Sprintf("\t(%v %vh%02d)\n",
 			sym.StopWatch(), s.DurationHour, s.DurationMin)
+		// str += fmt.Sprintf("\t(%v pts, %v %.0fkm, %v +%.0fm/%.0fm | %v %.0fkm_e, %v %vh%02d)\n",
+		// 	s.NPoints,
+		// 	sym.ArrowIconLeftRight(), s.Distance,
+		// 	sym.UpAndDown(), s.DenivPos, s.DenivNeg,
+		// 	sym.ArrowWaveRight(), s.DistanceEffort,
+		// 	sym.StopWatch(), s.DurationHour, s.DurationMin)
 	}
 
 	return str
