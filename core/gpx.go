@@ -188,11 +188,12 @@ func (gpx Gpx) Save(filepath string) {
 // ================= Ls and Print ===========================
 type (
 	Trkname struct {
-		Id        int
-		Name      string
-		TrksegId  *int
-		TrkptId   *int
-		TrkptName *string
+		Id            int
+		Name          string
+		TrksegId      *int
+		TrkptId       *int
+		TrkptName     *string
+		Lat, Lon, Ele *float64
 	}
 	TrknameList []Trkname
 )
@@ -225,6 +226,9 @@ func (gpx Gpx) Ls(all bool) TrknameList {
 								TrksegId:  &j,
 								TrkptId:   &k,
 								TrkptName: trkpt.Name,
+								Lat:       &trkpt.Lat,
+								Lon:       &trkpt.Lon,
+								Ele:       &trkpt.Ele,
 							})
 					}
 				}
@@ -248,7 +252,9 @@ func (tnList TrknameList) Print(all bool, ascii_format ...bool) {
 		if all {
 			// fmt.Printf("(seg:%v, pt:%v) %v\n", pt.TrksegId, pt.Id, pt.Name)
 			if trkname.IsTrkpt() {
-				fmt.Println("\t" + *trkname.TrkptName)
+				fmt.Printf("\t%v %v %v %v\n",
+					*trkname.TrkptName,
+					*trkname.Lat, *trkname.Lon, *trkname.Ele)
 			}
 		}
 	}
