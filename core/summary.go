@@ -80,13 +80,13 @@ func (trkSummary TrkSummary) ToString(args PrintArgs) string {
 		sym.ArrowWaveRight(), trkSummary.Track.DistanceEffort,
 		sym.StopWatch(), trkSummary.Track.DurationHour, trkSummary.Track.DurationMin)
 
-	// TODO: rename PrintFrom
-	// this parameter is actually used to print details or not
-	// if args.PrintFrom {
-	// 	str += "\n"
-	// }
 	for _, sectionInfo := range trkSummary.Section {
 		str += sectionInfo.ToString(args)
+	}
+	// TODO: rename PrintFrom
+	// this parameter is actually used to print details or not
+	if args.PrintFrom {
+		str += "\n"
 	}
 
 	return str
@@ -113,7 +113,6 @@ func (s SectionInfo) ToString(args PrintArgs) string {
 		// 	sym.ArrowWaveRight(), s.DistanceEffort,
 		// 	sym.StopWatch(), s.DurationHour, s.DurationMin)
 
-		str += "\n"
 	}
 
 	return str
