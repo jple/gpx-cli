@@ -39,14 +39,20 @@ type Trk struct {
 		DurationMin  int8    `xml:"DurationMin,omitempty"`
 
 		Line struct {
-			Xmlns      string `xml:"xmlns,attr"`
+			Xmlns string `xml:"xmlns,attr"`
+
 			Color      string `xml:"color,omitempty"`
-			Dasharray  *int   `xml:"dasharray"`
+			Opacity    string `xml:"opacity,omitempty"`
+			Weight     string `xml:"Weight,omitempty"`
+			Width      int    `xml:"width,omitempty"`
+			Linecap    string `xml:"linecap,omitempty"`
+			Linejoin   string `xml:"linejoin,omitempty"`
+			Dasharray  *int   `xml:"dasharray,omitempty"`
+			Dashoffset int    `xml:"dashoffset,omitempty"`
+
 			Extensions *struct {
 				Jonction int `xml:"jonction"`
 			} `xml:"extensions"`
-			Opacity *float64 `xml:"opacity"`
-			Width   int      `xml:"width,omitempty"`
 		} `xml:"line,omitempty"`
 	} `xml:"extensions,omitempty"`
 
