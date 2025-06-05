@@ -19,7 +19,8 @@ type Gpx struct {
 }
 
 type Trk struct {
-	Name string `xml:"name"`
+	Name string `xml:"name,omitempty"`
+
 	// Should be optional
 	Extensions struct {
 		DenivPos float64 `xml:"DenivPos,omitempty"`

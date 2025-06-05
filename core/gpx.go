@@ -7,13 +7,15 @@ import (
 	"slices"
 )
 
-func (gpx *Gpx) ParseFile(gpxFilename string) {
+// TODO: add return *Gpx without testing !
+func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 	data, _ := os.ReadFile(gpxFilename)
 	if err := xml.Unmarshal(data, &gpx); err != nil {
 		if err.Error() != "EOF" {
 			fmt.Println(err)
 		}
 	}
+	return gpx
 }
 
 func (gpx *Gpx) SetVitesse(v float64) {
@@ -182,6 +184,15 @@ func (gpx Gpx) Save(filepath string) {
 		fmt.Printf("error: %v\n", err)
 		return
 	}
+}
+
+func (gpx *Gpx) AddColor() *Gpx {
+	colors := []string{"8e44ad", "ff5733"}
+	for i, _ := range gpx.Trk {
+		gpx.Trk[i].Extensions.Line.Xmlns = "http://www.topografix.com/GPX/gpx_style/0/2"
+		gpx.Trk[i].Extensions.Line.Color = colors[i%len(colors)]
+	}
+	return gpx
 }
 
 // TODO: To be removed after update tui/model.go

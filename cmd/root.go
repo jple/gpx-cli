@@ -53,6 +53,7 @@ func init() {
 	rootCmd.AddCommand(CreateSplitCmd())
 	rootCmd.AddCommand(CreateMergeCmd())
 	rootCmd.AddCommand(CreateTuiCmd())
+	rootCmd.AddCommand(CreateColorCmd())
 
 	rootCmd.AddCommand(CreateTestCmd())
 }
