@@ -1,7 +1,9 @@
 package tui
 
 import (
+	"errors"
 	"fmt"
+	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jple/gpx-cli/core"
@@ -50,21 +52,32 @@ func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		// =========== action =============
-		case "m":
+		case "left":
 			selectedTrkId := sections[m.cursor].TrkId
 			if selectedTrkId > 0 && selectedTrkId < len(m.Gpx.Trk) {
 				m.Gpx = m.Gpx.Merge(selectedTrkId-1, selectedTrkId)
 				m.GpxSummary = m.Gpx.GetInfo(true)
 			}
 			return m, nil
-		case "s":
+		case "right":
 			m.Gpx = m.Gpx.SplitAtName(sections[m.cursor].To)
 			m.GpxSummary = m.Gpx.GetInfo(true)
 			return m, nil
+		case "s":
+			filename := "tata/0.gpx"
+			for i := 0; FileExists(filename); i++ {
+				filename = fmt.Sprintf("tata/%v.gpx", i)
+			}
+			m.Gpx.Save(filename)
 		}
 	}
 
 	return m, nil
+}
+
+func FileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return !errors.Is(err, os.ErrNotExist)
 }
 
 func (m GpxTui) View() string {
