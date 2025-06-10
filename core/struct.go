@@ -4,18 +4,21 @@ package core
 
 type Gpx struct {
 	XMLName  string `xml:"gpx"`
-	Filepath string `xlm:-` // ok for json, but xml ?
+	Filepath string `xml:"-"` // ok for json, but xml ?
 
-	Metadata struct {
-		Desc string `xml:"desc"`
-		Name string `xml:"name"`
-	} `xml:"metadata"`
-	Trk []Trk `xml:"trk"`
-	Wpt []Wpt `xml:"wpt"`
+	Metadata *struct {
+		Desc string `xml:"desc,omitempty"`
+		Name string `xml:"name,omitempty"`
+	} `xml:"metadata,omitempty"`
+	Trk []Trk `xml:"trk,omitempty"`
+	Wpt []Wpt `xml:"wpt,omitempty"`
 
+	// NOTE: use pointer in order to omitemtpy
+	// (otherwise, parser expects Extensions to be non-empty, due to Vitesse child-field)
+	// This notation is making code less readable
 	Extensions struct {
-		Vitesse float64 "Vitesse de marche sur plat (km/h)"
-	} `xml:"extensions"`
+		Vitesse float64 `xml:"vitesse,omitempty" descr:"Vitesse de marche sur plat (km/h)"`
+	} `xml:"extensions,omitempty"`
 }
 
 type Trk struct {
@@ -39,7 +42,7 @@ type Trk struct {
 		DurationMin  int8    `xml:"DurationMin,omitempty"`
 
 		Line struct {
-			Xmlns string `xml:"xmlns,attr"`
+			Xmlns string `xml:"xmlns,attr,omitempty"`
 
 			Color      string `xml:"color,omitempty"`
 			Opacity    string `xml:"opacity,omitempty"`
@@ -51,9 +54,9 @@ type Trk struct {
 			Dashoffset int    `xml:"dashoffset,omitempty"`
 
 			Extensions *struct {
-				Jonction int `xml:"jonction"`
-			} `xml:"extensions"`
-		} `xml:"line,omitempty"`
+				Jonction int `xml:"jonction,omitempty"`
+			} `xml:"extensions,omitempty"`
+		} `xml:"line,omitzero"`
 	} `xml:"extensions,omitempty"`
 
 	Trkseg []Trkseg `xml:"trkseg"`
