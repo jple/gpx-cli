@@ -23,7 +23,6 @@ func (gpx *Gpx) SetVitesse(v float64) {
 }
 
 func (gpx Gpx) GetInfo(ascii_format bool) GpxSummary {
-
 	var trkSummary GpxSummary
 	for i, trk := range gpx.Trk {
 		summary := trk.GetInfo(i, gpx.Extensions.Vitesse, true)
@@ -90,6 +89,7 @@ out:
 
 					// TODO: this print is a pb in tui module
 					// fmt.Printf("Split at trk %v, trkseg %v, trkpt %v\n", i, j, k)
+
 					gpx = gpx.Split(i, j, k)
 
 					break out
@@ -99,7 +99,7 @@ out:
 	}
 
 	if !found {
-		fmt.Println("Name (", name, ") not found in gpx")
+		fmt.Printf("Name ('%v') not found in gpx", name)
 	}
 	return gpx
 }
@@ -109,44 +109,72 @@ func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
 	return *gpx
 }
 
-// TODO: split should put trkptid to the previous trk
+// TODO: Split should put trkptid to the previous trk (update: NO)
+// TODO: Split should be inplace (method of *Gpx)
+// Split Trk[trkId] containing trkptId into two trk 0:trptkId and trkptId:end
 func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
+	// filterBeforeTrkpt returns Trk keeping everything BEFORE TrkptId (excluded)
+	// return gpx.Trk[trkId].Trkseg[:trkseg+1] where Trkseg[trkSeg] is filter on Trkpt[:trkptEnd]
 	filterBeforeTrkpt := func(gpx Gpx, trkId, trksegId, trkptId int, name string) Trk {
-		// return gpx.Trk[trkId].Trkseg[:trkseg+1] where Trkseg[trkSeg] is filter on Trkpt[:trkptEnd]
-
 		trk := gpx.Trk[trkId]
-		trk.AddName(name)
+		trksegs_bef := trk.Trkseg[:trksegId]
+		trkseg_last := Trkseg{trk.Trkseg[trksegId].Trkpt[:trkptId]}
 
-		trk.Trkseg = slices.Concat(
-			trk.Trkseg[:trksegId],
-			[]Trkseg{
-				Trkseg{trk.Trkseg[trksegId].Trkpt[:trkptId]},
-			},
-		)
-		return trk
+		// Create result Trk
+		out := Trk{Name: name}
+		if len(trksegs_bef) > 0 { // TODO: check
+			// if trksegId > 0 { // if non-empty
+			out.Trkseg = trksegs_bef
+		}
+		if len(trkseg_last.Trkpt) > 0 { // TODO: check
+			// if trkptId > 0 { // if non-empty
+			// out.Trkseg = slices.Concat(out.Trkseg, trksegs_aft)
+			out.Trkseg = append(out.Trkseg, trkseg_last)
+		}
+
+		return out
 	}
+
+	// filterAfterTrkpt returns Trk keeping everything AFTER TrkptId (excluded)
+	// return gpx.Trk[trkId].Trkseg[trkseg:] where Trkseg[0] is filter on Trkpt[trkptId:]
 	filterAfterTrkpt := func(gpx Gpx, trkId, trksegId, trkptId int, name string) Trk {
-		// return gpx.Trk[trkId].Trkseg[trkseg:] where Trkseg[0] is filter on Trkpt[trkptId:]
+		// OTHER SYNTAX
+		// ==============
+		// // Output everything after trksegId
+		// out := Trk{
+		// 	Trkseg: gpx.Trk[trkId].Trkseg[trksegId:],
+		// 	Name:   name}
+		// // Update first trkseg to filter everything after trkptId
+		// out.Trkseg[0] = Trkseg{out.Trkseg[0].Trkpt[trkptId:]}
+		// ==============
 
 		trk := gpx.Trk[trkId]
-		trk.AddName(name)
+		trksegs_after := trk.Trkseg[trksegId:]
+		trkseg_first := Trkseg{trk.Trkseg[trksegId].Trkpt[trkptId:]}
 
-		trk.Trkseg = trk.Trkseg[trksegId:]
-		trk.Trkseg[0] = Trkseg{trk.Trkseg[0].Trkpt[trkptId:]}
-		return trk
+		// Output everything after trksegId
+		out := Trk{
+			Trkseg: trksegs_after,
+			Name:   name}
+		// Update first trkseg to filter everything after trkptId
+		out.Trkseg[0] = trkseg_first
+
+		return out
 	}
 
-	// WIP
 	bef := filterBeforeTrkpt(gpx, trkId, trksegId, trkptId, gpx.Trk[trkId].Name)
 	aft := filterAfterTrkpt(gpx, trkId, trksegId, trkptId, *gpx.Trk[trkId].Trkseg[trksegId].Trkpt[trkptId].Name)
 
-	gpx.Trk = slices.Delete(gpx.Trk, trkId, trkId+1)
-	gpx.Trk = slices.Insert(
-		gpx.Trk, trkId,
-		bef, aft,
-	)
+	// Update gpx.Trk value
+	newTrk := slices.Clone(gpx.Trk) // prevent unwanted update on gpx argument
+	newTrk = slices.Delete(newTrk, trkId, trkId+1)
+	newTrk = slices.Insert(newTrk, trkId, aft) // NOTE: poor readability inserting aft, then bef...
+	if len(bef.Trkseg) > 0 {
+		newTrk = slices.Insert(newTrk, trkId, bef)
+	}
 
-	return gpx
+	gpx.Trk = newTrk
+	return gpx // newGpx
 }
 
 // Merge Trk[trkId2] into Trk[trkId1]
@@ -159,7 +187,8 @@ func (gpx Gpx) Save(filepath string) {
 	if filepath == "" {
 		filepath = "out.gpx"
 	}
-	fmt.Println("Save to", filepath)
+	// TODO: to reset, but mess up with TUI...
+	// fmt.Println("Save to", filepath)
 
 	// Create xml file
 	xmlFile, err := os.Create(filepath)
