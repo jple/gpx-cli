@@ -9,7 +9,7 @@ import (
 // 1. create [][]Trkpt containing []Trkpt until name (excluded)
 // 2. calculate NPoints, ... on each []Trkpt
 
-func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
+func (trk Trk) GetInfo_old(trkid int, vitessePlat float64, detail bool) TrkSummary {
 	var distance, denivPos, denivNeg float64 = 0, 0, 0
 	var p_prev Pos
 
@@ -59,14 +59,14 @@ func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
 			// fmt.Printf("+%v ", eleDiff)
 			fmt.Printf("+%v ", denivPos)
 
-			var section SectionSummary
+			var section TrkptsSummary
 			// Create trkpts from this iteration, if any of these conditions are fulfilled
 			// - detail is asked, and current trkpt contains a name
 			// - last trkpt of the trk
 			isLastTrkpt := (i == n_seg-1) && (j == n_pt-1)
 			if (detail && trkpt.Name != nil) || isLastTrkpt {
 				fmt.Printf("NS\n")
-				section = SectionSummary{
+				section = TrkptsSummary{
 					TrkId:       trkid,
 					TrkName:     trkName,
 					VitessePlat: vitessePlat,
@@ -106,10 +106,10 @@ func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
 
 			if (detail && trkpt.Name != nil) || isLastTrkpt {
 				// Append new section
-				trkSummary.ListSectionSummary = append(trkSummary.ListSectionSummary, section)
+				trkSummary.ListTrkptsSummary = append(trkSummary.ListTrkptsSummary, section)
 
 				// Update whole track values
-				trkSummary.Track = SectionSummary{
+				trkSummary.Track = TrkptsSummary{
 					TrkName:     trkName,
 					VitessePlat: vitessePlat,
 					From:        trkName,

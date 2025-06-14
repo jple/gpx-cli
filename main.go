@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jple/gpx-cli/cmd"
 	. "github.com/jple/gpx-cli/core"
 )
 
@@ -32,7 +33,7 @@ func TestNPoints() {
 
 	var sumTrkNPoints = func(trkSummary TrkSummary) int {
 		var n int
-		for _, section := range trkSummary.ListSectionSummary {
+		for _, section := range trkSummary.ListTrkptsSummary {
 			n += section.NPoints
 		}
 		return n
@@ -51,7 +52,7 @@ func TestNPoints() {
 	fmt.Printf("have2: %v\n", have2)
 	fmt.Printf("have : %v trkpts\nwants : %v trkSummary.NPoints\n", have, want)
 
-	for _, section := range gpxSummary[0].ListSectionSummary {
+	for _, section := range gpxSummary[0].ListTrkptsSummary {
 		fmt.Println(section.From)
 		fmt.Println(section.NPoints)
 		fmt.Println(section.DenivPos)
@@ -62,15 +63,15 @@ func TestNPoints() {
 func test() {
 	gpx := Gpx{}
 	gpx.ParseFile("core/test/data/npoints.gpx")
-	trkSummary := gpx.Trk[0].GetInfo2(0, 4.5, true)
+	trkSummary := gpx.Trk[0].GetInfo(0, 4.5, true)
 	fmt.Printf("%+v\n", trkSummary)
 	fmt.Println(prettyprint(trkSummary))
 	// fmt.Println(trkSummary.ToString(PrintArgs{PrintFrom: true}))
 }
 
 func main() {
-	test()
-	// cmd.Execute()
+	// test()
+	cmd.Execute()
 	// TestNPoints()
 	// sym.ShowUnicode()
 }

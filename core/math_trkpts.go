@@ -91,3 +91,16 @@ func (trkpts Trkpts) GetTotalDescent() float64 {
 	}
 	return out
 }
+
+// func (trkpts Trkpts) GetFrom() string {
+// 	return trkpts.From
+// }
+// func (trkpts *Trkpts) SetFrom(s string) {
+// 	trkpts.From = s
+// }
+// func (trkpts Trkpts) GetTo() string {
+// 	return trkpts.To
+// }
+// func (trkpts *Trkpts) SetTo(s string) {
+// 	trkpts.To = s
+// }

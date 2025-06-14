@@ -41,68 +41,81 @@ func (trk Trk) GetListTrkptsPerName() ListTrkpts {
 	return listTrkpts
 }
 
+func (trkpts Trkpts) GetSummary(vitessePlat float64) TrkptsSummary {
+	trkptsSummary := TrkptsSummary{
+		VitessePlat: vitessePlat,
+		From:        "start",
+		To:          "end",
+
+		NPoints:  len(trkpts),
+		Distance: trkpts.GetTotalDistance(),
+		DenivPos: trkpts.GetTotalAscent(),
+		DenivNeg: trkpts.GetTotalDescent(),
+	}
+
+	// Set calculation value
+	trkptsSummary.DistanceEffort = CalcDistanceEffort(
+		trkptsSummary.Distance,
+		trkptsSummary.DenivPos,
+		trkptsSummary.DenivNeg)
+	_, trkptsSummary.DurationHour, trkptsSummary.DurationMin =
+		CalcDuration(
+			trkptsSummary.DistanceEffort,
+			vitessePlat)
+
+	return trkptsSummary
+}
+
 // WIP: refacto GetInfo
 // NOTE: detail is not used. Should be removed ?
-func (trk Trk) GetInfo2(trkid int, vitessePlat float64, detail bool) TrkSummary {
+func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
 	listTrkpts := trk.GetListTrkpts()
 	trkSummary := TrkSummary{Id: trkid, Name: trk.Name}
 
-	var sectionDuration, trackDuration float64
+	var trackDuration float64
 	for i, trkpts := range listTrkpts {
 		// ============= Calculation geo info ============================
-		sectionSummary := SectionSummary{
-			TrkId:       trkid,
-			TrkName:     trk.Name,
-			VitessePlat: vitessePlat,
-			From:        "start",
-			To:          "end"}
-
-		// Set calculation value
-		sectionSummary.NPoints = len(trkpts)
-		sectionSummary.Distance = trkpts.GetTotalDistance()
-		sectionSummary.DenivPos = trkpts.GetTotalAscent()
-		sectionSummary.DenivNeg = trkpts.GetTotalDescent()
-		sectionSummary.DistanceEffort = CalcDistanceEffort(
-			sectionSummary.Distance,
-			sectionSummary.DenivPos,
-			sectionSummary.DenivNeg)
-		sectionDuration, sectionSummary.DurationHour, sectionSummary.DurationMin =
-			CalcDuration(
-				sectionSummary.DistanceEffort,
-				vitessePlat)
+		trkptsSummary := trkpts.GetSummary(vitessePlat)
+		trkptsSummary.TrkId = trkid
+		trkptsSummary.TrkName = trk.Name
 
 		// ============= Calculation From and To ============================
 		// Set From with trk.Name, or first Trkpts name (depending on which available)
 		if i == 0 && trk.Name != "" {
-			sectionSummary.From = trk.Name
+			trkptsSummary.From = trk.Name
 		}
-		sectionSummary.From = *trkpts[0].Name
+		if trkpts[0].Name != nil {
+			trkptsSummary.From = *trkpts[0].Name
+		}
 
 		// Set To with next Trkpts name
 		if i < len(listTrkpts)-1 && len(trkpts) > 0 {
 			nextTrkpts := listTrkpts[i+1]
-			sectionSummary.To = *nextTrkpts[0].Name
+			trkptsSummary.To = *nextTrkpts[0].Name
 		}
 
-		// ============= Update trkSummary.ListSectionSummary ============================
-		trkSummary.ListSectionSummary = append(trkSummary.ListSectionSummary, sectionSummary)
+		// ============= Update trkSummary.ListTrkptsSummary ============================
+		if detail {
+			trkSummary.ListTrkptsSummary = append(trkSummary.ListTrkptsSummary, trkptsSummary)
+		}
 
 		// ============= Update trkSummary.Track ============================
+		sectionDuration, _, _ := CalcDuration(trkptsSummary.DistanceEffort, vitessePlat)
 		trackDuration += sectionDuration
-		trkSummary.Track = SectionSummary{
+		trkSummary.Track = TrkptsSummary{
 			TrkName:     trk.Name,
 			VitessePlat: vitessePlat,
 			From:        trk.Name,
 			To:          "end",
 
-			NPoints:        trkSummary.Track.NPoints + sectionSummary.NPoints,
-			Distance:       trkSummary.Track.Distance + sectionSummary.Distance,
-			DenivPos:       trkSummary.Track.DenivPos + sectionSummary.DenivPos,
-			DenivNeg:       trkSummary.Track.DenivNeg + sectionSummary.DenivNeg,
-			DistanceEffort: trkSummary.Track.DistanceEffort + sectionSummary.DistanceEffort,
+			NPoints:        trkSummary.Track.NPoints + trkptsSummary.NPoints,
+			Distance:       trkSummary.Track.Distance + trkptsSummary.Distance,
+			DenivPos:       trkSummary.Track.DenivPos + trkptsSummary.DenivPos,
+			DenivNeg:       trkSummary.Track.DenivNeg + trkptsSummary.DenivNeg,
+			DistanceEffort: trkSummary.Track.DistanceEffort + trkptsSummary.DistanceEffort,
 
-			DurationHour: trkSummary.Track.DurationHour + sectionSummary.DurationHour,
-			DurationMin:  trkSummary.Track.DurationMin + sectionSummary.DurationMin,
+			DurationHour: trkSummary.Track.DurationHour + trkptsSummary.DurationHour,
+			DurationMin:  trkSummary.Track.DurationMin + trkptsSummary.DurationMin,
 		}
 		trkSummary.Track.DurationHour, trkSummary.Track.DurationMin = FloatToHourMin(trackDuration)
 	}
