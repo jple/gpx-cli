@@ -7,7 +7,6 @@ import (
 // Trkpts is to contain Trkpt between two Trkpt.Name
 // ie. from a the first Trkpt or a Trkpt.Name
 // up to the last Trkpt without Trkpt.Name
-// TODO/refacto: create generic Trkpts type, and move math_trkpts.go into methods
 
 func (trk Trk) GetTrkpts() Trkpts {
 	trkpts := Trkpts{}
@@ -39,31 +38,6 @@ func (trk Trk) GetListTrkptsPerName() ListTrkpts {
 	}
 	listTrkpts = append(listTrkpts, trkpts) // add last trkpts
 	return listTrkpts
-}
-
-func (trkpts Trkpts) GetSummary(vitessePlat float64) TrkptsSummary {
-	trkptsSummary := TrkptsSummary{
-		VitessePlat: vitessePlat,
-		From:        "start",
-		To:          "end",
-
-		NPoints:  len(trkpts),
-		Distance: trkpts.GetTotalDistance(),
-		DenivPos: trkpts.GetTotalAscent(),
-		DenivNeg: trkpts.GetTotalDescent(),
-	}
-
-	// Set calculation value
-	trkptsSummary.DistanceEffort = CalcDistanceEffort(
-		trkptsSummary.Distance,
-		trkptsSummary.DenivPos,
-		trkptsSummary.DenivNeg)
-	_, trkptsSummary.DurationHour, trkptsSummary.DurationMin =
-		CalcDuration(
-			trkptsSummary.DistanceEffort,
-			vitessePlat)
-
-	return trkptsSummary
 }
 
 // WIP: refacto GetInfo

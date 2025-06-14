@@ -54,7 +54,6 @@ func (trkpts Trkpts) GetTotalDistance() float64 {
 	return d
 }
 
-// TODO/rename: DiffAltitude
 func (trkpts Trkpts) GetDiffElevations() []float64 {
 	return trkpts.Map(DiffElevation)
 }
@@ -104,3 +103,28 @@ func (trkpts Trkpts) GetTotalDescent() float64 {
 // func (trkpts *Trkpts) SetTo(s string) {
 // 	trkpts.To = s
 // }
+
+func (trkpts Trkpts) GetSummary(vitessePlat float64) TrkptsSummary {
+	trkptsSummary := TrkptsSummary{
+		VitessePlat: vitessePlat,
+		From:        "start",
+		To:          "end",
+
+		NPoints:  len(trkpts),
+		Distance: trkpts.GetTotalDistance(),
+		DenivPos: trkpts.GetTotalAscent(),
+		DenivNeg: trkpts.GetTotalDescent(),
+	}
+
+	// Set calculation value
+	trkptsSummary.DistanceEffort = CalcDistanceEffort(
+		trkptsSummary.Distance,
+		trkptsSummary.DenivPos,
+		trkptsSummary.DenivNeg)
+	_, trkptsSummary.DurationHour, trkptsSummary.DurationMin =
+		CalcDuration(
+			trkptsSummary.DistanceEffort,
+			vitessePlat)
+
+	return trkptsSummary
+}

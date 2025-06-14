@@ -84,8 +84,7 @@ func (trkSummary TrkSummary) ToString(args PrintArgs) string {
 	for _, sectionInfo := range trkSummary.ListTrkptsSummary {
 		str += sectionInfo.ToString(args)
 	}
-	// TODO: rename PrintFrom
-	// this parameter is actually used to print details or not
+	// TODO/rename: poor readability. this parameter is actually used to print details or not
 	if args.PrintFrom {
 		str += "\n"
 	}
@@ -95,8 +94,7 @@ func (trkSummary TrkSummary) ToString(args PrintArgs) string {
 
 func (s TrkptsSummary) ToString(args PrintArgs) string {
 	var str string
-	// TODO: rename PrintFrom
-	// this parameter is actually used to print details or not
+	// TODO/rename: poor readability. this parameter is actually used to print details or not
 	if args.PrintFrom {
 		if args.AsciiFormat {
 			// str += fmt.Sprintf("      --> %v", sym.Green(s.To))
