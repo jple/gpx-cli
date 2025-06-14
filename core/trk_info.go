@@ -45,8 +45,9 @@ func (trk Trk) GetInfo2(trkid int, vitessePlat float64, detail bool) TrkSummary 
 	listTrkpts := trk.GetListTrkpts()
 	trkSummary := TrkSummary{Id: trkid, Name: trk.Name}
 
-	var sectionDuration float64
+	var sectionDuration, trackDuration float64
 	for i, trkpts := range listTrkpts {
+		// ============= Calculation geo info ============================
 		sectionSummary := SectionSummary{
 			TrkId:       trkid,
 			TrkName:     trk.Name,
@@ -68,8 +69,7 @@ func (trk Trk) GetInfo2(trkid int, vitessePlat float64, detail bool) TrkSummary 
 				sectionSummary.DistanceEffort,
 				vitessePlat)
 
-		_ = sectionDuration
-
+		// ============= Calculation From and To ============================
 		// Set From with trk.Name, or first Trkpts name (depending on which available)
 		if i == 0 && trk.Name != "" {
 			sectionSummary.From = trk.Name
@@ -82,7 +82,28 @@ func (trk Trk) GetInfo2(trkid int, vitessePlat float64, detail bool) TrkSummary 
 			sectionSummary.To = *nextTrkpts[0].Name
 		}
 
+		// ============= Update trkSummary.ListSectionSummary ============================
 		trkSummary.ListSectionSummary = append(trkSummary.ListSectionSummary, sectionSummary)
+
+		// ============= Update trkSummary.Track ============================
+		trackDuration += sectionDuration
+		trkSummary.Track = SectionSummary{
+			TrkName:     trk.Name,
+			VitessePlat: vitessePlat,
+			From:        trk.Name,
+			To:          "end",
+
+			NPoints:        trkSummary.Track.NPoints + sectionSummary.NPoints,
+			Distance:       trkSummary.Track.Distance + sectionSummary.Distance,
+			DenivPos:       trkSummary.Track.DenivPos + sectionSummary.DenivPos,
+			DenivNeg:       trkSummary.Track.DenivNeg + sectionSummary.DenivNeg,
+			DistanceEffort: trkSummary.Track.DistanceEffort + sectionSummary.DistanceEffort,
+
+			DurationHour: trkSummary.Track.DurationHour + sectionSummary.DurationHour,
+			DurationMin:  trkSummary.Track.DurationMin + sectionSummary.DurationMin,
+		}
+		trkSummary.Track.DurationHour, trkSummary.Track.DurationMin = FloatToHourMin(trackDuration)
 	}
+
 	return trkSummary
 }
