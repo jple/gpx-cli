@@ -33,18 +33,12 @@ func (p_trk *Trk) Reverse() Trk {
 }
 
 func (trk Trk) GetElevations() []float64 {
-	var trkpts []Trkpt
-	for _, trkseg := range trk.Trkseg {
-		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
-	}
-	var elevs []float64
-	for _, trkpt := range trkpts {
-		elevs = append(elevs, trkpt.Ele)
-	}
-	return elevs
+	trkpts := trk.GetTrkpts()
+	return trkpts.GetElevations()
 }
 
 // Calculate cumulated distance between two index of trk
+// TODO/refacto: move into Trkpts
 func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 	if i >= j {
 		fmt.Println("i must be < j")
@@ -80,39 +74,33 @@ func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 	return dist
 }
 
-// Caculate cumulated distance for each trkpt
+// Calculate cumulated distance for each trkpt
 // (distance between trkpt[0] and trkpt[i])
-// TODO: must use GetEachDistance([]Trkpt)
-func (trk Trk) GetDistanceEachTrkpts() []float64 {
-	// var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
-	var trkpts []Trkpt
-	for _, trkseg := range trk.Trkseg {
-		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
-	}
-	var dists []float64
-	posInit := Pos{
-		Lon: trkpts[0].Lon,
-		Lat: trkpts[0].Lat,
-		Ele: trkpts[0].Ele,
-	}
-	var pos Pos
-	for _, trkpt := range trkpts {
-		pos = Pos{
-			Lon: trkpt.Lon,
-			Lat: trkpt.Lat,
-			Ele: trkpt.Ele,
-		}
-		dists = append(dists,
-			Dist(posInit, pos))
-	}
-	return dists
+func (trk Trk) GetCumulatedDistances() []float64 {
+	trkpts := trk.GetTrkpts()
+	return trkpts.GetCumulatedDistances()
 }
+
+// var cumDistance []float64
+// p0 := Pos{
+// 	Lat: trkpts[0].Lat,
+// 	Lon: trkpts[0].Lon,
+// 	Ele: trkpts[0].Ele}
+// for _, trkpt := range trkpts {
+// 	p := Pos{
+// 		Lat: trkpt.Lat,
+// 		Lon: trkpt.Lon,
+// 		Ele: trkpt.Ele}
+// 	cumDistance = append(cumDistance, Dist(p0, p))
+// }
+// return cumDistance
+// }
 
 func (trk Trk) GetRollElevations(winSize int, calc RollCalc) []float64 {
 	return Rolling(trk.GetElevations(), winSize, calc)
 }
 func (trk Trk) GetRollDistances(winSize int, calc RollCalc) []float64 {
-	return Rolling(trk.GetDistanceEachTrkpts(), winSize, calc)
+	return Rolling(trk.GetCumulatedDistances(), winSize, calc)
 }
 
 func (trk *Trk) AddName(name string) {

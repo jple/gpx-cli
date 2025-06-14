@@ -30,8 +30,26 @@ func (trkpts Trkpts) Map(calculation func(posPrev, pos Pos) float64) []float64 {
 	return res
 }
 
+// Same as Map, but posPrev is replaced by p0
+func (trkpts Trkpts) Map0(calculation func(unusedPos, pos Pos) float64) []float64 {
+	var res []float64
+	pos0 := Pos{
+		Lon: trkpts[0].Lon,
+		Lat: trkpts[0].Lat,
+		Ele: trkpts[0].Ele,
+	}
+	for _, trkpt := range trkpts {
+		pos := Pos{
+			Lon: trkpt.Lon,
+			Lat: trkpt.Lat,
+			Ele: trkpt.Ele,
+		}
+		res = append(res, calculation(pos0, pos))
+	}
+	return res
+}
+
 // Returns all trkpt Ele
-// TODO/refacto: this function should replace Trk method
 func (trkpts Trkpts) GetElevations() []float64 {
 	getCurrentEle := func(posPrev, pos Pos) float64 {
 		return pos.Ele
@@ -40,9 +58,13 @@ func (trkpts Trkpts) GetElevations() []float64 {
 }
 
 // Returns distance between each trkpt (first value set to 0)
-// TODO/refacto: this function should replace Trk method
 func (trkpts Trkpts) GetDistances() []float64 {
 	return trkpts.Map(Dist)
+}
+
+// Returns distance between each trkpt (first value set to 0)
+func (trkpts Trkpts) GetCumulatedDistances() []float64 {
+	return trkpts.Map0(Dist)
 }
 
 func (trkpts Trkpts) GetTotalDistance() float64 {
