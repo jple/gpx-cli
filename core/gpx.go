@@ -77,33 +77,6 @@ func (p_gpx *Gpx) Reverse() Gpx {
 	return gpx
 }
 
-func (gpx Gpx) SplitAtName(name string) Gpx {
-	found := false
-
-out:
-	for i, trk := range gpx.Trk {
-		for j, trkseg := range trk.Trkseg {
-			for k, trkpt := range trkseg.Trkpt {
-				if trkpt.Name != nil && *trkpt.Name == name {
-					found = true
-
-					// TODO: this print is a pb in tui module
-					// fmt.Printf("Split at trk %v, trkseg %v, trkpt %v\n", i, j, k)
-
-					gpx = gpx.Split(i, j, k)
-
-					break out
-				}
-			}
-		}
-	}
-
-	if !found {
-		fmt.Printf("Name ('%v') not found in gpx", name)
-	}
-	return gpx
-}
-
 func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
 	gpx.Wpt = append(gpx.Wpt, wpt)
 	return *gpx
@@ -175,6 +148,33 @@ func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
 
 	gpx.Trk = newTrk
 	return gpx // newGpx
+}
+
+func (gpx Gpx) SplitAtName(name string) Gpx {
+	found := false
+
+out:
+	for i, trk := range gpx.Trk {
+		for j, trkseg := range trk.Trkseg {
+			for k, trkpt := range trkseg.Trkpt {
+				if trkpt.Name != nil && *trkpt.Name == name {
+					found = true
+
+					// TODO: this print is a pb in tui module
+					// fmt.Printf("Split at trk %v, trkseg %v, trkpt %v\n", i, j, k)
+
+					gpx = gpx.Split(i, j, k)
+
+					break out
+				}
+			}
+		}
+	}
+
+	if !found {
+		fmt.Printf("Name ('%v') not found in gpx", name)
+	}
+	return gpx
 }
 
 // Merge Trk[trkId2] into Trk[trkId1]

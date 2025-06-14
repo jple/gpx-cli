@@ -23,11 +23,11 @@ func (m GpxTui) Init() tea.Cmd {
 
 func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cursorMax int
-	var sections []core.SectionInfo
+	var sections []core.TrkptsSummary
 	// Note: cursor is only going through sections, not track name
-	for _, trksummary := range m.GpxSummary {
-		cursorMax += len(trksummary.Section)
-		for _, section := range trksummary.Section {
+	for _, trkSummary := range m.GpxSummary {
+		cursorMax += len(trkSummary.ListTrkptsSummary)
+		for _, section := range trkSummary.ListTrkptsSummary {
 			sections = append(sections, section)
 		}
 	}
@@ -83,10 +83,10 @@ func FileExists(filename string) bool {
 func (m GpxTui) View() string {
 	var str string
 
-	var sections []core.SectionInfo
+	var sections []core.TrkptsSummary
 	// Note: cursor is only going through sections, not track name
-	for _, trksummary := range m.GpxSummary {
-		for _, section := range trksummary.Section {
+	for _, trkSummary := range m.GpxSummary {
+		for _, section := range trkSummary.ListTrkptsSummary {
 			sections = append(sections, section)
 		}
 	}
@@ -102,7 +102,7 @@ func (m GpxTui) View() string {
 			sym.StopWatch(), trkSummary.Track.DurationHour, trkSummary.Track.DurationMin)
 		// str += "\n"
 
-		for _, sectionInfo := range trkSummary.Section {
+		for _, sectionInfo := range trkSummary.ListTrkptsSummary {
 			if m.cursor == k {
 				// str += ">>> "
 				str += fmt.Sprintf(">>> **c:%v** ", m.cursor)
