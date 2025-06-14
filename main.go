@@ -64,6 +64,7 @@ func test() {
 	gpx.ParseFile("core/test/data/npoints.gpx")
 	trkSummary := gpx.Trk[0].GetInfo2(0, 4.5, true)
 	fmt.Printf("%+v\n", trkSummary)
+	fmt.Println(prettyprint(trkSummary))
 	// fmt.Println(trkSummary.ToString(PrintArgs{PrintFrom: true}))
 }
 

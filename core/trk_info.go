@@ -44,25 +44,43 @@ func (trk Trk) GetFlattenTrkptsSplitName() ListTrkpts {
 func (trk Trk) GetInfo2(trkid int, vitessePlat float64, detail bool) TrkSummary {
 	listTrkpts := trk.GetListTrkpts()
 	trkSummary := TrkSummary{Id: trkid, Name: trk.Name}
-	sectionSummary := SectionSummary{
-		TrkId:       trkid,
-		TrkName:     trk.Name,
-		VitessePlat: vitessePlat,
 
-		// Cumulative values between "From" and "To"
-		// NPoints
-		// Distance       float64
-		// DenivPos       float64
-		// DenivNeg       float64
-		// DistanceEffort float64
-		// DurationHour   int8
-		// DurationMin    int8
-	}
-	for _, trkpts := range listTrkpts {
+	var sectionDuration float64
+	for i, trkpts := range listTrkpts {
+		sectionSummary := SectionSummary{
+			TrkId:       trkid,
+			TrkName:     trk.Name,
+			VitessePlat: vitessePlat,
+			From:        "start",
+			To:          "end"}
+
+		// Set calculation value
 		sectionSummary.NPoints = len(trkpts)
 		sectionSummary.Distance = trkpts.GetTotalDistance()
 		sectionSummary.DenivPos = trkpts.GetTotalAscent()
 		sectionSummary.DenivNeg = trkpts.GetTotalDescent()
+		sectionSummary.DistanceEffort = CalcDistanceEffort(
+			sectionSummary.Distance,
+			sectionSummary.DenivPos,
+			sectionSummary.DenivNeg)
+		sectionDuration, sectionSummary.DurationHour, sectionSummary.DurationMin =
+			CalcDuration(
+				sectionSummary.DistanceEffort,
+				vitessePlat)
+
+		_ = sectionDuration
+
+		// Set From with trk.Name, or first Trkpts name (depending on which available)
+		if i == 0 && trk.Name != "" {
+			sectionSummary.From = trk.Name
+		}
+		sectionSummary.From = *trkpts[0].Name
+
+		// Set To with next Trkpts name
+		if i < len(listTrkpts)-1 && len(trkpts) > 0 {
+			nextTrkpts := listTrkpts[i+1]
+			sectionSummary.To = *nextTrkpts[0].Name
+		}
 
 		trkSummary.ListSectionSummary = append(trkSummary.ListSectionSummary, sectionSummary)
 	}
