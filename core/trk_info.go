@@ -9,7 +9,7 @@ import (
 // up to the last Trkpt without Trkpt.Name
 // TODO/refacto: create generic Trkpts type, and move math_trkpts.go into methods
 
-func (trk Trk) GetFlattenTrkpts() Trkpts {
+func (trk Trk) GetTrkpts() Trkpts {
 	trkpts := Trkpts{}
 	for _, trkseg := range trk.Trkseg {
 		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
@@ -17,30 +17,32 @@ func (trk Trk) GetFlattenTrkpts() Trkpts {
 	return trkpts
 }
 
+// This is just an alias to GetListTrkptsPerName
 func (trk Trk) GetListTrkpts() ListTrkpts {
-	return trk.GetFlattenTrkptsSplitName()
+	return trk.GetListTrkptsPerName()
 }
 
-// GetFlattenTrkptsSplitName creates ListTrkpts ([][]Trkpt) containing Trkpts ([]Trkpt until name (excluded))
-func (trk Trk) GetFlattenTrkptsSplitName() ListTrkpts {
-	sections := ListTrkpts{}
-	s := Trkpts{}
-	trkpts := trk.GetFlattenTrkpts()
-	for i, trkpt := range trkpts {
+// GetListTrkptsPerName creates ListTrkpts ([][]Trkpt) containing Trkpts ([]Trkpt until name (excluded))
+func (trk Trk) GetListTrkptsPerName() ListTrkpts {
+	trkpts := Trkpts{}
+	listTrkpts := ListTrkpts{}
+
+	for i, trkpt := range trk.GetTrkpts() {
 		if i == 0 || trkpt.Name == nil {
 			// Update current trkpts
-			s = append(s, trkpt)
-		} else { // End trkpts
-			// Update list of sections, starting new trkpts
-			sections = append(sections, s)
-			s = Trkpts{trkpt}
+			trkpts = append(trkpts, trkpt)
+		} else { // End trkpts, or trkpt has Name
+			// Update list of Trkpts, starting new trkpts
+			listTrkpts = append(listTrkpts, trkpts)
+			trkpts = Trkpts{trkpt}
 		}
 	}
-	sections = append(sections, s) // add last trkpts
-	return sections
+	listTrkpts = append(listTrkpts, trkpts) // add last trkpts
+	return listTrkpts
 }
 
 // WIP: refacto GetInfo
+// NOTE: detail is not used. Should be removed ?
 func (trk Trk) GetInfo2(trkid int, vitessePlat float64, detail bool) TrkSummary {
 	listTrkpts := trk.GetListTrkpts()
 	trkSummary := TrkSummary{Id: trkid, Name: trk.Name}
