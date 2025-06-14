@@ -17,7 +17,7 @@ type Pos struct {
 // Section summaries either
 // - the whole trk
 // - a section between a trkpt name and the next one (no matter trkseg)
-type SectionInfo struct {
+type SectionSummary struct {
 
 	// TODO: Dupplicates on TrkSummary
 	TrkId       int
@@ -26,8 +26,8 @@ type SectionInfo struct {
 
 	// TrkptName
 	From         string
-	FromTrksegId *int
-	FromTrkptId  *int
+	FromTrksegId *int // unused !
+	FromTrkptId  *int // unused !
 	To           string
 
 	// Cumulative values between "From" and "To"
@@ -41,10 +41,10 @@ type SectionInfo struct {
 }
 
 type TrkSummary struct {
-	Id      int
-	Name    string
-	Section []SectionInfo
-	Track   SectionInfo
+	Id                 int
+	Name               string
+	ListSectionSummary []SectionSummary
+	Track              SectionSummary
 }
 
 type GpxSummary []TrkSummary
@@ -80,7 +80,7 @@ func (trkSummary TrkSummary) ToString(args PrintArgs) string {
 		sym.ArrowWaveRight(), trkSummary.Track.DistanceEffort,
 		sym.StopWatch(), trkSummary.Track.DurationHour, trkSummary.Track.DurationMin)
 
-	for _, sectionInfo := range trkSummary.Section {
+	for _, sectionInfo := range trkSummary.ListSectionSummary {
 		str += sectionInfo.ToString(args)
 	}
 	// TODO: rename PrintFrom
@@ -92,7 +92,7 @@ func (trkSummary TrkSummary) ToString(args PrintArgs) string {
 	return str
 }
 
-func (s SectionInfo) ToString(args PrintArgs) string {
+func (s SectionSummary) ToString(args PrintArgs) string {
 	var str string
 	// TODO: rename PrintFrom
 	// this parameter is actually used to print details or not

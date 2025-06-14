@@ -17,3 +17,6 @@ cmd/test.go
 
 wip/
 src/
+
+debug*
+tmp*

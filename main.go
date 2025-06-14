@@ -4,11 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
-	"strconv"
-	"text/tabwriter"
 
-	"github.com/jple/gpx-cli/cmd"
 	. "github.com/jple/gpx-cli/core"
 )
 
@@ -20,43 +16,60 @@ func prettyprint(in any) string {
 	return string(j)
 }
 
+func TestNPoints() {
+	gpx := Gpx{}
+	// gpx.ParseFile("core/test/data/split.gpx")
+	gpx.ParseFile("core/test/data/npoints.gpx")
+	gpxSummary := gpx.GetInfo(true)
+
+	var countingTrkpt = func(trk Trk) int {
+		n := 0
+		for _, trkseg := range trk.Trkseg {
+			n += len(trkseg.Trkpt)
+		}
+		return n
+	}
+
+	var sumTrkNPoints = func(trkSummary TrkSummary) int {
+		var n int
+		for _, section := range trkSummary.ListSectionSummary {
+			n += section.NPoints
+		}
+		return n
+	}
+
+	var trackNPoints = func(trkSummary TrkSummary) int {
+		return trkSummary.Track.NPoints
+	}
+
+	want := countingTrkpt(gpx.Trk[0])
+	have := sumTrkNPoints(gpxSummary[0])
+	have2 := trackNPoints(gpxSummary[0])
+	if have != want {
+	}
+
+	fmt.Printf("have2: %v\n", have2)
+	fmt.Printf("have : %v trkpts\nwants : %v trkSummary.NPoints\n", have, want)
+
+	for _, section := range gpxSummary[0].ListSectionSummary {
+		fmt.Println(section.From)
+		fmt.Println(section.NPoints)
+		fmt.Println(section.DenivPos)
+		// fmt.Printf("seg: %v, pt: %v\n", *section.FromTrksegId, *section.FromTrkptId)
+	}
+}
+
 func test() {
 	gpx := Gpx{}
-	gpx.ParseFile("src/my.gpx")
-	gpx.SetVitesse(4.5)
-
-	var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
-	var trkid int
-	i, _ := strconv.ParseInt(os.Args[1], 0, 0)
-	trkid = int(i)
-
-	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', tabwriter.Debug)
-	if trkid == -1 {
-		printArgs.Silent = true
-		infos := gpx.
-			GetInfo(true).
-			ToString(printArgs)
-		fmt.Fprintln(w, infos)
-		// fmt.Println(str)
-		// fmt.Printf("%+v\n", gpx.GetInfo(true))
-		// fmt.Println(prettyprint(gpx.GetInfo(true)))
-	} else {
-		printArgs.PrintFrom = true
-		// fmt.Println()
-		// fmt.Println()
-		infos := gpx.
-			Trk[trkid].
-			GetInfo(trkid, gpx.Extensions.Vitesse, true).
-			ToString(printArgs)
-			// fmt.Println(str)
-		fmt.Fprintln(w, infos)
-		// fmt.Println(prettyprint(gpx.Trk[trkid].GetInfo(gpx.Extensions.Vitesse, true)))
-	}
-	w.Flush()
+	gpx.ParseFile("core/test/data/npoints.gpx")
+	trkSummary := gpx.Trk[0].GetInfoFromSections(0, 4.5, true)
+	fmt.Printf("%+v\n", trkSummary)
+	// fmt.Println(trkSummary.ToString(PrintArgs{PrintFrom: true}))
 }
 
 func main() {
-	cmd.Execute()
-	// test()
+	test()
+	// cmd.Execute()
+	// TestNPoints()
 	// sym.ShowUnicode()
 }

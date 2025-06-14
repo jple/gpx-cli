@@ -1,5 +1,11 @@
 # Todo
 
+- fix split
+    * create func (Gpx) Copy() Gpx
+- fix tui
+    * trk.GetInfo: ignore empty <trkseg>
+    * gpx.Split: remove <trkseg> if empty
+
 - create function
     * check distance between trk[t].trkpt[-1] and trk[t+1].trkp[0]
         + try reverse (4 cases). If better, keep it
