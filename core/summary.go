@@ -17,6 +17,7 @@ type Pos struct {
 // Section summaries either
 // - the whole trk
 // - a section between a trkpt name and the next one (no matter trkseg)
+// TODO/refacto: rename to TrkptsSummary
 type SectionSummary struct {
 
 	// TODO: Dupplicates on TrkSummary
@@ -49,6 +50,7 @@ type TrkSummary struct {
 
 type GpxSummary []TrkSummary
 
+// TODO/refacto: rename or delete. Poor readability
 type PrintArgs struct {
 	PrintFrom   bool
 	AsciiFormat bool
