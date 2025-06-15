@@ -1,9 +1,6 @@
 # Todo
 
-- fix split
-    * create func (Gpx) Copy() Gpx
 - fix tui
-    * trk.GetInfo: ignore empty <trkseg>
     * gpx.Split: remove <trkseg> if empty
 
 - create function

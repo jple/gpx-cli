@@ -40,7 +40,6 @@ func (trk Trk) GetListTrkptsPerName() ListTrkpts {
 	return listTrkpts
 }
 
-// WIP: refacto GetInfo
 // NOTE: detail is not used. Should be removed ?
 func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
 	listTrkpts := trk.GetListTrkpts()
@@ -48,6 +47,10 @@ func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
 
 	var trackDuration float64
 	for i, trkpts := range listTrkpts {
+		if len(trkpts) == 0 {
+			continue
+		}
+
 		// ============= Calculation geo info ============================
 		trkptsSummary := trkpts.GetSummary(vitessePlat)
 		trkptsSummary.TrkId = trkid

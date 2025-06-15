@@ -13,6 +13,10 @@ type ListTrkpts []Trkpts
 // Returns a []float64 containing a specific calculation on each trkpt
 func (trkpts Trkpts) Map(calculation func(posPrev, pos Pos) float64) []float64 {
 	var res []float64
+	if len(trkpts) == 0 {
+		return res
+	}
+
 	posPrev := Pos{
 		Lon: trkpts[0].Lon,
 		Lat: trkpts[0].Lat,
