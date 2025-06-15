@@ -54,14 +54,14 @@ func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// =========== action =============
 		case "left":
 			selectedTrkId := sections[m.cursor].TrkId
-			if selectedTrkId > 0 && selectedTrkId < len(m.Gpx.Trk) {
+			if selectedTrkId > 0 && selectedTrkId < len(m.Gpx.Trks) {
 				m.Gpx = m.Gpx.Merge(selectedTrkId-1, selectedTrkId)
-				m.GpxSummary = m.Gpx.GetInfo(true)
+				m.GpxSummary = m.Gpx.GetInfo()
 			}
 			return m, nil
 		case "right":
 			m.Gpx = m.Gpx.SplitAtName(sections[m.cursor].To)
-			m.GpxSummary = m.Gpx.GetInfo(true)
+			m.GpxSummary = m.Gpx.GetInfo()
 			return m, nil
 		case "s":
 			filename := "tata/0.gpx"

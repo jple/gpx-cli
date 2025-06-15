@@ -7,7 +7,24 @@ import (
 	"slices"
 )
 
-// TODO: add return *Gpx without testing !
+type Gpx struct {
+	XMLName string `xml:"gpx"`
+
+	Metadata *struct {
+		Desc string `xml:"desc,omitempty"`
+		Name string `xml:"name,omitempty"`
+	} `xml:"metadata,omitempty"`
+	Trks []Trk `xml:"trk,omitempty"`
+	Wpts []Wpt `xml:"wpt,omitempty"`
+
+	// TODO: use pointer in order to omitemtpy
+	// (otherwise, parser expects Extensions to be non-empty, due to Vitesse child-field)
+	// This notation is making code less readable
+	Extensions struct {
+		Vitesse float64 `xml:"vitesse,omitempty" descr:"Vitesse de marche sur plat (km/h)"`
+	} `xml:"extensions,omitempty"`
+}
+
 func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 	data, _ := os.ReadFile(gpxFilename)
 	if err := xml.Unmarshal(data, &gpx); err != nil {
@@ -22,40 +39,43 @@ func (gpx *Gpx) SetVitesse(v float64) {
 	gpx.Extensions.Vitesse = v
 }
 
-func (gpx Gpx) GetInfo(ascii_format bool) GpxSummary {
-	var trkSummary GpxSummary
-	for i, trk := range gpx.Trk {
-		summary := trk.GetInfo(i, gpx.Extensions.Vitesse, true)
-		trkSummary = append(trkSummary, summary)
+func (gpx Gpx) GetInfo() GpxSummary {
+	var gpxSummary GpxSummary
+	for i, trk := range gpx.Trks {
+		trkSummary := trk.GetInfo(i, gpx.Extensions.Vitesse)
+		gpxSummary = append(gpxSummary, trkSummary)
 	}
-	return trkSummary
+	return gpxSummary
 }
 
-func (gpx *Gpx) GetClosestTrkpts(p Pos) []*Trkpt {
+// Returns slice of pointers to Trkpt
+// This function is used to add name to trkpt in-place
+// without need to specify Trk,Trkseg,Trkpt id
+func (gpx *Gpx) GetClosestTrkpts(p Pt) []*Trkpt {
 	var trkpts []*Trkpt
 	// var ind struct{ i, j, k int }
 
-	seg := gpx.Trk[0].Trkseg[0]
-	p0 := seg.Trkpt[0]
+	// TODO: add check on len(...)
+	seg := gpx.Trks[0].Trksegs[0]
+	p0 := seg.Trkpts[0]
 	minDist := Dist(
-		// TODO: add elevation ?
-		Pos{Lat: p.Lat, Lon: p.Lon},
-		Pos{Lat: p0.Lat, Lon: p0.Lon},
+		Pt{Lat: p.Lat, Lon: p.Lon},
+		Pt{Lat: p0.Lat, Lon: p0.Lon},
 	)
 
-	for i, _ := range gpx.Trk {
-		for j, _ := range gpx.Trk[i].Trkseg {
-			for k, trkpt := range gpx.Trk[i].Trkseg[j].Trkpt {
+	for i, _ := range gpx.Trks {
+		for j, _ := range gpx.Trks[i].Trksegs {
+			for k, trkpt := range gpx.Trks[i].Trksegs[j].Trkpts {
 				d := Dist(
-					Pos{Lat: p.Lat, Lon: p.Lon},
-					Pos{Lat: trkpt.Lat, Lon: trkpt.Lon},
+					Pt{Lat: p.Lat, Lon: p.Lon},
+					Pt{Lat: trkpt.Lat, Lon: trkpt.Lon},
 				)
 
 				if d == minDist {
-					trkpts = append(trkpts, &gpx.Trk[i].Trkseg[j].Trkpt[k])
+					trkpts = append(trkpts, &gpx.Trks[i].Trksegs[j].Trkpts[k])
 				} else if d < minDist {
 					// Using index to prevent copy value to keep correct address
-					trkpts = []*Trkpt{&gpx.Trk[i].Trkseg[j].Trkpt[k]}
+					trkpts = []*Trkpt{&gpx.Trks[i].Trksegs[j].Trkpts[k]}
 					// ind = struct{ i, j, k int }{i, j, k}
 					minDist = d
 				}
@@ -69,8 +89,8 @@ func (gpx *Gpx) GetClosestTrkpts(p Pos) []*Trkpt {
 func (p_gpx *Gpx) Reverse() Gpx {
 	gpx := *p_gpx
 
-	slices.Reverse(gpx.Trk)
-	for _, trk := range gpx.Trk {
+	slices.Reverse(gpx.Trks)
+	for _, trk := range gpx.Trks {
 		trk.Reverse()
 	}
 
@@ -78,7 +98,7 @@ func (p_gpx *Gpx) Reverse() Gpx {
 }
 
 func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
-	gpx.Wpt = append(gpx.Wpt, wpt)
+	gpx.Wpts = append(gpx.Wpts, wpt)
 	return *gpx
 }
 
@@ -87,66 +107,66 @@ func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
 // Split Trk[trkId] containing trkptId into two trk 0:trptkId and trkptId:end
 func (gpx Gpx) Split(trkId, trksegId, trkptId int) Gpx {
 	// filterBeforeTrkpt returns Trk keeping everything BEFORE TrkptId (excluded)
-	// return gpx.Trk[trkId].Trkseg[:trkseg+1] where Trkseg[trkSeg] is filter on Trkpt[:trkptEnd]
+	// return gpx.Trks[trkId].Trksegs[:trkseg+1] where Trkseg[trkSeg] is filter on Trkpt[:trkptEnd]
 	filterBeforeTrkpt := func(gpx Gpx, trkId, trksegId, trkptId int, name string) Trk {
-		trk := gpx.Trk[trkId]
-		trksegs_bef := trk.Trkseg[:trksegId]
-		trkseg_last := Trkseg{trk.Trkseg[trksegId].Trkpt[:trkptId]}
+		trk := gpx.Trks[trkId]
+		trksegs_bef := trk.Trksegs[:trksegId]
+		trkseg_last := Trkseg{trk.Trksegs[trksegId].Trkpts[:trkptId]}
 
 		// Create result Trk
 		out := Trk{Name: name}
 		if len(trksegs_bef) > 0 { // TODO: check
 			// if trksegId > 0 { // if non-empty
-			out.Trkseg = trksegs_bef
+			out.Trksegs = trksegs_bef
 		}
-		if len(trkseg_last.Trkpt) > 0 { // TODO: check
+		if len(trkseg_last.Trkpts) > 0 { // TODO: check
 			// if trkptId > 0 { // if non-empty
-			// out.Trkseg = slices.Concat(out.Trkseg, trksegs_aft)
-			out.Trkseg = append(out.Trkseg, trkseg_last)
+			// out.Trksegs = slices.Concat(out.Trksegs, trksegs_aft)
+			out.Trksegs = append(out.Trksegs, trkseg_last)
 		}
 
 		return out
 	}
 
 	// filterAfterTrkpt returns Trk keeping everything AFTER TrkptId (excluded)
-	// return gpx.Trk[trkId].Trkseg[trkseg:] where Trkseg[0] is filter on Trkpt[trkptId:]
+	// return gpx.Trks[trkId].Trksegs[trkseg:] where Trkseg[0] is filter on Trkpt[trkptId:]
 	filterAfterTrkpt := func(gpx Gpx, trkId, trksegId, trkptId int, name string) Trk {
 		// OTHER SYNTAX
 		// ==============
 		// // Output everything after trksegId
 		// out := Trk{
-		// 	Trkseg: gpx.Trk[trkId].Trkseg[trksegId:],
+		// 	Trkseg: gpx.Trks[trkId].Trksegs[trksegId:],
 		// 	Name:   name}
 		// // Update first trkseg to filter everything after trkptId
-		// out.Trkseg[0] = Trkseg{out.Trkseg[0].Trkpt[trkptId:]}
+		// out.Trksegs[0] = Trkseg{out.Trksegs[0].Trkpts[trkptId:]}
 		// ==============
 
-		trk := gpx.Trk[trkId]
-		trksegs_after := trk.Trkseg[trksegId:]
-		trkseg_first := Trkseg{trk.Trkseg[trksegId].Trkpt[trkptId:]}
+		trk := gpx.Trks[trkId]
+		trksegs_after := trk.Trksegs[trksegId:]
+		trkseg_first := Trkseg{trk.Trksegs[trksegId].Trkpts[trkptId:]}
 
 		// Output everything after trksegId
 		out := Trk{
-			Trkseg: trksegs_after,
-			Name:   name}
+			Trksegs: trksegs_after,
+			Name:    name}
 		// Update first trkseg to filter everything after trkptId
-		out.Trkseg[0] = trkseg_first
+		out.Trksegs[0] = trkseg_first
 
 		return out
 	}
 
-	bef := filterBeforeTrkpt(gpx, trkId, trksegId, trkptId, gpx.Trk[trkId].Name)
-	aft := filterAfterTrkpt(gpx, trkId, trksegId, trkptId, *gpx.Trk[trkId].Trkseg[trksegId].Trkpt[trkptId].Name)
+	bef := filterBeforeTrkpt(gpx, trkId, trksegId, trkptId, gpx.Trks[trkId].Name)
+	aft := filterAfterTrkpt(gpx, trkId, trksegId, trkptId, *gpx.Trks[trkId].Trksegs[trksegId].Trkpts[trkptId].Name)
 
-	// Update gpx.Trk value
-	newTrk := slices.Clone(gpx.Trk) // prevent unwanted update on gpx argument
+	// Update gpx.Trks value
+	newTrk := slices.Clone(gpx.Trks) // prevent unwanted update on gpx argument
 	newTrk = slices.Delete(newTrk, trkId, trkId+1)
 	newTrk = slices.Insert(newTrk, trkId, aft) // NOTE: poor readability inserting aft, then bef...
-	if len(bef.Trkseg) > 0 {
+	if len(bef.Trksegs) > 0 {
 		newTrk = slices.Insert(newTrk, trkId, bef)
 	}
 
-	gpx.Trk = newTrk
+	gpx.Trks = newTrk
 	return gpx // newGpx
 }
 
@@ -154,9 +174,9 @@ func (gpx Gpx) SplitAtName(name string) Gpx {
 	found := false
 
 out:
-	for i, trk := range gpx.Trk {
-		for j, trkseg := range trk.Trkseg {
-			for k, trkpt := range trkseg.Trkpt {
+	for i, trk := range gpx.Trks {
+		for j, trkseg := range trk.Trksegs {
+			for k, trkpt := range trkseg.Trkpts {
 				if trkpt.Name != nil && *trkpt.Name == name {
 					found = true
 
@@ -179,8 +199,8 @@ out:
 
 // Merge Trk[trkId2] into Trk[trkId1]
 func (gpx *Gpx) Merge(trkId1, trkId2 int) Gpx {
-	gpx.Trk[trkId1].Trkseg = slices.Concat(gpx.Trk[trkId1].Trkseg, gpx.Trk[trkId2].Trkseg)
-	gpx.Trk = slices.Delete(gpx.Trk, trkId2, trkId2+1)
+	gpx.Trks[trkId1].Trksegs = slices.Concat(gpx.Trks[trkId1].Trksegs, gpx.Trks[trkId2].Trksegs)
+	gpx.Trks = slices.Delete(gpx.Trks, trkId2, trkId2+1)
 	return *gpx
 }
 func (gpx Gpx) Save(filepath string) {
@@ -208,7 +228,6 @@ func (gpx Gpx) Save(filepath string) {
 	encoder.Indent("", "\t")
 
 	// Write gpx
-	gpx.Filepath = ""
 	if err = encoder.Encode(gpx); err != nil {
 		fmt.Printf("error: %v\n", err)
 		return
@@ -217,9 +236,9 @@ func (gpx Gpx) Save(filepath string) {
 
 func (gpx *Gpx) AddColor() *Gpx {
 	colors := []string{"8e44ad", "ff5733"}
-	for i, _ := range gpx.Trk {
-		gpx.Trk[i].Extensions.Line.Xmlns = "http://www.topografix.com/GPX/gpx_style/0/2"
-		gpx.Trk[i].Extensions.Line.Color = colors[i%len(colors)]
+	for i, _ := range gpx.Trks {
+		gpx.Trks[i].Extensions.Line.Xmlns = "http://www.topografix.com/GPX/gpx_style/0/2"
+		gpx.Trks[i].Extensions.Line.Color = colors[i%len(colors)]
 	}
 	return gpx
 }
@@ -249,15 +268,13 @@ func (tn Trkname) IsTrk() bool {
 }
 
 func (gpx Gpx) Ls(all bool) TrknameList {
-	gpx.ParseFile(gpx.Filepath)
-
 	var out TrknameList
-	for i, trk := range gpx.Trk {
+	for i, trk := range gpx.Trks {
 		out = append(out, Trkname{Id: i, Name: trk.Name})
 
 		if all {
-			for j, trkseg := range trk.Trkseg {
-				for k, trkpt := range trkseg.Trkpt {
+			for j, trkseg := range trk.Trksegs {
+				for k, trkpt := range trkseg.Trkpts {
 					if trkpt.Name != nil {
 						out = append(out,
 							Trkname{

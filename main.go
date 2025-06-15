@@ -21,12 +21,12 @@ func TestNPoints() {
 	gpx := Gpx{}
 	// gpx.ParseFile("core/test/data/split.gpx")
 	gpx.ParseFile("core/test/data/npoints.gpx")
-	gpxSummary := gpx.GetInfo(true)
+	gpxSummary := gpx.GetInfo()
 
 	var countingTrkpt = func(trk Trk) int {
 		n := 0
-		for _, trkseg := range trk.Trkseg {
-			n += len(trkseg.Trkpt)
+		for _, trkseg := range trk.Trksegs {
+			n += len(trkseg.Trkpts)
 		}
 		return n
 	}
@@ -43,7 +43,7 @@ func TestNPoints() {
 		return trkSummary.Track.NPoints
 	}
 
-	want := countingTrkpt(gpx.Trk[0])
+	want := countingTrkpt(gpx.Trks[0])
 	have := sumTrkNPoints(gpxSummary[0])
 	have2 := trackNPoints(gpxSummary[0])
 	if have != want {
@@ -63,7 +63,7 @@ func TestNPoints() {
 func test() {
 	gpx := Gpx{}
 	gpx.ParseFile("core/test/data/npoints.gpx")
-	trkSummary := gpx.Trk[0].GetInfo(0, 4.5, true)
+	trkSummary := gpx.Trks[0].GetInfo(0, 4.5)
 	fmt.Printf("%+v\n", trkSummary)
 	fmt.Println(prettyprint(trkSummary))
 	// fmt.Println(trkSummary.ToString(PrintArgs{PrintFrom: true}))

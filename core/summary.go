@@ -6,23 +6,14 @@ import (
 	sym "github.com/jple/text-symbol"
 )
 
-type Pos struct {
-	Lat float64
-	Lon float64
-	Ele float64
-
-	Name string
-}
-
 // Section summaries either
 // - the whole trk
 // - a section between a trkpt name and the next one (no matter trkseg)
 type TrkptsSummary struct {
 
 	// TODO: Dupplicates on TrkSummary
-	TrkId       int
-	TrkName     string
-	VitessePlat float64
+	TrkId   int
+	TrkName string
 
 	// TrkptName
 	From         string
@@ -30,6 +21,7 @@ type TrkptsSummary struct {
 	FromTrkptId  *int // unused !
 	To           string
 
+	VitessePlat float64
 	// Cumulative values between "From" and "To"
 	NPoints        int
 	Distance       float64

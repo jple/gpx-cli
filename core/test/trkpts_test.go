@@ -9,7 +9,7 @@ import (
 func TestTrkpts(t *testing.T) {
 	gpx := Gpx{}
 	gpx.ParseFile("data/npoints.gpx")
-	trk := gpx.Trk[0]
+	trk := gpx.Trks[0]
 	trkpts := trk.GetTrkpts()
 	have := len(trkpts)
 	want := 9
@@ -21,7 +21,7 @@ func TestTrkpts(t *testing.T) {
 func TestListTrkpts(t *testing.T) {
 	gpx := Gpx{}
 	gpx.ParseFile("data/npoints.gpx")
-	sections := gpx.Trk[0].GetListTrkpts()
+	sections := gpx.Trks[0].GetListTrkpts()
 	want := 3
 	have := len(sections)
 	if want != have {

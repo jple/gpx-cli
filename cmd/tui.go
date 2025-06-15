@@ -28,7 +28,7 @@ func CreateTuiCmd() *cobra.Command {
 			}
 
 			var m tui.GpxTui = tui.GpxTui{
-				GpxSummary: gpx.GetInfo(true),
+				GpxSummary: gpx.GetInfo(),
 				Gpx:        gpx,
 			}
 			p := tea.NewProgram(m)

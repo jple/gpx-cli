@@ -2,28 +2,55 @@ package core
 
 import "math"
 
-/*
-NOTE/ADR: we created functions instead of type Trkpts with methods
-because they are used both in Trk[].Trkseg[].Trkpt and SectionSummary (in TrkSummary)
-*/
+type Pt struct {
+	Lat float64 `xml:"lat,attr"`
+	Lon float64 `xml:"lon,attr"`
+	Ele float64 `xml:"ele,omitempty"`
+}
 
+type Wpt struct {
+	Pt
+
+	Name *string `xml:"name"`
+	Type *string `xml:"type"`
+	Cmt  *string `xml:"cmt"`
+}
+
+type Trkpt struct {
+	Wpt
+
+	Extensions *struct {
+		TrkExtension struct {
+			Visugpx string `xml:"visugpx,attr,omitempty"`
+			Node    int    `xml:"node,omitempty"`
+		} `xml:"TrkExtension,omitempty"`
+	} `xml:"extensions,omitempty"`
+}
 type Trkpts []Trkpt
 type ListTrkpts []Trkpts
 
+// TODO: create generics for AddName
+func (trkpt *Trkpt) AddName(name string) {
+	trkpt.Name = &name
+}
+func (trkpt *Trkpt) AddElevation(ele float64) {
+	trkpt.Ele = ele
+}
+
 // Returns a []float64 containing a specific calculation on each trkpt
-func (trkpts Trkpts) Map(calculation func(posPrev, pos Pos) float64) []float64 {
+func (trkpts Trkpts) Map(calculation func(posPrev, pos Pt) float64) []float64 {
 	var res []float64
 	if len(trkpts) == 0 {
 		return res
 	}
 
-	posPrev := Pos{
+	posPrev := Pt{
 		Lon: trkpts[0].Lon,
 		Lat: trkpts[0].Lat,
 		Ele: trkpts[0].Ele,
 	}
 	for _, trkpt := range trkpts {
-		pos := Pos{
+		pos := Pt{
 			Lon: trkpt.Lon,
 			Lat: trkpt.Lat,
 			Ele: trkpt.Ele,
@@ -35,15 +62,15 @@ func (trkpts Trkpts) Map(calculation func(posPrev, pos Pos) float64) []float64 {
 }
 
 // Same as Map, but posPrev is replaced by p0
-func (trkpts Trkpts) Map0(calculation func(unusedPos, pos Pos) float64) []float64 {
+func (trkpts Trkpts) Map0(calculation func(unusedPos, pos Pt) float64) []float64 {
 	var res []float64
-	pos0 := Pos{
+	pos0 := Pt{
 		Lon: trkpts[0].Lon,
 		Lat: trkpts[0].Lat,
 		Ele: trkpts[0].Ele,
 	}
 	for _, trkpt := range trkpts {
-		pos := Pos{
+		pos := Pt{
 			Lon: trkpt.Lon,
 			Lat: trkpt.Lat,
 			Ele: trkpt.Ele,
@@ -55,7 +82,7 @@ func (trkpts Trkpts) Map0(calculation func(unusedPos, pos Pos) float64) []float6
 
 // Returns all trkpt Ele
 func (trkpts Trkpts) GetElevations() []float64 {
-	getCurrentEle := func(posPrev, pos Pos) float64 {
+	getCurrentEle := func(posPrev, pos Pt) float64 {
 		return pos.Ele
 	}
 	return trkpts.Map(getCurrentEle)

@@ -44,14 +44,14 @@ func CreateInfoCmd() *cobra.Command {
 			trkid := viper.GetInt("trk-id")
 			if trkid == -1 {
 				printArgs.PrintFrom = bool(detail)
-				gpx.GetInfo(true).ToString(printArgs)
+				gpx.GetInfo().ToString(printArgs)
 			} else {
 				printArgs.PrintFrom = true
 
 				fmt.Printf("[%v] ", trkid)
 				gpx.
-					Trk[trkid].
-					GetInfo(trkid, gpx.Extensions.Vitesse, true).
+					Trks[trkid].
+					GetInfo(trkid, gpx.Extensions.Vitesse).
 					ToString(printArgs)
 			}
 

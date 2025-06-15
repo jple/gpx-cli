@@ -25,7 +25,8 @@ func CreateLsCmd() *cobra.Command {
 			bindFlags(cmd, flagsConf)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			Gpx{Filepath: viper.GetString("filename")}.
+			gpx := Gpx{}
+			gpx.ParseFile(viper.GetString("filename")).
 				Ls(viper.GetBool("all")).
 				Print(viper.GetBool("all"))
 		},

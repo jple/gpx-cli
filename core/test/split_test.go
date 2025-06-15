@@ -9,7 +9,7 @@ import (
 func TestSplit(t *testing.T) {
 	gpx := Gpx{}
 	gpx.ParseFile("data/split.gpx")
-	// gpx.GetInfo(true).ToString(PrintArgs{})
+	// gpx.GetInfo().ToString(PrintArgs{})
 
 	gpx1 := gpx.SplitAtName("first")
 	gpx2 := gpx.SplitAtName("between")
@@ -25,6 +25,6 @@ func TestSplit(t *testing.T) {
 	satisfy("len(gpx2.Trk)", len(gpx2.Trk), len(gpx.Trk)+1)
 	satisfy("len(gpx3.Trk)", len(gpx3.Trk), len(gpx.Trk)+1)
 
-	satisfy("len(gpx2.Trk[0].Trkseg)", len(gpx2.Trk[0].Trkseg), 1)
-	satisfy("len(gpx3.Trk[0].Trkseg)", len(gpx3.Trk[0].Trkseg), len(gpx.Trk[0].Trkseg)-1)
+	satisfy("len(gpx2.Trks[0].Trksegs)", len(gpx2.Trks[0].Trksegs), 1)
+	satisfy("len(gpx3.Trks[0].Trksegs)", len(gpx3.Trks[0].Trksegs), len(gpx.Trks[0].Trksegs)-1)
 }

@@ -55,10 +55,10 @@ func GetElevation(param QueryParam) []byte {
 const AltimetrieApiUrl = "https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json"
 
 func main() {
-	gpx := Gpx{Filepath: "src/my.gpx"}
+	gpx := Gpx{}
 	gpx.ParseFile(gpx.Filepath)
 
-	lons, lats := gpx.Trk[0].GetLonLat()
+	lons, lats := gpx.Trks[0].GetLonLat()
 	fmt.Println(len(lons))
 	fmt.Println(len(lats))
 

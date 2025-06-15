@@ -22,8 +22,8 @@ representing 2 GPS coordinates`,
 			lon2, _ := strconv.ParseFloat(args[3], 64)
 
 			d := Dist(
-				Pos{Lat: lat1, Lon: lon1},
-				Pos{Lat: lat2, Lon: lon2},
+				Pt{Lat: lat1, Lon: lon1},
+				Pt{Lat: lat2, Lon: lon2},
 			)
 
 			fmt.Printf("Distance: %.1f km\n", d)

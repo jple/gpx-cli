@@ -4,14 +4,14 @@ import (
 	"slices"
 )
 
-// Trkpts is to contain Trkpt between two Trkpt.Name
+// In Trk perspective, Trkpts is to contain Trkpt between two Trkpt.Name
 // ie. from a the first Trkpt or a Trkpt.Name
 // up to the last Trkpt without Trkpt.Name
 
 func (trk Trk) GetTrkpts() Trkpts {
 	trkpts := Trkpts{}
-	for _, trkseg := range trk.Trkseg {
-		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	for _, trkseg := range trk.Trksegs {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpts)
 	}
 	return trkpts
 }
@@ -41,7 +41,7 @@ func (trk Trk) GetListTrkptsPerName() ListTrkpts {
 }
 
 // NOTE: detail is not used. Should be removed ?
-func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
+func (trk Trk) GetInfo(trkid int, vitessePlat float64) TrkSummary {
 	listTrkpts := trk.GetListTrkpts()
 	trkSummary := TrkSummary{Id: trkid, Name: trk.Name}
 
@@ -72,9 +72,7 @@ func (trk Trk) GetInfo(trkid int, vitessePlat float64, detail bool) TrkSummary {
 		}
 
 		// ============= Update trkSummary.ListTrkptsSummary ============================
-		if detail {
-			trkSummary.ListTrkptsSummary = append(trkSummary.ListTrkptsSummary, trkptsSummary)
-		}
+		trkSummary.ListTrkptsSummary = append(trkSummary.ListTrkptsSummary, trkptsSummary)
 
 		// ============= Update trkSummary.Track ============================
 		sectionDuration, _, _ := CalcDuration(trkptsSummary.DistanceEffort, vitessePlat)

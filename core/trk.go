@@ -6,13 +6,56 @@ import (
 	"strconv"
 )
 
+type Trkseg struct {
+	Trkpts Trkpts `xml:"trkpt"`
+}
+type Trk struct {
+	Name    string   `xml:"name,omitempty"`
+	Trksegs []Trkseg `xml:"trkseg"`
+
+	// Should be optional
+	Extensions struct {
+		DenivPos float64 `xml:"DenivPos,omitempty"`
+		DenivNeg float64 `xml:"DenivNeg,omitempty"`
+		Distance float64 `xml:"Distance,omitempty"`
+		// Conversion du denivele positif/negatif en km effort
+		DenivPosEffort float64 `xml:"DenivPosEffort,omitempty"`
+		DenivNegEffort float64 `xml:"DenivNegEffort,omitempty"`
+
+		// Distance équivalente sur plat en incluant le dénivelé 
+		DistanceEffort float64 `xml:"DistanceEffort,omitempty"`
+
+		// Estimation de temps de marche
+		Duration     float64 `xml:"Duration,omitempty"`
+		DurationHour int8    `xml:"DurationHour,omitempty"`
+		DurationMin  int8    `xml:"DurationMin,omitempty"`
+
+		Line struct {
+			Xmlns string `xml:"xmlns,attr,omitempty"`
+
+			Color      string `xml:"color,omitempty"`
+			Opacity    string `xml:"opacity,omitempty"`
+			Weight     string `xml:"Weight,omitempty"`
+			Width      int    `xml:"width,omitempty"`
+			Linecap    string `xml:"linecap,omitempty"`
+			Linejoin   string `xml:"linejoin,omitempty"`
+			Dasharray  *int   `xml:"dasharray,omitempty"`
+			Dashoffset int    `xml:"dashoffset,omitempty"`
+
+			Extensions *struct {
+				Jonction int `xml:"jonction,omitempty"`
+			} `xml:"extensions,omitempty"`
+		} `xml:"line,omitzero"`
+	} `xml:"extensions,omitempty"`
+}
+
 func (trk Trk) GetLonLat() ([]string, []string) {
 	var lons, lats []string
 
-	// trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+	// trkpts := slices.Concat(trk.Trksegs)[0].Trkpts
 	var trkpts []Trkpt
-	for _, trkseg := range trk.Trkseg {
-		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	for _, trkseg := range trk.Trksegs {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpts)
 	}
 	for _, trkpt := range trkpts {
 		lons = append(lons, strconv.FormatFloat(trkpt.Lon, 'f', -1, 64))
@@ -25,9 +68,9 @@ func (trk Trk) GetLonLat() ([]string, []string) {
 func (p_trk *Trk) Reverse() Trk {
 	trk := *p_trk
 
-	slices.Reverse(trk.Trkseg)
-	for _, trkseg := range trk.Trkseg {
-		slices.Reverse(trkseg.Trkpt)
+	slices.Reverse(trk.Trksegs)
+	for _, trkseg := range trk.Trksegs {
+		slices.Reverse(trkseg.Trkpts)
 	}
 	return trk
 }
@@ -44,13 +87,13 @@ func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 		fmt.Println("i must be < j")
 		return 0.0
 	}
-	// var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	// var trkpts []Trkpt = slices.Concat(trk.Trksegs)[0].Trkpts
 	var trkpts []Trkpt
-	for _, trkseg := range trk.Trkseg {
-		trkpts = slices.Concat(trkpts, trkseg.Trkpt)
+	for _, trkseg := range trk.Trksegs {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpts)
 	}
 	var dist float64
-	posPrev := Pos{
+	posPrev := Pt{
 		Lon: trkpts[i].Lon,
 		Lat: trkpts[i].Lat,
 		Ele: trkpts[i].Ele,
@@ -63,7 +106,7 @@ func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 			break
 		}
 
-		pos := Pos{
+		pos := Pt{
 			Lon: trkpt.Lon,
 			Lat: trkpt.Lat,
 			Ele: trkpt.Ele,
@@ -81,21 +124,6 @@ func (trk Trk) GetCumulatedDistances() []float64 {
 	return trkpts.GetCumulatedDistances()
 }
 
-// var cumDistance []float64
-// p0 := Pos{
-// 	Lat: trkpts[0].Lat,
-// 	Lon: trkpts[0].Lon,
-// 	Ele: trkpts[0].Ele}
-// for _, trkpt := range trkpts {
-// 	p := Pos{
-// 		Lat: trkpt.Lat,
-// 		Lon: trkpt.Lon,
-// 		Ele: trkpt.Ele}
-// 	cumDistance = append(cumDistance, Dist(p0, p))
-// }
-// return cumDistance
-// }
-
 func (trk Trk) GetRollElevations(winSize int, calc RollCalc) []float64 {
 	return Rolling(trk.GetElevations(), winSize, calc)
 }
@@ -106,47 +134,3 @@ func (trk Trk) GetRollDistances(winSize int, calc RollCalc) []float64 {
 func (trk *Trk) AddName(name string) {
 	trk.Name = name
 }
-
-// TODO: create generics for AddName
-func (trkpt *Trkpt) AddName(name string) {
-	trkpt.Name = &name
-}
-func (trkpt *Trkpt) AddElevation(ele float64) {
-	trkpt.Ele = ele
-}
-
-// func (trk Trk) Plot(filename string) {
-// 	var elevs []float64 = trk.GetElevations()
-// 	var rollmean []float64 = Rolling(elevs, 5, Mean)
-
-// 	var elevsSummary []float64
-// 	for _, v := range VariationSummary(rollmean) {
-// 		elevsSummary = append(elevsSummary, v.Value)
-// 	}
-
-// 	var xys [][2][]float64
-// 	var xs, ys []float64
-// 	for i, v := range rollmean {
-// 		ys = append(ys, v)
-// 		xs = append(xs, float64(i))
-// 	}
-// 	xys = append(xys, [2][]float64{xs, ys})
-// 	xs, ys = nil, nil
-// 	for _, v := range VariationSummary(rollmean) {
-// 		ys = append(ys, v.Value)
-// 		xs = append(xs, float64(v.Index))
-// 	}
-// 	xys = append(xys, [2][]float64{xs, ys})
-
-// 	// ==============
-
-// 	// ys := [][]float64{elevsSummary, rollmean}
-// 	// names := []string{"Estimation", "rollmean"}
-// 	names := []string{"rollmean", "estimation"}
-// 	colors := []color.RGBA{
-// 		color.RGBA{R: 255, A: 255},
-// 		color.RGBA{B: 255, A: 255},
-// 	}
-// 	// Plot(xys, names, colors)
-
-// }
