@@ -95,14 +95,14 @@ func (s TrkptsSummary) ToString(args PrintArgs) string {
 			str += fmt.Sprintf("      --> %v", s.To)
 		}
 
-		str += fmt.Sprintf("\t(%v %vh%02d)\n",
-			sym.StopWatch(), s.DurationHour, s.DurationMin)
-		// str += fmt.Sprintf("\t(%v pts, %v %.0fkm, %v +%.0fm/%.0fm | %v %.0fkm_e, %v %vh%02d)\n",
-		// 	s.NPoints,
-		// 	sym.ArrowIconLeftRight(), s.Distance,
-		// 	sym.UpAndDown(), s.DenivPos, s.DenivNeg,
-		// 	sym.ArrowWaveRight(), s.DistanceEffort,
+		// str += fmt.Sprintf("\t(%v %vh%02d)\n",
 		// 	sym.StopWatch(), s.DurationHour, s.DurationMin)
+		str += fmt.Sprintf("\t(%v pts, %v %.0fkm, %v +%.0fm/%.0fm | %v %.0fkm_e, %v %vh%02d)\n",
+			s.NPoints,
+			sym.ArrowIconLeftRight(), s.Distance,
+			sym.UpAndDown(), s.DenivPos, s.DenivNeg,
+			sym.ArrowWaveRight(), s.DistanceEffort,
+			sym.StopWatch(), s.DurationHour, s.DurationMin)
 
 	}
 

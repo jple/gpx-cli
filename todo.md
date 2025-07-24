@@ -1,14 +1,16 @@
 # Todo
 
+
 - fix tui
     * gpx.Split: remove <trkseg> if empty
 
 - create function
     * check distance between trk[t].trkpt[-1] and trk[t+1].trkp[0]
         + try reverse (4 cases). If better, keep it
-
     * info -a : shows names in trkpt
+    * info with rolling mean option
     * merge ls / info
+    * merge several gpx into 1 with several trk
 
 - use rolling calcultion in info, etc. (improve elevation estimation)
 

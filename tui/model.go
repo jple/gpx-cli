@@ -104,8 +104,8 @@ func (m GpxTui) View() string {
 
 		for _, sectionInfo := range trkSummary.ListTrkptsSummary {
 			if m.cursor == k {
-				// str += ">>> "
-				str += fmt.Sprintf(">>> **c:%v** ", m.cursor)
+				str += ">>> "
+				// str += fmt.Sprintf(">>> **c:%v** ", m.cursor) // DEBUG
 			}
 			str += sectionInfo.ToString(core.PrintArgs{PrintFrom: true, AsciiFormat: true})
 			k += 1
@@ -113,6 +113,7 @@ func (m GpxTui) View() string {
 	}
 
 	str += "Press 'ctrl-c' or 'q' to exit..."
+
 	return str
 	// }
 
