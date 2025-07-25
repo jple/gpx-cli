@@ -6,7 +6,7 @@ import (
 	sym "github.com/jple/text-symbol"
 )
 
-// Section summaries either
+// TkrptsSummary summaries either
 // - the whole trk
 // - a section between a trkpt name and the next one (no matter trkseg)
 type TrkptsSummary struct {
@@ -93,6 +93,7 @@ func (s TrkptsSummary) ToString(args PrintArgs) string {
 			str += fmt.Sprintf("      %v --> %v", sym.Green(s.From), sym.Green(s.To))
 		} else {
 			str += fmt.Sprintf("      --> %v", s.To)
+			// str += fmt.Sprintf("      %v --> %v", s.From, s.To)
 		}
 
 		// str += fmt.Sprintf("\t(%v %vh%02d)\n",

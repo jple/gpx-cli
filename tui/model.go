@@ -104,10 +104,11 @@ func (m GpxTui) View() string {
 
 		for _, sectionInfo := range trkSummary.ListTrkptsSummary {
 			if m.cursor == k {
-				str += ">>> "
-				// str += fmt.Sprintf(">>> **c:%v** ", m.cursor) // DEBUG
+				// NOTE: background never applies to tab to terminal behaviour
+				str += sym.BgBrightGreen(sectionInfo.ToString(core.PrintArgs{PrintFrom: true, AsciiFormat: true}))
+			} else {
+				str += sectionInfo.ToString(core.PrintArgs{PrintFrom: true, AsciiFormat: true})
 			}
-			str += sectionInfo.ToString(core.PrintArgs{PrintFrom: true, AsciiFormat: true})
 			k += 1
 		}
 	}
