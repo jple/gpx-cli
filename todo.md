@@ -1,8 +1,15 @@
 # Todo
 
+- features
+    * merge several gpx into 1 with several trk
+    * calculation info between two nammed point
+        * get intersection between trk
+        * ...
+    * get closest actual track using OSRM match function
 
-- fix tui
-    * gpx.Split: remove <trkseg> if empty
+- fix 
+    * tui: gpx.Split: remove <trkseg> if empty
+    * info -d: when last trkpt is named, there is still a `xxx --> end` entry
 
 - create function
     * check distance between trk[t].trkpt[-1] and trk[t+1].trkp[0]
@@ -10,7 +17,6 @@
     * info -a : shows names in trkpt
     * info with rolling mean option
     * merge ls / info
-    * merge several gpx into 1 with several trk
 
 - use rolling calcultion in info, etc. (improve elevation estimation)
 
