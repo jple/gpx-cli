@@ -16,7 +16,7 @@ func DegToRad(deg float64) float64 {
 	return 2 * math.Pi / 360 * deg
 }
 
-func Dist(p1 Pos, p2 Pos) float64 {
+func Dist(p1 Pt, p2 Pt) float64 {
 	// output: km
 	var R float64 = 6371
 
@@ -32,7 +32,7 @@ func Dist(p1 Pos, p2 Pos) float64 {
 
 }
 
-func DiffElevation(p1 Pos, p2 Pos) float64 {
+func DiffElevation(p1 Pt, p2 Pt) float64 {
 	return p2.Ele - p1.Ele
 }
 

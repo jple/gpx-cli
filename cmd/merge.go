@@ -34,13 +34,13 @@ func CreateMergeCmd() *cobra.Command {
 			gpx := Gpx{}
 			gpx.ParseFile(viper.GetString("filename"))
 
-			if trkId == len(gpx.Trk)-1 {
+			if trkId == len(gpx.Trks)-1 {
 				fmt.Printf("The chosen trkId (%v) is the last one\n", trkId)
 				fmt.Println("Nothing to do")
 				return
 			}
-			if trkId >= len(gpx.Trk)-1 {
-				fmt.Printf("The chosen trkId (%v) is greater than the number of trk ()\n", trkId, len(gpx.Trk))
+			if trkId >= len(gpx.Trks)-1 {
+				fmt.Printf("The chosen trkId (%v) is greater than the number of trk ()\n", trkId, len(gpx.Trks))
 				fmt.Println("Nothing to do")
 				return
 			}

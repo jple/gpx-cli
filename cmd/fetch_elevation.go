@@ -21,14 +21,14 @@ func CreateFetchElevationCmd() *cobra.Command {
 			gpx.ParseFile(viper.GetString("filename"))
 
 			var pts ign.Points
-			// for _, trk := range gpx.Trk {
-			for i, trk := range gpx.Trk {
-				// for _, trkseg := range trk.Trkseg {
-				for j, trkseg := range trk.Trkseg {
+			// for _, trk := range gpx.Trks {
+			for i, trk := range gpx.Trks {
+				// for _, trkseg := range trk.Trksegs {
+				for j, trkseg := range trk.Trksegs {
 					// TODO: asynchronous fetch to prevent 2 loops
 					c := 0
 					chunkSize := 2000
-					for trkchunk := range slices.Chunk(trkseg.Trkpt, chunkSize) {
+					for trkchunk := range slices.Chunk(trkseg.Trkpts, chunkSize) {
 						pts = nil
 						for _, trkpt := range trkchunk {
 							pts = append(pts, ign.Point{Lat: trkpt.Lat, Lon: trkpt.Lon})
@@ -52,7 +52,7 @@ func CreateFetchElevationCmd() *cobra.Command {
 						}
 
 						for k, _ := range trkchunk {
-							gpx.Trk[i].Trkseg[j].Trkpt[c*chunkSize+k].Ele = elevations[k]
+							gpx.Trks[i].Trksegs[j].Trkpts[c*chunkSize+k].Ele = elevations[k]
 						}
 						c++
 					}

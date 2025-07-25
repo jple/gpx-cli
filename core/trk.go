@@ -2,97 +2,61 @@ package core
 
 import (
 	"fmt"
-	"math"
 	"slices"
 	"strconv"
 )
 
-func (trk Trk) GetInfo(vitessePlat float64, detail bool) TrkSummary {
-	var distance, denivPos, denivNeg float64 = 0, 0, 0
+type Trkseg struct {
+	Trkpts Trkpts `xml:"trkpt"`
+}
+type Trk struct {
+	Name    string   `xml:"name,omitempty"`
+	Trksegs []Trkseg `xml:"trkseg"`
 
-	var p_prev Pos
-	var from string
-	var trkName string = trk.Name
+	// Should be optional
+	Extensions struct {
+		DenivPos float64 `xml:"DenivPos,omitempty"`
+		DenivNeg float64 `xml:"DenivNeg,omitempty"`
+		Distance float64 `xml:"Distance,omitempty"`
+		// Conversion du denivele positif/negatif en km effort
+		DenivPosEffort float64 `xml:"DenivPosEffort,omitempty"`
+		DenivNegEffort float64 `xml:"DenivNegEffort,omitempty"`
 
-	n := 0
-	var trkSummary TrkSummary
-	trkSummary.Name = trk.Name
+		// Distance équivalente sur plat en incluant le dénivelé 
+		DistanceEffort float64 `xml:"DistanceEffort,omitempty"`
 
-	trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
-	for i, trkpt := range trkpts {
-		p := Pos{
-			Lat: trkpt.Lat,
-			Lon: trkpt.Lon,
-			Ele: trkpt.Ele,
-		}
+		// Estimation de temps de marche
+		Duration     float64 `xml:"Duration,omitempty"`
+		DurationHour int8    `xml:"DurationHour,omitempty"`
+		DurationMin  int8    `xml:"DurationMin,omitempty"`
 
-		if i == 0 {
-			p_prev = p
-			if detail {
-				from = "start"
-				if trkpt.Name != nil {
-					from = *trkpt.Name
-				}
-			} else {
-				from = trk.Name
-			}
-			continue
-		}
+		Line struct {
+			Xmlns string `xml:"xmlns,attr,omitempty"`
 
-		eleDiff := DiffElevation(p_prev, p)
-		denivPos += math.Max(eleDiff, 0)
-		denivNeg += math.Min(eleDiff, 0)
+			Color      string `xml:"color,omitempty"`
+			Opacity    string `xml:"opacity,omitempty"`
+			Weight     string `xml:"Weight,omitempty"`
+			Width      int    `xml:"width,omitempty"`
+			Linecap    string `xml:"linecap,omitempty"`
+			Linejoin   string `xml:"linejoin,omitempty"`
+			Dasharray  *int   `xml:"dasharray,omitempty"`
+			Dashoffset int    `xml:"dashoffset,omitempty"`
 
-		distance += Dist(p_prev, p)
-		n += 1
-
-		var x SectionInfo
-		if (detail && trkpt.Name != nil) || (i == len(trkpts)-1) {
-			x = SectionInfo{
-				TrkName:        trkName,
-				From:           from,
-				NPoints:        n,
-				VitessePlat:    vitessePlat,
-				Distance:       distance,
-				DenivPos:       denivPos,
-				DenivNeg:       denivNeg,
-				DistanceEffort: CalcDistanceEffort(distance, denivPos, denivNeg),
-			}
-			_, x.DurationHour, x.DurationMin = CalcDuration(x.DistanceEffort, vitessePlat)
-		}
-
-		if detail && trkpt.Name != nil {
-			x.To = *trkpt.Name
-			from = *trkpt.Name
-
-			distance = 0
-			denivPos = 0
-			denivNeg = 0
-			n = 0
-		}
-
-		if i == len(trkpts)-1 {
-			x.To = "end"
-		}
-
-		if (detail && trkpt.Name != nil) || (i == len(trkpts)-1) {
-			trkSummary.Section = append(trkSummary.Section, x)
-		}
-
-		p_prev = p
-	}
-
-	// trk.Extensions.DenivPos = denivPos
-	// trk.Extensions.DenivNeg = denivNeg
-	// trk.Extensions.Distance = distance
-
-	return trkSummary
+			Extensions *struct {
+				Jonction int `xml:"jonction,omitempty"`
+			} `xml:"extensions,omitempty"`
+		} `xml:"line,omitzero"`
+	} `xml:"extensions,omitempty"`
 }
 
 func (trk Trk) GetLonLat() ([]string, []string) {
 	var lons, lats []string
 
-	trkpts := slices.Concat(trk.Trkseg)[0].Trkpt
+	// trkpts := slices.Concat(trk.Trksegs)[0].Trkpts
+	var trkpts []Trkpt
+	for _, trkseg := range trk.Trksegs {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpts)
+	}
 	for _, trkpt := range trkpts {
 		lons = append(lons, strconv.FormatFloat(trkpt.Lon, 'f', -1, 64))
 		lats = append(lats, strconv.FormatFloat(trkpt.Lat, 'f', -1, 64))
@@ -104,31 +68,32 @@ func (trk Trk) GetLonLat() ([]string, []string) {
 func (p_trk *Trk) Reverse() Trk {
 	trk := *p_trk
 
-	slices.Reverse(trk.Trkseg)
-	for _, trkseg := range trk.Trkseg {
-		slices.Reverse(trkseg.Trkpt)
+	slices.Reverse(trk.Trksegs)
+	for _, trkseg := range trk.Trksegs {
+		slices.Reverse(trkseg.Trkpts)
 	}
 	return trk
 }
 
 func (trk Trk) GetElevations() []float64 {
-	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
-	var elevs []float64
-	for _, trkpt := range trkpts {
-		elevs = append(elevs, trkpt.Ele)
-	}
-	return elevs
+	trkpts := trk.GetTrkpts()
+	return trkpts.GetElevations()
 }
 
 // Calculate cumulated distance between two index of trk
+// TODO/refacto: move into Trkpts
 func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 	if i >= j {
 		fmt.Println("i must be < j")
 		return 0.0
 	}
-	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
+	// var trkpts []Trkpt = slices.Concat(trk.Trksegs)[0].Trkpts
+	var trkpts []Trkpt
+	for _, trkseg := range trk.Trksegs {
+		trkpts = slices.Concat(trkpts, trkseg.Trkpts)
+	}
 	var dist float64
-	posPrev := Pos{
+	posPrev := Pt{
 		Lon: trkpts[i].Lon,
 		Lat: trkpts[i].Lat,
 		Ele: trkpts[i].Ele,
@@ -141,7 +106,7 @@ func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 			break
 		}
 
-		pos := Pos{
+		pos := Pt{
 			Lon: trkpt.Lon,
 			Lat: trkpt.Lat,
 			Ele: trkpt.Ele,
@@ -152,80 +117,20 @@ func (trk Trk) GetDistanceFromTo(i, j int) float64 {
 	return dist
 }
 
-// Caculate cumulated distance for each trkpt
+// Calculate cumulated distance for each trkpt
 // (distance between trkpt[0] and trkpt[i])
-func (trk Trk) GetDistanceEachTrkpts() []float64 {
-	var trkpts []Trkpt = slices.Concat(trk.Trkseg)[0].Trkpt
-	var dists []float64
-	posInit := Pos{
-		Lon: trkpts[0].Lon,
-		Lat: trkpts[0].Lat,
-		Ele: trkpts[0].Ele,
-	}
-	var pos Pos
-	for _, trkpt := range trkpts {
-		pos = Pos{
-			Lon: trkpt.Lon,
-			Lat: trkpt.Lat,
-			Ele: trkpt.Ele,
-		}
-		dists = append(dists,
-			Dist(posInit, pos))
-	}
-	return dists
+func (trk Trk) GetCumulatedDistances() []float64 {
+	trkpts := trk.GetTrkpts()
+	return trkpts.GetCumulatedDistances()
 }
 
 func (trk Trk) GetRollElevations(winSize int, calc RollCalc) []float64 {
 	return Rolling(trk.GetElevations(), winSize, calc)
 }
 func (trk Trk) GetRollDistances(winSize int, calc RollCalc) []float64 {
-	return Rolling(trk.GetDistanceEachTrkpts(), winSize, calc)
+	return Rolling(trk.GetCumulatedDistances(), winSize, calc)
 }
 
 func (trk *Trk) AddName(name string) {
 	trk.Name = name
 }
-
-// TODO: create generics for AddName
-func (trkpt *Trkpt) AddName(name string) {
-	trkpt.Name = &name
-}
-func (trkpt *Trkpt) AddElevation(ele float64) {
-	trkpt.Ele = ele
-}
-
-// func (trk Trk) Plot(filename string) {
-// 	var elevs []float64 = trk.GetElevations()
-// 	var rollmean []float64 = Rolling(elevs, 5, Mean)
-
-// 	var elevsSummary []float64
-// 	for _, v := range VariationSummary(rollmean) {
-// 		elevsSummary = append(elevsSummary, v.Value)
-// 	}
-
-// 	var xys [][2][]float64
-// 	var xs, ys []float64
-// 	for i, v := range rollmean {
-// 		ys = append(ys, v)
-// 		xs = append(xs, float64(i))
-// 	}
-// 	xys = append(xys, [2][]float64{xs, ys})
-// 	xs, ys = nil, nil
-// 	for _, v := range VariationSummary(rollmean) {
-// 		ys = append(ys, v.Value)
-// 		xs = append(xs, float64(v.Index))
-// 	}
-// 	xys = append(xys, [2][]float64{xs, ys})
-
-// 	// ==============
-
-// 	// ys := [][]float64{elevsSummary, rollmean}
-// 	// names := []string{"Estimation", "rollmean"}
-// 	names := []string{"rollmean", "estimation"}
-// 	colors := []color.RGBA{
-// 		color.RGBA{R: 255, A: 255},
-// 		color.RGBA{B: 255, A: 255},
-// 	}
-// 	// Plot(xys, names, colors)
-
-// }

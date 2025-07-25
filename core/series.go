@@ -8,14 +8,11 @@ import (
 	"strings"
 )
 
-type (
-	IndexValue struct {
-		Index int
-		Value float64
-	}
-
-	Series []IndexValue
-)
+type IndexValue struct {
+	Index int
+	Value float64
+}
+type Series []IndexValue
 
 func (s Series) GetValues() []float64 {
 	var values []float64

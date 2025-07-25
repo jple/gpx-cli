@@ -36,7 +36,7 @@ func CreateReverseCmd() *cobra.Command {
 				gpx.Reverse()
 			} else {
 				fmt.Println("Reverse trk n°", trkId)
-				gpx.Trk[trkId].Reverse()
+				gpx.Trks[trkId].Reverse()
 			}
 
 			gpx.Save(viper.GetString("output"))

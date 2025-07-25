@@ -29,7 +29,7 @@ func CreatePlotCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{}
 			gpx.ParseFile(viper.GetString("filename"))
-			trk := gpx.Trk[viper.GetInt("trk-id")]
+			trk := gpx.Trks[viper.GetInt("trk-id")]
 
 			rollElev := trk.GetRollElevations(5, Mean)
 			rollDist := trk.GetRollDistances(5, Mean)

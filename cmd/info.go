@@ -15,10 +15,16 @@ func StringPointer(s string) *string {
 
 func CreateInfoCmd() *cobra.Command {
 	var trkId IntValue = -1
+	var detail BoolValue = false
 	flagsConf := []FlagConfig{
 		{
 			Name: "trk-id", Shortname: "t", DefaultValue: &trkId,
 			Description: "Details about i-th trk. Value -1 will display all trk summary",
+		},
+		{
+			Name: "detail", Shortname: "d", DefaultValue: &detail,
+			Description: "Details on trk",
+			NoOptDefVal: StringPointer("true"),
 		},
 	}
 
@@ -35,20 +41,18 @@ func CreateInfoCmd() *cobra.Command {
 
 			var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
 
-			if viper.GetInt("trk-id") != -1 {
+			trkid := viper.GetInt("trk-id")
+			if trkid == -1 {
+				printArgs.PrintFrom = bool(detail)
+				gpx.GetInfo().ToString(printArgs)
+			} else {
 				printArgs.PrintFrom = true
 
-				fmt.Printf("[%v] ", viper.GetInt("trk-id"))
+				fmt.Printf("[%v] ", trkid)
 				gpx.
-					Trk[viper.GetInt("trk-id")].
-					GetInfo(gpx.Extensions.Vitesse, true).
-					Print(printArgs)
-			} else {
-				printArgs.PrintFrom = false
-
-				gpx.
-					GetInfo(true).
-					Print(printArgs)
+					Trks[trkid].
+					GetInfo(trkid, gpx.Extensions.Vitesse).
+					ToString(printArgs)
 			}
 
 		},

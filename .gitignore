@@ -11,7 +11,12 @@ out/
 note.md
 
 main.save.go
-test*
+
+test.go
+cmd/test.go
 
 wip/
 src/
+
+debug*
+tmp*
