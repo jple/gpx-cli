@@ -41,21 +41,24 @@ func init() {
 	initFlags(rootCmd, flagsConf)
 	bindFlags(rootCmd, flagsConf)
 
-	rootCmd.AddCommand(CreateReverseCmd())
 	rootCmd.AddCommand(CreateCalcEffortCmd())
 	rootCmd.AddCommand(CreateDistCmd())
 	rootCmd.AddCommand(CreateInfoCmd())
 	rootCmd.AddCommand(CreateLsCmd())
+
 	rootCmd.AddCommand(CreatePlotCmd())
 	rootCmd.AddCommand(CreateTermPlotCmd())
+
+	rootCmd.AddCommand(CreateReverseCmd())
 	rootCmd.AddCommand(CreateAddNameCmd())
 	rootCmd.AddCommand(CreateFetchElevationCmd())
-	rootCmd.AddCommand(CreateSplitCmd())
-	rootCmd.AddCommand(CreateMergeCmd())
+
+	rootCmd.AddCommand(CreateSplitTrkCmd())
+	rootCmd.AddCommand(CreateMergeTrkCmd())
+	rootCmd.AddCommand(CreateMergeGpxCmd())
+
 	rootCmd.AddCommand(CreateTuiCmd())
 	rootCmd.AddCommand(CreateColorCmd())
-
-	rootCmd.AddCommand(CreateTestCmd())
 }
 
 func Execute() error {

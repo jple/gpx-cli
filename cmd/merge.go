@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -9,7 +10,7 @@ import (
 	. "github.com/jple/gpx-cli/core"
 )
 
-func CreateMergeCmd() *cobra.Command {
+func CreateMergeTrkCmd() *cobra.Command {
 	var trkId IntValue = -1
 	flagsConf := []FlagConfig{
 		{
@@ -18,7 +19,7 @@ func CreateMergeCmd() *cobra.Command {
 		},
 	}
 	cmd := &cobra.Command{
-		Use:   "merge",
+		Use:   "merge-trk",
 		Short: "Merge Trk",
 		Long:  `Merge Trk at id with the next one`,
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -66,6 +67,33 @@ func CreateMergeCmd() *cobra.Command {
 	}
 
 	initFlags(cmd, flagsConf)
+
+	return cmd
+}
+
+func CreateMergeGpxCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "merge-gpx",
+		Short: "Merge Trk",
+		Long:  `Merge Trk at id with the next one`,
+		Run: func(cmd *cobra.Command, args []string) {
+			gpx := Gpx{}
+			for i, filename := range args {
+				if i == 0 {
+					gpx.ParseFile(filename)
+					continue
+				}
+
+				g := Gpx{}
+				g.ParseFile(filename)
+				gpx.Trks = slices.Concat(gpx.Trks, g.Trks)
+				gpx.Wpts = slices.Concat(gpx.Wpts, g.Wpts)
+			}
+
+			gpx.Save(viper.GetString("output"))
+
+		},
+	}
 
 	return cmd
 }

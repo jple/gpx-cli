@@ -9,7 +9,7 @@ import (
 	. "github.com/jple/gpx-cli/core"
 )
 
-func CreateSplitCmd() *cobra.Command {
+func CreateSplitTrkCmd() *cobra.Command {
 	var name, point StringValue
 	flagsConf := []FlagConfig{
 		{
@@ -21,7 +21,7 @@ func CreateSplitCmd() *cobra.Command {
 		},
 	}
 	cmd := &cobra.Command{
-		Use:   "split",
+		Use:   "split-trk",
 		Short: "Split Trk",
 		Long:  `Split Trk at specific name or closest trkpt`,
 		PreRun: func(cmd *cobra.Command, args []string) {
