@@ -42,7 +42,7 @@ func init() {
 	bindFlags(rootCmd, flagsConf)
 
 	rootCmd.AddCommand(CreateCalcEffortCmd())
-	rootCmd.AddCommand(CreateDistCmd())
+	rootCmd.AddCommand(CreateCalcDistCmd())
 	rootCmd.AddCommand(CreateInfoCmd())
 	rootCmd.AddCommand(CreateLsCmd())
 
