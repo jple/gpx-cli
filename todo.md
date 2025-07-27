@@ -1,7 +1,6 @@
 # Todo
 
 - features
-    * merge several gpx into 1 with several trk
     * calculation info between two nammed point
         * get intersection between trk
         * ...
@@ -25,13 +24,25 @@
     * make gpx.Filepath unexported (need SetFilepath, GetFilepath instead), to prevent save
     - gpx.Save : ajouter un calcul avant save pour obtenir les infos pour set denivPos, ...
     - modifier en CLI
-        * gpx test
-        * gpx trk 
-            + info
-            + ls
-            + dist
-        * gpx utils
-            + dist : calculate distance from gpx to km 
+        * gpx
+            * apply
+                + color
+                + name
+                + elevation
+                + reverse
+            * trk 
+                + info
+                + ls --> TODO: remove !
+            * calc
+                + dist : calculate distance from gpx to km 
+                + calc-effort
+            * utils
+                + split
+                + merge
+                    + trk
+                    + gpx
+            * plot
+            * test
 
 - add check when no args in
     * dist
