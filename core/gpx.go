@@ -53,10 +53,6 @@ func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 	return gpx
 }
 
-// func (gpx *Gpx) SetVitesse(v float64) {
-// 	gpx.Extensions.Vitesse = v
-// }
-
 func (gpx Gpx) GetInfo(vitessePlat float64) GpxSummary {
 	var gpxSummary GpxSummary
 	for i, trk := range gpx.Trks {
