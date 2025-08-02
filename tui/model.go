@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -21,15 +22,34 @@ func (m GpxTui) Init() tea.Cmd {
 	return nil
 }
 
+type Section struct {
+	core.TrkptsSummary
+	TrkId int
+}
+
+// ==================
+func pretty(v any) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf(string(b))
+	}
+}
+
+// ==================
+
 func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	vitessePlat := 4.5
 	var cursorMax int
-	var sections []core.TrkptsSummary
+	var sections []Section
 	// Note: cursor is only going through sections, not track name
 	for _, trkSummary := range m.GpxSummary {
 		cursorMax += len(trkSummary.ListTrkptsSummary)
 		for _, section := range trkSummary.ListTrkptsSummary {
-			sections = append(sections, section)
+			sections = append(sections,
+				Section{TrkptsSummary: section, TrkId: trkSummary.Id},
+			)
 		}
 	}
 
