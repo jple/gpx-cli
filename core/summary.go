@@ -11,11 +11,6 @@ import (
 // - a section between a trkpt name and the next one (no matter trkseg)
 type TrkptsSummary struct {
 
-	// TODO: Dupplicates on TrkSummary
-	// TODO: design issue: these fields are only use in tui package
-	// TrkId   int
-	// TrkName string
-
 	// TrkptName
 	From string
 	To   string
