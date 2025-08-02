@@ -9,8 +9,9 @@ import (
 )
 
 type Gpx struct {
-	XMLName string     `xml:"gpx"`
-	Attrs   []xml.Attr `xml:",any,attr"`
+	XMLName string `xml:"gpx"`
+	// NOTE: known issues: xmlns:_xmlns not found
+	Attrs []xml.Attr `xml:",any,attr"`
 
 	Trks []Trk `xml:"trk,omitempty"`
 	Wpts []Wpt `xml:"wpt,omitempty"`
