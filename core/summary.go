@@ -12,14 +12,13 @@ import (
 type TrkptsSummary struct {
 
 	// TODO: Dupplicates on TrkSummary
-	TrkId   int
-	TrkName string
+	// TODO: design issue: these fields are only use in tui package
+	// TrkId   int
+	// TrkName string
 
 	// TrkptName
-	From         string
-	FromTrksegId *int // unused !
-	FromTrkptId  *int // unused !
-	To           string
+	From string
+	To   string
 
 	VitessePlat float64
 	// Cumulative values between "From" and "To"
