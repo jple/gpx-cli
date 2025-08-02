@@ -8,20 +8,32 @@ import (
 )
 
 type Gpx struct {
-	XMLName string `xml:"gpx"`
+	XMLName string     `xml:"gpx"`
+	Attrs   []xml.Attr `xml:",any,attr"`
 
-	Metadata *struct {
-		Desc string `xml:"desc,omitempty"`
-		Name string `xml:"name,omitempty"`
+	Metadata struct {
+		Inner string `xml:",innerxml"`
 	} `xml:"metadata,omitempty"`
+
 	Trks []Trk `xml:"trk,omitempty"`
 	Wpts []Wpt `xml:"wpt,omitempty"`
 
 	// TODO: use pointer in order to omitemtpy
 	// (otherwise, parser expects Extensions to be non-empty, due to Vitesse child-field)
 	// This notation is making code less readable
+
 	Extensions struct {
-		Vitesse float64 `xml:"vitesse,omitempty" descr:"Vitesse de marche sur plat (km/h)"`
+		Inner string `xml:",innerxml"`
+
+		// Vitesse float64 `xml:"vitesse,omitempty" descr:"Vitesse de marche sur plat (km/h)"`
+
+		// NOTE: this adds xmlns...
+		// To prevent this, have to remove Vitesse field
+		// Else []struct {
+		// 	XMLName xml.Name
+		// 	Content string `xml:",innerxml"`
+		// 	// Attrs   []xml.Attr `xml:",any,attr"`
+		// } `xml:",any"`
 	} `xml:"extensions,omitempty"`
 }
 
@@ -35,14 +47,14 @@ func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 	return gpx
 }
 
-func (gpx *Gpx) SetVitesse(v float64) {
-	gpx.Extensions.Vitesse = v
-}
+// func (gpx *Gpx) SetVitesse(v float64) {
+// 	gpx.Extensions.Vitesse = v
+// }
 
-func (gpx Gpx) GetInfo() GpxSummary {
+func (gpx Gpx) GetInfo(vitessePlat float64) GpxSummary {
 	var gpxSummary GpxSummary
 	for i, trk := range gpx.Trks {
-		trkSummary := trk.GetInfo(i, gpx.Extensions.Vitesse)
+		trkSummary := trk.GetInfo(i, vitessePlat)
 		gpxSummary = append(gpxSummary, trkSummary)
 	}
 	return gpxSummary
@@ -236,7 +248,11 @@ func (gpx Gpx) Save(filepath string) {
 func (gpx *Gpx) AddColor() *Gpx {
 	colors := []string{"8e44ad", "ff5733"}
 	for i, _ := range gpx.Trks {
-		gpx.Trks[i].Extensions.Line.Xmlns = "http://www.topografix.com/GPX/gpx_style/0/2"
+		gpx.Trks[i].Extensions.Line.Attrs[0] = xml.Attr{
+			xml.Name{"", "xmlns"},
+			"http://www.topografix.com/GPX/gpx_style/0/2",
+		}
+
 		gpx.Trks[i].Extensions.Line.Color = colors[i%len(colors)]
 	}
 	return gpx

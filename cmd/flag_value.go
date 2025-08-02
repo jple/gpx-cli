@@ -61,14 +61,14 @@ func (v BoolValue) Type() string {
 }
 
 // =======================
-type FloatValue int64
+type FloatValue float64 // int64
 
 func (v *FloatValue) String() string {
 	return strconv.Itoa(int(*v))
 }
 
 func (v *FloatValue) Set(s string) error {
-	i, err := strconv.ParseInt(s, 0, 64)
+	i, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return err
 	}

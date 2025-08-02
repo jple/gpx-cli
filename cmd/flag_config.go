@@ -19,9 +19,18 @@ type FlagConfig struct {
 	NoOptDefVal    *string
 }
 
+func StringPointer(s string) *string {
+	return &s
+}
+
 func BoolPointer(b bool) *bool {
 	return &b
 }
+
+// func FloatPointer(v float64) *string {
+// 	s := strconv.FormatFloat(v, 'f', -1, 64)
+// 	return &s
+// }
 
 func createFlag(cmd *cobra.Command, f FlagConfig) {
 	var flags *pflag.FlagSet

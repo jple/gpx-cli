@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/xml"
 	"fmt"
 	"slices"
 	"strconv"
@@ -31,7 +32,7 @@ type Trk struct {
 		DurationMin  int8    `xml:"DurationMin,omitempty"`
 
 		Line struct {
-			Xmlns string `xml:"xmlns,attr,omitempty"`
+			Attrs []xml.Attr `xml:",any,attr"`
 
 			Color      string `xml:"color,omitempty"`
 			Opacity    string `xml:"opacity,omitempty"`
@@ -45,7 +46,12 @@ type Trk struct {
 			Extensions *struct {
 				Jonction int `xml:"jonction,omitempty"`
 			} `xml:"extensions,omitempty"`
-		} `xml:"line,omitzero"`
+		} `xml:"line,omitempty"`
+
+		Else []struct {
+			XMLName xml.Name
+			Content string `xml:",innerxml"`
+		} `xml:",any"`
 	} `xml:"extensions,omitempty"`
 }
 
