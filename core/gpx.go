@@ -34,6 +34,8 @@ func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 		}
 	}
 
+	// TODO: create receiver directly where it has to be cleaned
+	// 		 then create interface to clean all
 	// Cleaning struct
 	// ... tags ",innerxml": remove empty struct
 	if gpx.Metadata != nil && strings.TrimSpace(gpx.Metadata.Inner) == "" {
@@ -53,15 +55,14 @@ func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 	return gpx
 }
 
-// func (gpx *Gpx) SetVitesse(v float64) {
-// 	gpx.Extensions.Vitesse = v
-// }
-
 func (gpx Gpx) GetInfo(vitessePlat float64) GpxSummary {
-	var gpxSummary GpxSummary
+	gpxSummary := GpxSummary{VitessePlat: vitessePlat}
 	for i, trk := range gpx.Trks {
 		trkSummary := trk.GetInfo(i, vitessePlat)
-		gpxSummary = append(gpxSummary, trkSummary)
+		gpxSummary.Trks = append(gpxSummary.Trks, struct {
+			Name string
+			TrkSummary
+		}{trk.Name, trkSummary})
 	}
 	return gpxSummary
 }

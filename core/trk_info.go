@@ -40,10 +40,9 @@ func (trk Trk) GetListTrkptsPerName() ListTrkpts {
 	return listTrkpts
 }
 
-// NOTE: detail is not used. Should be removed ?
 func (trk Trk) GetInfo(trkid int, vitessePlat float64) TrkSummary {
 	listTrkpts := trk.GetListTrkpts()
-	trkSummary := TrkSummary{Id: trkid, Name: trk.Name}
+	trkSummary := TrkSummary{}
 
 	var trackDuration float64
 	for i, trkpts := range listTrkpts {
@@ -53,8 +52,8 @@ func (trk Trk) GetInfo(trkid int, vitessePlat float64) TrkSummary {
 
 		// ============= Calculation geo info ============================
 		trkptsSummary := trkpts.GetSummary(vitessePlat)
-		trkptsSummary.TrkId = trkid
-		trkptsSummary.TrkName = trk.Name
+		// trkptsSummary.TrkId = trkid
+		// trkptsSummary.TrkName = trk.Name
 
 		// ============= Calculation From and To ============================
 		// Set From with trk.Name, or first Trkpts name (depending on which available)
@@ -78,10 +77,8 @@ func (trk Trk) GetInfo(trkid int, vitessePlat float64) TrkSummary {
 		sectionDuration, _, _ := CalcDuration(trkptsSummary.DistanceEffort, vitessePlat)
 		trackDuration += sectionDuration
 		trkSummary.Track = TrkptsSummary{
-			TrkName:     trk.Name,
-			VitessePlat: vitessePlat,
-			From:        trk.Name,
-			To:          "end",
+			From: trk.Name,
+			To:   "end",
 
 			NPoints:        trkSummary.Track.NPoints + trkptsSummary.NPoints,
 			Distance:       trkSummary.Track.Distance + trkptsSummary.Distance,

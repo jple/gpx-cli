@@ -10,36 +10,33 @@ import (
 // - the whole trk
 // - a section between a trkpt name and the next one (no matter trkseg)
 type TrkptsSummary struct {
+	// Tkr.Name or Trkpt.Name
+	From string `json:",omitempty"`
+	To   string `json:",omitempty"`
 
-	// TODO: Dupplicates on TrkSummary
-	TrkId   int
-	TrkName string
-
-	// TrkptName
-	From         string
-	FromTrksegId *int // unused !
-	FromTrkptId  *int // unused !
-	To           string
-
-	VitessePlat float64
 	// Cumulative values between "From" and "To"
-	NPoints        int
-	Distance       float64
-	DenivPos       float64
-	DenivNeg       float64
-	DistanceEffort float64
-	DurationHour   int8
-	DurationMin    int8
+	NPoints        int     `json:",omitempty"`
+	Distance       float64 `json:",omitempty"`
+	DenivPos       float64 `json:",omitempty"`
+	DenivNeg       float64 `json:",omitempty"`
+	DistanceEffort float64 `json:",omitempty"`
+	DurationHour   int8    `json:",omitempty"`
+	DurationMin    int8    `json:",omitempty"`
 }
 
 type TrkSummary struct {
-	Id                int
-	Name              string
 	ListTrkptsSummary []TrkptsSummary
 	Track             TrkptsSummary
 }
 
-type GpxSummary []TrkSummary
+type GpxSummary struct {
+	VitessePlat float64 `json:",omitempty"`
+
+	Trks []struct {
+		Name string
+		TrkSummary
+	}
+}
 
 // TODO/refacto: rename or delete. Poor readability
 type PrintArgs struct {
@@ -50,9 +47,9 @@ type PrintArgs struct {
 
 func (gpxSummary GpxSummary) ToString(args PrintArgs) string {
 	var str string
-	for i, trkSummary := range gpxSummary {
-		str += fmt.Sprintf("[%v] ", i)
-		str += trkSummary.ToString(args)
+	for i, trk := range gpxSummary.Trks {
+		str += fmt.Sprintf("[%v] %v: %v", i, sym.Underline("Etape"), sym.Green(trk.Name))
+		str += trk.TrkSummary.ToString(args)
 	}
 	// TODO: remove this
 	if !args.Silent {
@@ -64,8 +61,6 @@ func (gpxSummary GpxSummary) ToString(args PrintArgs) string {
 func (trkSummary TrkSummary) ToString(args PrintArgs) string {
 	var str string
 
-	trkName := trkSummary.Name
-	str += fmt.Sprintf("%v: %v", sym.Underline("Etape"), sym.Green(trkName))
 	str += fmt.Sprintf("\t(%v pts, %v %.0fkm, %v +%.0fm/%.0fm | %v %.0fkm_e, %v %vh%02d)\n",
 		trkSummary.Track.NPoints,
 		sym.ArrowIconLeftRight(), trkSummary.Track.Distance,

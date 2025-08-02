@@ -17,6 +17,7 @@ func prettyprint(in any) string {
 	return string(j)
 }
 
+// TODO: move to test
 func TestNPoints() {
 	vitessePlat := 4.5
 	gpx := Gpx{}
@@ -45,22 +46,21 @@ func TestNPoints() {
 	}
 
 	want := countingTrkpt(gpx.Trks[0])
-	have := sumTrkNPoints(gpxSummary[0])
-	have2 := trackNPoints(gpxSummary[0])
+	have := sumTrkNPoints(gpxSummary.Trks[0].TrkSummary)
+	have2 := trackNPoints(gpxSummary.Trks[0].TrkSummary)
 	if have != want {
 	}
 
 	fmt.Printf("have2: %v\n", have2)
 	fmt.Printf("have : %v trkpts\nwants : %v trkSummary.NPoints\n", have, want)
 
-	for _, section := range gpxSummary[0].ListTrkptsSummary {
+	for _, section := range gpxSummary.Trks[0].ListTrkptsSummary {
 		fmt.Println(section.From)
 		fmt.Println(section.NPoints)
 		fmt.Println(section.DenivPos)
 		// fmt.Printf("seg: %v, pt: %v\n", *section.FromTrksegId, *section.FromTrkptId)
 	}
 }
-
 func test() {
 	gpx := Gpx{}
 	gpx.ParseFile("core/test/data/npoints.gpx")

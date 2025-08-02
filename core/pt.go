@@ -159,9 +159,8 @@ func (trkpts Trkpts) GetTotalDescent() float64 {
 
 func (trkpts Trkpts) GetSummary(vitessePlat float64) TrkptsSummary {
 	trkptsSummary := TrkptsSummary{
-		VitessePlat: vitessePlat,
-		From:        "start",
-		To:          "end",
+		From: "start",
+		To:   "end",
 
 		NPoints:  len(trkpts),
 		Distance: trkpts.GetTotalDistance(),

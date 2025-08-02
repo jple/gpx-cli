@@ -21,15 +21,22 @@ func (m GpxTui) Init() tea.Cmd {
 	return nil
 }
 
+type Section struct {
+	core.TrkptsSummary
+	TrkId int
+}
+
 func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	vitessePlat := 4.5
 	var cursorMax int
-	var sections []core.TrkptsSummary
+	var sections []Section
 	// Note: cursor is only going through sections, not track name
-	for _, trkSummary := range m.GpxSummary {
+	for i, trkSummary := range m.GpxSummary.Trks {
 		cursorMax += len(trkSummary.ListTrkptsSummary)
 		for _, section := range trkSummary.ListTrkptsSummary {
-			sections = append(sections, section)
+			sections = append(sections,
+				Section{TrkptsSummary: section, TrkId: i},
+			)
 		}
 	}
 
@@ -86,14 +93,14 @@ func (m GpxTui) View() string {
 
 	var sections []core.TrkptsSummary
 	// Note: cursor is only going through sections, not track name
-	for _, trkSummary := range m.GpxSummary {
+	for _, trkSummary := range m.GpxSummary.Trks {
 		for _, section := range trkSummary.ListTrkptsSummary {
 			sections = append(sections, section)
 		}
 	}
 
 	var k int
-	for _, trkSummary := range m.GpxSummary {
+	for _, trkSummary := range m.GpxSummary.Trks {
 		str += fmt.Sprintf("%v: %v", sym.Underline("Etape"), sym.Green(trkSummary.Name))
 		str += fmt.Sprintf("\t(%v pts, %v %.0fkm, %v +%.0fm/%.0fm | %v %.0fkm_e, %v %vh%02d)\n",
 			trkSummary.Track.NPoints,
