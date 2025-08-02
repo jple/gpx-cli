@@ -13,7 +13,7 @@ func CreateColorCmd() *cobra.Command {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			filename := viper.GetString("filename")
-			// fmt.Println(filename)
+
 			gpx := Gpx{}
 			gpx.ParseFile(filename).
 				AddColor().Save(filename)
