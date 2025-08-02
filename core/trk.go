@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/xml"
 	"fmt"
 	"slices"
 	"strconv"
@@ -9,44 +10,38 @@ import (
 type Trkseg struct {
 	Trkpts Trkpts `xml:"trkpt"`
 }
+
+type ExtensionsTrk struct {
+	Line *ExtensionsLine `xml:"line,omitempty"`
+	Else []struct {
+		XMLName xml.Name
+		Content string     `xml:",innerxml"`
+		Attrs   []xml.Attr `xml:",any,attr"`
+	} `xml:",any"`
+}
+type ExtensionsLine struct {
+	Attrs []xml.Attr `xml:",any,attr"`
+
+	Color      string `xml:"color,omitempty"`
+	Opacity    string `xml:"opacity,omitempty"`
+	Weight     string `xml:"Weight,omitempty"`
+	Width      int    `xml:"width,omitempty"`
+	Linecap    string `xml:"linecap,omitempty"`
+	Linejoin   string `xml:"linejoin,omitempty"`
+	Dasharray  *int   `xml:"dasharray,omitempty"`
+	Dashoffset int    `xml:"dashoffset,omitempty"`
+
+	Else []struct {
+		XMLName xml.Name
+		Content string `xml:",innerxml"`
+	} `xml:",any"`
+}
+
 type Trk struct {
 	Name    string   `xml:"name,omitempty"`
 	Trksegs []Trkseg `xml:"trkseg"`
 
-	// Should be optional
-	Extensions struct {
-		DenivPos float64 `xml:"DenivPos,omitempty"`
-		DenivNeg float64 `xml:"DenivNeg,omitempty"`
-		Distance float64 `xml:"Distance,omitempty"`
-		// Conversion du denivele positif/negatif en km effort
-		DenivPosEffort float64 `xml:"DenivPosEffort,omitempty"`
-		DenivNegEffort float64 `xml:"DenivNegEffort,omitempty"`
-
-		// Distance équivalente sur plat en incluant le dénivelé 
-		DistanceEffort float64 `xml:"DistanceEffort,omitempty"`
-
-		// Estimation de temps de marche
-		Duration     float64 `xml:"Duration,omitempty"`
-		DurationHour int8    `xml:"DurationHour,omitempty"`
-		DurationMin  int8    `xml:"DurationMin,omitempty"`
-
-		Line struct {
-			Xmlns string `xml:"xmlns,attr,omitempty"`
-
-			Color      string `xml:"color,omitempty"`
-			Opacity    string `xml:"opacity,omitempty"`
-			Weight     string `xml:"Weight,omitempty"`
-			Width      int    `xml:"width,omitempty"`
-			Linecap    string `xml:"linecap,omitempty"`
-			Linejoin   string `xml:"linejoin,omitempty"`
-			Dasharray  *int   `xml:"dasharray,omitempty"`
-			Dashoffset int    `xml:"dashoffset,omitempty"`
-
-			Extensions *struct {
-				Jonction int `xml:"jonction,omitempty"`
-			} `xml:"extensions,omitempty"`
-		} `xml:"line,omitzero"`
-	} `xml:"extensions,omitempty"`
+	Extensions *ExtensionsTrk `xml:"extensions,omitempty"`
 }
 
 func (trk Trk) GetLonLat() ([]string, []string) {

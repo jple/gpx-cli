@@ -17,6 +17,7 @@ func CreateTuiCmd() *cobra.Command {
 		Use:   "tui",
 		Short: "Visualize GPX in TUI mode",
 		Run: func(cmd *cobra.Command, args []string) {
+			vitessePlat := 4.5
 
 			var gpx Gpx
 			if viper.GetString("filename") == "" {
@@ -24,11 +25,10 @@ func CreateTuiCmd() *cobra.Command {
 				os.Exit(1)
 			} else {
 				gpx.ParseFile(viper.GetString("filename"))
-				gpx.SetVitesse(4.5)
 			}
 
 			var m tui.GpxTui = tui.GpxTui{
-				GpxSummary: gpx.GetInfo(),
+				GpxSummary: gpx.GetInfo(vitessePlat),
 				Gpx:        gpx,
 			}
 			p := tea.NewProgram(m)

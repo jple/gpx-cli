@@ -9,13 +9,11 @@ import (
 	. "github.com/jple/gpx-cli/core"
 )
 
-func StringPointer(s string) *string {
-	return &s
-}
-
 func CreateInfoCmd() *cobra.Command {
 	var trkId IntValue = -1
 	var detail BoolValue = false
+	var speed FloatValue = 4.5
+
 	flagsConf := []FlagConfig{
 		{
 			Name: "trk-id", Shortname: "t", DefaultValue: &trkId,
@@ -25,6 +23,10 @@ func CreateInfoCmd() *cobra.Command {
 			Name: "detail", Shortname: "d", DefaultValue: &detail,
 			Description: "Details on trk",
 			NoOptDefVal: StringPointer("true"),
+		},
+		{
+			Name: "speed", Shortname: "s", DefaultValue: &speed,
+			Description: "Hiking speed on flat (km/h)",
 		},
 	}
 
@@ -37,21 +39,20 @@ func CreateInfoCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{}
 			gpx.ParseFile(viper.GetString("filename"))
-			gpx.SetVitesse(4.5)
 
 			var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
 
 			trkid := viper.GetInt("trk-id")
 			if trkid == -1 {
 				printArgs.PrintFrom = bool(detail)
-				gpx.GetInfo().ToString(printArgs)
+				gpx.GetInfo(viper.GetFloat64("speed")).ToString(printArgs)
 			} else {
 				printArgs.PrintFrom = true
 
 				fmt.Printf("[%v] ", trkid)
 				gpx.
 					Trks[trkid].
-					GetInfo(trkid, gpx.Extensions.Vitesse).
+					GetInfo(trkid, viper.GetFloat64("speed")).
 					ToString(printArgs)
 			}
 

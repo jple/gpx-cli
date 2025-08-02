@@ -18,10 +18,11 @@ func prettyprint(in any) string {
 }
 
 func TestNPoints() {
+	vitessePlat := 4.5
 	gpx := Gpx{}
 	// gpx.ParseFile("core/test/data/split.gpx")
 	gpx.ParseFile("core/test/data/npoints.gpx")
-	gpxSummary := gpx.GetInfo()
+	gpxSummary := gpx.GetInfo(vitessePlat)
 
 	var countingTrkpt = func(trk Trk) int {
 		n := 0

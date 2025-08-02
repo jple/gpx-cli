@@ -6,6 +6,9 @@
 .envrc
 
 out/
+plot/
+src/
+wip/
 *.save
 
 note.md
@@ -15,8 +18,6 @@ main.save.go
 test.go
 cmd/test.go
 
-wip/
-src/
 
 debug*
 tmp*

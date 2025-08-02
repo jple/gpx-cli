@@ -5,44 +5,62 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strings"
 )
 
 type Gpx struct {
 	XMLName string `xml:"gpx"`
+	// NOTE: known issues: xmlns:_xmlns not found
+	Attrs []xml.Attr `xml:",any,attr"`
 
-	Metadata *struct {
-		Desc string `xml:"desc,omitempty"`
-		Name string `xml:"name,omitempty"`
-	} `xml:"metadata,omitempty"`
 	Trks []Trk `xml:"trk,omitempty"`
 	Wpts []Wpt `xml:"wpt,omitempty"`
 
-	// TODO: use pointer in order to omitemtpy
-	// (otherwise, parser expects Extensions to be non-empty, due to Vitesse child-field)
-	// This notation is making code less readable
-	Extensions struct {
-		Vitesse float64 `xml:"vitesse,omitempty" descr:"Vitesse de marche sur plat (km/h)"`
+	Metadata *struct {
+		Inner string `xml:",innerxml"`
+	} `xml:"metadata,omitempty"`
+
+	Extensions *struct {
+		Inner string `xml:",innerxml"`
 	} `xml:"extensions,omitempty"`
 }
 
 func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
+	// Parse gpx
 	data, _ := os.ReadFile(gpxFilename)
 	if err := xml.Unmarshal(data, &gpx); err != nil {
 		if err.Error() != "EOF" {
 			fmt.Println(err)
 		}
 	}
+
+	// Cleaning struct
+	// ... tags ",innerxml": remove empty struct
+	if gpx.Metadata != nil && strings.TrimSpace(gpx.Metadata.Inner) == "" {
+		gpx.Metadata = nil
+	}
+	if gpx.Extensions != nil && strings.TrimSpace(gpx.Extensions.Inner) == "" {
+		gpx.Extensions = nil
+	}
+	// ... tags ",any": remove xmlns attribute
+	for i, trk := range gpx.Trks {
+		if trk.Extensions != nil {
+			for j := range trk.Extensions.Else {
+				gpx.Trks[i].Extensions.Else[j].XMLName.Space = ""
+			}
+		}
+	}
 	return gpx
 }
 
-func (gpx *Gpx) SetVitesse(v float64) {
-	gpx.Extensions.Vitesse = v
-}
+// func (gpx *Gpx) SetVitesse(v float64) {
+// 	gpx.Extensions.Vitesse = v
+// }
 
-func (gpx Gpx) GetInfo() GpxSummary {
+func (gpx Gpx) GetInfo(vitessePlat float64) GpxSummary {
 	var gpxSummary GpxSummary
 	for i, trk := range gpx.Trks {
-		trkSummary := trk.GetInfo(i, gpx.Extensions.Vitesse)
+		trkSummary := trk.GetInfo(i, vitessePlat)
 		gpxSummary = append(gpxSummary, trkSummary)
 	}
 	return gpxSummary
@@ -224,7 +242,7 @@ func (gpx Gpx) Save(filepath string) {
 	}
 
 	encoder := xml.NewEncoder(xmlFile)
-	encoder.Indent("", "\t")
+	encoder.Indent("", "  ")
 
 	// Write gpx
 	if err = encoder.Encode(gpx); err != nil {
@@ -235,9 +253,23 @@ func (gpx Gpx) Save(filepath string) {
 
 func (gpx *Gpx) AddColor() *Gpx {
 	colors := []string{"8e44ad", "ff5733"}
+	newLineColor := ExtensionsLine{
+		Attrs: []xml.Attr{
+			xml.Attr{
+				xml.Name{"", "xmlns"},
+				"http://www.topografix.com/GPX/gpx_style/0/2",
+			}},
+	}
+
 	for i, _ := range gpx.Trks {
-		gpx.Trks[i].Extensions.Line.Xmlns = "http://www.topografix.com/GPX/gpx_style/0/2"
-		gpx.Trks[i].Extensions.Line.Color = colors[i%len(colors)]
+		newLineColor.Color = colors[i%len(colors)]
+
+		// TODO: improvement: create Trk.AddLineColor
+		if gpx.Trks[i].Extensions == nil {
+			gpx.Trks[i].Extensions = &ExtensionsTrk{Line: &newLineColor}
+		} else {
+			gpx.Trks[i].Extensions.Line = &newLineColor
+		}
 	}
 	return gpx
 }

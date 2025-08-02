@@ -22,6 +22,7 @@ func (m GpxTui) Init() tea.Cmd {
 }
 
 func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	vitessePlat := 4.5
 	var cursorMax int
 	var sections []core.TrkptsSummary
 	// Note: cursor is only going through sections, not track name
@@ -56,12 +57,12 @@ func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			selectedTrkId := sections[m.cursor].TrkId
 			if selectedTrkId > 0 && selectedTrkId < len(m.Gpx.Trks) {
 				m.Gpx = m.Gpx.Merge(selectedTrkId-1, selectedTrkId)
-				m.GpxSummary = m.Gpx.GetInfo()
+				m.GpxSummary = m.Gpx.GetInfo(vitessePlat)
 			}
 			return m, nil
 		case "right":
 			m.Gpx = m.Gpx.SplitAtName(sections[m.cursor].To)
-			m.GpxSummary = m.Gpx.GetInfo()
+			m.GpxSummary = m.Gpx.GetInfo(vitessePlat)
 			return m, nil
 		case "s":
 			filename := "tata/0.gpx"
