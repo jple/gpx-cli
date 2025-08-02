@@ -57,7 +57,9 @@ func (gpx Gpx) GetInfo(vitessePlat float64) GpxSummary {
 	var gpxSummary GpxSummary
 	for i, trk := range gpx.Trks {
 		trkSummary := trk.GetInfo(i, vitessePlat)
-		gpxSummary = append(gpxSummary, trkSummary)
+		gpxSummary.Trks = append(gpxSummary.Trks, struct {
+			Summary TrkSummary
+		}{Summary: trkSummary})
 	}
 	return gpxSummary
 }

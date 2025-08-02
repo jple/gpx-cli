@@ -33,7 +33,13 @@ type TrkSummary struct {
 	Track             TrkptsSummary
 }
 
-type GpxSummary []TrkSummary
+// type GpxSummary []TrkSummary
+
+type GpxSummary struct {
+	Trks []struct {
+		Summary TrkSummary
+	}
+}
 
 // TODO/refacto: rename or delete. Poor readability
 type PrintArgs struct {
@@ -44,9 +50,9 @@ type PrintArgs struct {
 
 func (gpxSummary GpxSummary) ToString(args PrintArgs) string {
 	var str string
-	for i, trkSummary := range gpxSummary {
+	for i, trk := range gpxSummary.Trks {
 		str += fmt.Sprintf("[%v] ", i)
-		str += trkSummary.ToString(args)
+		str += trk.Summary.ToString(args)
 	}
 	// TODO: remove this
 	if !args.Silent {

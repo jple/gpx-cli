@@ -1,5 +1,10 @@
 # Todo
 
+- **WIP**: refacto gpxSummary
+    - move TrkSummary Id, Name, Track outside Trksummary
+    - move ListTrkptsSummary into Summary
+    - check 
+
 - features
     * calculation info between two nammed point
         * get intersection between trk
