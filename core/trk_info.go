@@ -7,7 +7,6 @@ import (
 // In Trk perspective, Trkpts is to contain Trkpt between two Trkpt.Name
 // ie. from a the first Trkpt or a Trkpt.Name
 // up to the last Trkpt without Trkpt.Name
-
 func (trk Trk) GetTrkpts() Trkpts {
 	trkpts := Trkpts{}
 	for _, trkseg := range trk.Trksegs {
@@ -16,47 +15,56 @@ func (trk Trk) GetTrkpts() Trkpts {
 	return trkpts
 }
 
-// This is just an alias to GetListTrkptsPerName
-func (trk Trk) GetListTrkpts() ListTrkpts {
-	return trk.GetListTrkptsPerName()
-}
-
-// GetListTrkptsPerName creates ListTrkpts ([][]Trkpt) containing Trkpts ([]Trkpt until name (excluded))
+// GetListTrkptsPerName creates ListTrkpts ([]Trkpts, ie. [][]Trkpt)
+// where each Trkpts is a []Trkpt from named item to next named item (included)
+// NOTE: the next named item is included in order to correctly calculate summary of Trkpts
+// Without it, the calculation would skip the calculation between ListTrkpts[i].Trkpts[-1] and
+// ListTrkpts[I+].Trkpts[0]
 func (trk Trk) GetListTrkptsPerName() ListTrkpts {
-	trkpts := Trkpts{}
+	currentTrkpts := Trkpts{}
 	listTrkpts := ListTrkpts{}
 
 	for i, trkpt := range trk.GetTrkpts() {
-		if i == 0 || trkpt.Name == nil {
-			// Update current trkpts
-			trkpts = append(trkpts, trkpt)
-		} else { // End trkpts, or trkpt has Name
-			// Update list of Trkpts, starting new trkpts
-			listTrkpts = append(listTrkpts, trkpts)
-			trkpts = Trkpts{trkpt}
+		currentTrkpts = append(currentTrkpts, trkpt)
+
+		// Reach a new named pt (which is not first element)
+		// This is the end of the current "section" (currentTrkpts)
+		if trkpt.Name != nil && i > 0 {
+			// Append "section" to listTrkpts
+			listTrkpts = append(listTrkpts, currentTrkpts)
+			// Prepare the new section, with the named pt
+			currentTrkpts = Trkpts{trkpt}
 		}
 	}
-	listTrkpts = append(listTrkpts, trkpts) // add last trkpts
+	// Add last "section" (trkpts) into the list
+	listTrkpts = append(listTrkpts, currentTrkpts)
 	return listTrkpts
 }
 
-func (trk Trk) GetInfo(trkid int, vitessePlat float64) TrkSummary {
-	listTrkpts := trk.GetListTrkpts()
-	trkSummary := TrkSummary{}
+func (trk Trk) GetInfoWholeTrack(vitessePlat float64) TrkptsSummary {
+	return trk.GetTrkpts().GetSummary(vitessePlat)
+}
 
-	var trackDuration float64
+func (trk Trk) GetInfoPerSection(vitessePlat float64) []TrkptsSummary {
+	listTrkpts := trk.GetListTrkptsPerName()
+	listTrkptsSummary := []TrkptsSummary{}
+
+	// Calculate summary for each "section" (trkpts)
 	for i, trkpts := range listTrkpts {
 		if len(trkpts) == 0 {
 			continue
 		}
 
-		// ============= Calculation geo info ============================
+		// ============= Calculate geo info ============================
 		trkptsSummary := trkpts.GetSummary(vitessePlat)
-		// trkptsSummary.TrkId = trkid
-		// trkptsSummary.TrkName = trk.Name
+		// NOTE: by design, GetListTrkptsPerName is adding a last additional named item in trkpts
+		// (see implementation). So NPoints calculation needs to be corrected:
+		if i < len(listTrkpts)-1 {
+			trkptsSummary.NPoints -= 1
+		}
 
-		// ============= Calculation From and To ============================
-		// Set From with trk.Name, or first Trkpts name (depending on which available)
+		// ============= Calculate values: From and To ============================
+		// Set From with trk.Name, or the first Trkpts name (depending on which available)
 		if i == 0 && trk.Name != "" {
 			trkptsSummary.From = trk.Name
 		}
@@ -64,33 +72,22 @@ func (trk Trk) GetInfo(trkid int, vitessePlat float64) TrkSummary {
 			trkptsSummary.From = *trkpts[0].Name
 		}
 
-		// Set To with next Trkpts name
+		// Set To with the last trkpts item (which is by design, a named element)
 		if i < len(listTrkpts)-1 && len(trkpts) > 0 {
-			nextTrkpts := listTrkpts[i+1]
-			trkptsSummary.To = *nextTrkpts[0].Name
+			trkptsSummary.To = *trkpts[len(trkpts)-1].Name
 		}
 
 		// ============= Update trkSummary.ListTrkptsSummary ============================
-		trkSummary.ListTrkptsSummary = append(trkSummary.ListTrkptsSummary, trkptsSummary)
+		listTrkptsSummary = append(listTrkptsSummary, trkptsSummary)
 
-		// ============= Update trkSummary.Track ============================
-		sectionDuration, _, _ := CalcDuration(trkptsSummary.DistanceEffort, vitessePlat)
-		trackDuration += sectionDuration
-		trkSummary.Track = TrkptsSummary{
-			From: trk.Name,
-			To:   "end",
-
-			NPoints:        trkSummary.Track.NPoints + trkptsSummary.NPoints,
-			Distance:       trkSummary.Track.Distance + trkptsSummary.Distance,
-			DenivPos:       trkSummary.Track.DenivPos + trkptsSummary.DenivPos,
-			DenivNeg:       trkSummary.Track.DenivNeg + trkptsSummary.DenivNeg,
-			DistanceEffort: trkSummary.Track.DistanceEffort + trkptsSummary.DistanceEffort,
-
-			DurationHour: trkSummary.Track.DurationHour + trkptsSummary.DurationHour,
-			DurationMin:  trkSummary.Track.DurationMin + trkptsSummary.DurationMin,
-		}
-		trkSummary.Track.DurationHour, trkSummary.Track.DurationMin = FloatToHourMin(trackDuration)
 	}
 
-	return trkSummary
+	return listTrkptsSummary
+}
+
+func (trk Trk) GetInfo(trkid int, vitessePlat float64) TrkSummary {
+	return TrkSummary{
+		ListTrkptsSummary: trk.GetInfoPerSection(vitessePlat),
+		Track:             trk.GetInfoWholeTrack(vitessePlat),
+	}
 }
