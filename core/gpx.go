@@ -55,6 +55,7 @@ func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 	return gpx
 }
 
+// NOTE: rename to GetInfoWhole ?
 func (gpx Gpx) GetInfo(vitessePlat float64) GpxSummary {
 	gpxSummary := GpxSummary{VitessePlat: vitessePlat}
 	for i, trk := range gpx.Trks {
@@ -66,6 +67,66 @@ func (gpx Gpx) GetInfo(vitessePlat float64) GpxSummary {
 	}
 	return gpxSummary
 }
+
+// ======= WIP =========
+func (gpx Gpx) GetTrkpts() (trkpts Trkpts) {
+	for _, trk := range gpx.Trks {
+		trkpts = append(trkpts, trk.GetTrkpts())
+	}
+	return
+}
+
+// TODO: rename for clarity
+func (gpx Gpx) GetTrkptsId(trkId, segId, ptId int) (id int) {
+	// Add all trkpts in Trk before Trk[TrkId]
+	for i := 0; i < trkId; i++ {
+		id += len(gpx.Trks[i].GetTrkpts())
+	}
+	// Add all trkpts in Seg before Seg[SegId], from Trk[trkId]
+	for i := 0; i < segId; i++ {
+		id += len(gpx.Trks[trkId].Trksegs[i].Trkpts)
+	}
+	// Add all trkpts before ptId (included), from Trk[trkId].Seg[segId]
+	id += ptId + 1
+
+	return id
+}
+
+func (gpx Gpx) GetInfoBetweenId(
+	trkId1, segId1, ptId1,
+	trkId2, segId2, ptId2 int,
+	vitessePlat float64) GpxSummary {
+
+	i1 := gpx.GetTrkptsId(trkId1, segId1, pt1)
+	i2 := gpx.GetTrkptsId(trkId2, segId2, pt2)
+
+	trkpts := gpx.GetTrkpts()
+	return trkpts[i1, i2].GetSummary(vitessePlat)
+}
+
+func (gpx Gpx) GetInfoBetweenTrkptsId(i1, i2 int, vitessePlat float64) GpxSummary {
+	trkpts := gpx.GetTrkpts()
+	return trkpts[i1, i2].GetSummary(vitessePlat)
+}
+
+// NOTE: compare speed between gettrkpts() + loop for name vs. loop trk, seg, pt for name
+func (gpx Gpx) GetTrkptsIdByName(name string) (int, error) {
+	trkpts := gpx.GetTrkpts()
+	for id, pt := range trkpts {
+		if pt.Name == name {
+			return id, nil
+		}
+	}
+	return -1, Error("Name not found")
+}
+
+func (gpx Gpx) GetInfoBetweenName(name1, name2 string, vitessePlat float64) GpxSummary {
+	id1 := gpx.GetTrkptsIdByName(name1)
+	id2 := gpx.GetTrkptsIdByName(name2)
+	return gpx.GetInfoBetweenTrkptsId(id1, id2)
+}
+
+// ======= WIP =========
 
 // Returns slice of pointers to Trkpt
 // This function is used to add name to trkpt in-place
@@ -103,17 +164,6 @@ func (gpx *Gpx) GetClosestTrkpts(p Pt) []*Trkpt {
 	}
 
 	return trkpts
-}
-
-func (p_gpx *Gpx) Reverse() Gpx {
-	gpx := *p_gpx
-
-	slices.Reverse(gpx.Trks)
-	for _, trk := range gpx.Trks {
-		trk.Reverse()
-	}
-
-	return gpx
 }
 
 func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
