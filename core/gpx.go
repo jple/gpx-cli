@@ -117,17 +117,25 @@ func (gpx Gpx) GetInfoBetweenTrkptsId(i1, i2 int, vitessePlat float64) TrkptsSum
 func (gpx Gpx) GetTrkptsIdByName(name string) (int, error) {
 	trkpts := gpx.GetTrkpts()
 	for id, pt := range trkpts {
-		if *pt.Name == name {
+		if pt.Name != nil && *pt.Name == name {
 			return id, nil
 		}
 	}
 	return -1, errors.New("Name not found")
 }
 
+func check(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 // TODO: output TrkptsSummary for convenience... should be GpxSummary ?
 func (gpx Gpx) GetInfoBetweenName(name1, name2 string, vitessePlat float64) TrkptsSummary {
-	id1, _ := gpx.GetTrkptsIdByName(name1)
-	id2, _ := gpx.GetTrkptsIdByName(name2)
+	id1, err := gpx.GetTrkptsIdByName(name1)
+	check(err)
+	id2, err := gpx.GetTrkptsIdByName(name2)
+	check(err)
 	return gpx.GetInfoBetweenTrkptsId(id1, id2, vitessePlat)
 }
 
