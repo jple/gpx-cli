@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"os"
 	"slices"
@@ -71,7 +72,7 @@ func (gpx Gpx) GetInfo(vitessePlat float64) GpxSummary {
 // ======= WIP =========
 func (gpx Gpx) GetTrkpts() (trkpts Trkpts) {
 	for _, trk := range gpx.Trks {
-		trkpts = append(trkpts, trk.GetTrkpts())
+		trkpts = slices.Concat(trkpts, trk.GetTrkpts())
 	}
 	return
 }
@@ -92,38 +93,42 @@ func (gpx Gpx) GetTrkptsId(trkId, segId, ptId int) (id int) {
 	return id
 }
 
+// TODO: output TrkptsSummary for convenience... should be GpxSummary ?
 func (gpx Gpx) GetInfoBetweenId(
 	trkId1, segId1, ptId1,
 	trkId2, segId2, ptId2 int,
-	vitessePlat float64) GpxSummary {
+	vitessePlat float64,
+) TrkptsSummary {
 
-	i1 := gpx.GetTrkptsId(trkId1, segId1, pt1)
-	i2 := gpx.GetTrkptsId(trkId2, segId2, pt2)
+	i1 := gpx.GetTrkptsId(trkId1, segId1, ptId1)
+	i2 := gpx.GetTrkptsId(trkId2, segId2, ptId2)
 
 	trkpts := gpx.GetTrkpts()
-	return trkpts[i1, i2].GetSummary(vitessePlat)
+	return trkpts[i1:i2].GetSummary(vitessePlat)
 }
 
-func (gpx Gpx) GetInfoBetweenTrkptsId(i1, i2 int, vitessePlat float64) GpxSummary {
+// TODO: output TrkptsSummary for convenience... should be GpxSummary ?
+func (gpx Gpx) GetInfoBetweenTrkptsId(i1, i2 int, vitessePlat float64) TrkptsSummary {
 	trkpts := gpx.GetTrkpts()
-	return trkpts[i1, i2].GetSummary(vitessePlat)
+	return trkpts[i1:i2].GetSummary(vitessePlat)
 }
 
 // NOTE: compare speed between gettrkpts() + loop for name vs. loop trk, seg, pt for name
 func (gpx Gpx) GetTrkptsIdByName(name string) (int, error) {
 	trkpts := gpx.GetTrkpts()
 	for id, pt := range trkpts {
-		if pt.Name == name {
+		if *pt.Name == name {
 			return id, nil
 		}
 	}
-	return -1, Error("Name not found")
+	return -1, errors.New("Name not found")
 }
 
-func (gpx Gpx) GetInfoBetweenName(name1, name2 string, vitessePlat float64) GpxSummary {
-	id1 := gpx.GetTrkptsIdByName(name1)
-	id2 := gpx.GetTrkptsIdByName(name2)
-	return gpx.GetInfoBetweenTrkptsId(id1, id2)
+// TODO: output TrkptsSummary for convenience... should be GpxSummary ?
+func (gpx Gpx) GetInfoBetweenName(name1, name2 string, vitessePlat float64) TrkptsSummary {
+	id1, _ := gpx.GetTrkptsIdByName(name1)
+	id2, _ := gpx.GetTrkptsIdByName(name2)
+	return gpx.GetInfoBetweenTrkptsId(id1, id2, vitessePlat)
 }
 
 // ======= WIP =========
@@ -164,6 +169,17 @@ func (gpx *Gpx) GetClosestTrkpts(p Pt) []*Trkpt {
 	}
 
 	return trkpts
+}
+
+func (p_gpx *Gpx) Reverse() Gpx {
+	gpx := *p_gpx
+
+	slices.Reverse(gpx.Trks)
+	for _, trk := range gpx.Trks {
+		trk.Reverse()
+	}
+
+	return gpx
 }
 
 func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
