@@ -61,6 +61,7 @@ func TestNPoints() {
 		// fmt.Printf("seg: %v, pt: %v\n", *section.FromTrksegId, *section.FromTrkptId)
 	}
 }
+
 func test() {
 	gpx := Gpx{}
 	gpx.ParseFile("core/test/data/npoints.gpx")
@@ -70,9 +71,34 @@ func test() {
 	// fmt.Println(trkSummary.ToString(PrintArgs{PrintFrom: true}))
 }
 
+func testDist2Point() {
+	filename := "src/test-info-d.gpx"
+	from := "a"
+	to := "c"
+	speed := 4.5
+
+	gpx := Gpx{}
+	gpx.ParseFile(filename)
+
+	var printArgs PrintArgs = PrintArgs{AsciiFormat: true, PrintFrom: true}
+	fmt.Println(gpx.GetInfoBetweenTrkptsId(0, 4, speed).ToString(printArgs))
+
+	fmt.Println("============")
+	if from == "" || to == "" {
+		fmt.Println("from and to must be filled")
+	} else {
+		fmt.Println(gpx.GetInfoBetweenName(from, to, speed).ToString(printArgs))
+	}
+
+}
+
 func main() {
 	// test()
-	cmd.Execute()
 	// TestNPoints()
 	// sym.ShowUnicode()
+
+	cmd.Execute()
+
+	// testDist2Point()
+
 }

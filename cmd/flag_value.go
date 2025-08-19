@@ -1,6 +1,8 @@
 package cmd
 
-import "strconv"
+import (
+	"strconv"
+)
 
 // =======================
 type StringValue string
@@ -64,7 +66,8 @@ func (v BoolValue) Type() string {
 type FloatValue float64 // int64
 
 func (v *FloatValue) String() string {
-	return strconv.Itoa(int(*v))
+	out := strconv.FormatFloat(float64(*v), 'f', 3, 64)
+	return out
 }
 
 func (v *FloatValue) Set(s string) error {
