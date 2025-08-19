@@ -110,7 +110,14 @@ func (gpx Gpx) GetInfoBetweenId(
 // TODO: output TrkptsSummary for convenience... should be GpxSummary ?
 func (gpx Gpx) GetInfoBetweenTrkptsId(i1, i2 int, vitessePlat float64) TrkptsSummary {
 	trkpts := gpx.GetTrkpts()
-	return trkpts[i1:i2].GetSummary(vitessePlat)
+	summary := trkpts[i1:i2].GetSummary(vitessePlat)
+	if trkpts[i1].Name != nil {
+		summary.SetFrom(*trkpts[i1].Name)
+	}
+	if trkpts[i2].Name != nil {
+		summary.SetTo(*trkpts[i2].Name)
+	}
+	return summary
 }
 
 // NOTE: compare speed between gettrkpts() + loop for name vs. loop trk, seg, pt for name

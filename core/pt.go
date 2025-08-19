@@ -144,18 +144,18 @@ func (trkpts Trkpts) GetTotalDescent() float64 {
 	return out
 }
 
-// func (trkpts Trkpts) GetFrom() string {
-// 	return trkpts.From
-// }
-// func (trkpts *Trkpts) SetFrom(s string) {
-// 	trkpts.From = s
-// }
-// func (trkpts Trkpts) GetTo() string {
-// 	return trkpts.To
-// }
-// func (trkpts *Trkpts) SetTo(s string) {
-// 	trkpts.To = s
-// }
+func (summary TrkptsSummary) GetFrom() string {
+	return summary.From
+}
+func (summary *TrkptsSummary) SetFrom(s string) {
+	summary.From = s
+}
+func (summary TrkptsSummary) GetTo() string {
+	return summary.To
+}
+func (summary *TrkptsSummary) SetTo(s string) {
+	summary.To = s
+}
 
 func (trkpts Trkpts) GetSummary(vitessePlat float64) TrkptsSummary {
 	trkptsSummary := TrkptsSummary{
