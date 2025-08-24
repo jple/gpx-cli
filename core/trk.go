@@ -28,7 +28,7 @@ type ExtensionsLine struct {
 	Width      int    `xml:"width,omitempty"`
 	Linecap    string `xml:"linecap,omitempty"`
 	Linejoin   string `xml:"linejoin,omitempty"`
-	Dasharray  *int   `xml:"dasharray,omitempty"`
+	Dasharray  int    `xml:"dasharray,omitempty"`
 	Dashoffset int    `xml:"dashoffset,omitempty"`
 
 	Else []struct {
@@ -38,10 +38,12 @@ type ExtensionsLine struct {
 }
 
 type Trk struct {
-	Name    string   `xml:"name,omitempty"`
-	Trksegs []Trkseg `xml:"trkseg"`
-
+	// NOTE: innerxml to prevent escaping (more readable, less secure :/)
+	// Name       string         `xml:"name,omitempty"`
+	Name       string         `xml:",innerxml"`
 	Extensions *ExtensionsTrk `xml:"extensions,omitempty"`
+
+	Trksegs []Trkseg `xml:"trkseg"`
 }
 
 func (trk Trk) GetLonLat() ([]string, []string) {

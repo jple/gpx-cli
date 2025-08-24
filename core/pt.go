@@ -11,9 +11,11 @@ type Pt struct {
 type Wpt struct {
 	Pt
 
-	Name *string `xml:"name"`
-	Type *string `xml:"type"`
-	Cmt  *string `xml:"cmt"`
+	// NOTE: innerxml to prevent escaping (more readable, less secure :/)
+	// Name *string `xml:"name,omitempty"`
+	Name *string `xml:",innerxml"`
+	Type *string `xml:"type,omitempty"`
+	Cmt  *string `xml:"cmt,omitempty"`
 }
 
 type Trkpt struct {

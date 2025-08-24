@@ -11,19 +11,26 @@ import (
 
 type Gpx struct {
 	XMLName string `xml:"gpx"`
+
 	// NOTE: known issues: xmlns:_xmlns not found
 	Attrs []xml.Attr `xml:",any,attr"`
-
-	Trks []Trk `xml:"trk,omitempty"`
-	Wpts []Wpt `xml:"wpt,omitempty"`
 
 	Metadata *struct {
 		Inner string `xml:",innerxml"`
 	} `xml:"metadata,omitempty"`
+	// Description string `xml:"description,omitempty"`
+	// Name        string `xml:"name,omitempty"`
+	// NOTE: innerxml to prevent escaping (more readable, less secure :/)
+	Description string `xml:",innerxml"`
+	Name        string `xml:",innerxml"`
 
+	Link       string `xml:"link,omitempty"`
 	Extensions *struct {
 		Inner string `xml:",innerxml"`
 	} `xml:"extensions,omitempty"`
+
+	Trks []Trk `xml:"trk,omitempty"`
+	Wpts []Wpt `xml:"wpt,omitempty"`
 }
 
 func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
@@ -53,6 +60,7 @@ func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 			}
 		}
 	}
+
 	return gpx
 }
 
@@ -334,20 +342,27 @@ func (gpx Gpx) Save(filepath string) {
 }
 
 func (gpx *Gpx) AddColor() *Gpx {
+	// TODO: create a single struct containing color, and dash*
 	colors := []string{"8e44ad", "ff5733"}
-	newLineColor := ExtensionsLine{
-		Attrs: []xml.Attr{
-			xml.Attr{
-				xml.Name{"", "xmlns"},
-				"http://www.topografix.com/GPX/gpx_style/0/2",
-			}},
-	}
+	dasharray := []int{10, 10}
+	dashoffset := []int{0, 5}
 
 	for i, _ := range gpx.Trks {
-		newLineColor.Color = colors[i%len(colors)]
+		newLineColor := ExtensionsLine{
+			Attrs: []xml.Attr{
+				xml.Attr{
+					xml.Name{"", "xmlns"},
+					"http://www.topografix.com/GPX/gpx_style/0/2",
+				}},
+			Color:      colors[i%len(colors)],
+			Dasharray:  dasharray[i%len(dasharray)],
+			Dashoffset: dashoffset[i%len(dashoffset)],
+		}
+		// newLineColor.Color = colors[i%len(colors)]
 
 		// TODO: improvement: create Trk.AddLineColor
 		if gpx.Trks[i].Extensions == nil {
+			fmt.Println(newLineColor)
 			gpx.Trks[i].Extensions = &ExtensionsTrk{Line: &newLineColor}
 		} else {
 			gpx.Trks[i].Extensions.Line = &newLineColor
