@@ -44,7 +44,7 @@ type ExtensionsLine struct {
 type Trk struct {
 	Name string `xml:"name,omitempty"`
 	// NOTE: innerxml to prevent escaping (more readable, less secure :/)
-	// NOTE: I don't know why, but it breaks plot...
+	// NOTE: I don't know why, but it breaks plot...Probable due to escape issue
 	// Name       string         `xml:",innerxml"`
 	Extensions *ExtensionsTrk `xml:"extensions,omitempty"`
 
