@@ -1,6 +1,8 @@
 package core
 
-import "math"
+import (
+	"math"
+)
 
 type Pt struct {
 	Lat float64 `xml:"lat,attr"`
@@ -97,7 +99,14 @@ func (trkpts Trkpts) GetDistances() []float64 {
 
 // Returns distance between each trkpt (first value set to 0)
 func (trkpts Trkpts) GetCumulatedDistances() []float64 {
-	return trkpts.Map0(Dist)
+	// return trkpts.Map0(Dist)
+
+	var cumdist []float64
+	for i := range trkpts {
+		cumdist = append(cumdist, trkpts[0:i].GetSummary(0).Distance)
+	}
+	return cumdist
+
 }
 
 func (trkpts Trkpts) GetTotalDistance() float64 {

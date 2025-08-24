@@ -13,7 +13,7 @@ replace github.com/jple/gpx-cli/tui => ./tui
 require (
 	github.com/jple/gpx-cli/cmd v0.0.0-00010101000000-000000000000
 	github.com/jple/gpx-cli/core v0.0.0-20250504064631-80a75ee2d61f
-// github.com/jple/overpass v0.0.0-00010101000000-000000000000
+	github.com/jple/overpass v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -69,4 +69,4 @@ require (
 
 replace github.com/jple/text-symbol => ../text_symbol
 
-// replace github.com/jple/overpass => ./overpass
+replace github.com/jple/overpass => ./wip/overpass

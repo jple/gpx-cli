@@ -68,6 +68,7 @@ func CreatePlotCmd() *cobra.Command {
 					color.RGBA{B: 255, A: 255}),
 			)
 			Plot2(plotCt, viper.GetString("output"))
+
 		},
 	}
 	initFlags(cmd, flagsConf)

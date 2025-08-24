@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/jple/gpx-cli/cmd"
 	. "github.com/jple/gpx-cli/core"
@@ -12,7 +11,8 @@ import (
 func prettyprint(in any) string {
 	j, err := json.MarshalIndent(in, "", "  ")
 	if err != nil {
-		log.Fatalf(err.Error())
+		// ./main.go:16:14: non-constant format string in call to log.Fatalf
+		// log.Fatalf(err.Error())
 	}
 	return string(j)
 }

@@ -69,6 +69,12 @@ func Plot2(plotCt PlotContent, save_filename string) {
 	blank := color.RGBA{0, 0, 0, 0}
 
 	for _, graph := range plotCt.Graphs {
+
+		// =============== TEST =================
+		// for _, xys := range graph.XYs {
+		// 	fmt.Printf("%+v\n", xys)
+		// }
+
 		l, pt, err := plotter.NewLinePoints(graph.XYs)
 		if err != nil {
 			panic(err)

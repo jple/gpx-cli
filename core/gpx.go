@@ -61,6 +61,20 @@ func (gpx *Gpx) ParseFile(gpxFilename string) *Gpx {
 		}
 	}
 
+	// // ===========WIP: remove _xmlns============
+	// // ... tags ",any": remove xmlns attribute
+	// for i, attr := range gpx.Attrs {
+	// 	fmt.Println(i)
+	// 	// fmt.Printf("%+v\n", attr.Name.Space)
+	// 	if attr.Value == "xmlns" {
+	// 		gpx.Attrs = slices.Delete(gpx.Attrs, i, i+1)
+	// 		// gpx.Attrs[i].Name.Space = ""
+	// 		// gpx.Attrs[i].Name.Space = ""
+	// 	}
+	// 	// Name:{Name:{Space:xmlns Local:_xmlns} Value:xmlns}
+	// }
+	// // ===========================
+
 	return gpx
 }
 
@@ -355,8 +369,8 @@ func (gpx *Gpx) AddColor() *Gpx {
 					"http://www.topografix.com/GPX/gpx_style/0/2",
 				}},
 			Color:      colors[i%len(colors)],
-			Dasharray:  dasharray[i%len(dasharray)],
-			Dashoffset: dashoffset[i%len(dashoffset)],
+			Dasharray:  &dasharray[i%len(dasharray)],
+			Dashoffset: &dashoffset[i%len(dashoffset)],
 		}
 		// newLineColor.Color = colors[i%len(colors)]
 

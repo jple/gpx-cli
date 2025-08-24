@@ -22,14 +22,18 @@ type ExtensionsTrk struct {
 type ExtensionsLine struct {
 	Attrs []xml.Attr `xml:",any,attr"`
 
-	Color      string `xml:"color,omitempty"`
-	Opacity    string `xml:"opacity,omitempty"`
-	Weight     string `xml:"Weight,omitempty"`
-	Width      int    `xml:"width,omitempty"`
-	Linecap    string `xml:"linecap,omitempty"`
-	Linejoin   string `xml:"linejoin,omitempty"`
-	Dasharray  int    `xml:"dasharray,omitempty"`
-	Dashoffset int    `xml:"dashoffset,omitempty"`
+	Color    string `xml:"color,omitempty"`
+	Opacity  string `xml:"opacity,omitempty"`
+	Weight   string `xml:"Weight,omitempty"`
+	Width    int    `xml:"width,omitempty"`
+	Linecap  string `xml:"linecap,omitempty"`
+	Linejoin string `xml:"linejoin,omitempty"`
+
+	// NOTE: I don't know why, but if Dasharray is not pointer
+	// then plot does not work correctly...
+	// So Dashoffset has also change to pointer, just in case...
+	Dasharray  *int `xml:"dasharray,omitempty"`
+	Dashoffset *int `xml:"dashoffset,omitempty"`
 
 	Else []struct {
 		XMLName xml.Name
@@ -38,9 +42,10 @@ type ExtensionsLine struct {
 }
 
 type Trk struct {
+	Name string `xml:"name,omitempty"`
 	// NOTE: innerxml to prevent escaping (more readable, less secure :/)
-	// Name       string         `xml:"name,omitempty"`
-	Name       string         `xml:",innerxml"`
+	// NOTE: I don't know why, but it breaks plot...
+	// Name       string         `xml:",innerxml"`
 	Extensions *ExtensionsTrk `xml:"extensions,omitempty"`
 
 	Trksegs []Trkseg `xml:"trkseg"`
