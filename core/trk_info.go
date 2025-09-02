@@ -1,25 +1,12 @@
 package core
 
-import (
-	"slices"
-)
-
-// In Trk perspective, Trkpts is to contain Trkpt between two Trkpt.Name
-// ie. from a the first Trkpt or a Trkpt.Name
-// up to the last Trkpt without Trkpt.Name
-func (trk Trk) GetTrkpts() Trkpts {
-	trkpts := Trkpts{}
-	for _, trkseg := range trk.Trksegs {
-		trkpts = slices.Concat(trkpts, trkseg.Trkpts)
-	}
-	return trkpts
-}
+type ListTrkpts []Trkpts
 
 // GetListTrkptsPerName creates ListTrkpts ([]Trkpts, ie. [][]Trkpt)
 // where each Trkpts is a []Trkpt from named item to next named item (included)
 // NOTE: the next named item is included in order to correctly calculate summary of Trkpts
 // Without it, the calculation would skip the calculation between ListTrkpts[i].Trkpts[-1] and
-// ListTrkpts[I+].Trkpts[0]
+// ListTrkpts[i+1].Trkpts[0]
 func (trk Trk) GetListTrkptsPerName() ListTrkpts {
 	currentTrkpts := Trkpts{}
 	listTrkpts := ListTrkpts{}

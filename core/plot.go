@@ -1,42 +1,21 @@
 package core
 
 import (
-	"image/color"
-
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 )
 
-type PlotContent struct {
-	Title  string
-	X      plot.Axis
-	Y      plot.Axis
-	Graphs []Graph
-}
-
 type Graph struct {
-	XYs   plotter.XYs
-	Name  string
-	Color color.RGBA
+	XYs  plotter.XYs
+	Name string
+
+	LineStyle  *draw.LineStyle
+	GlyphStyle *draw.GlyphStyle
 }
 
-func ToPlotterXYs(X []float64, Y []float64) plotter.XYs {
-	if len(X) != len(Y) {
-		panic("X and Y don't have the same length")
-	}
-
-	var xys plotter.XYs
-	n := len(X)
-	for i := 0; i < n; i++ {
-		xys = append(xys, plotter.XY{
-			X: X[i], Y: Y[i]})
-	}
-	return xys
-
-}
-func CreateGraph(series any, name string, color color.RGBA) Graph {
+func CreateGraph(series any, name string, lstyle *draw.LineStyle, ptstyle *draw.GlyphStyle) Graph {
 	var xys plotter.XYs
 
 	switch s := series.(type) {
@@ -48,70 +27,50 @@ func CreateGraph(series any, name string, color color.RGBA) Graph {
 		for _, v := range s {
 			xys = append(xys, plotter.XY{float64(v.Index), v.Value})
 		}
+	case XY:
+		xys = CreatePlotterXYs(s)
 	case plotter.XYs:
 		xys = s
 	}
 
 	return Graph{
-		XYs:  xys,
-		Name: name, Color: color,
+		XYs:        xys,
+		Name:       name,
+		LineStyle:  lstyle,
+		GlyphStyle: ptstyle,
 	}
 }
 
-func Plot2(plotCt PlotContent, save_filename string) {
+func NewPlot(title, xlabel, ylabel string, graphs []Graph) *plot.Plot {
 	p := plot.New()
-
-	p.Title.Text = plotCt.Title
-	p.X.Label.Text = plotCt.X.Label.Text
-	p.Y.Label.Text = plotCt.Y.Label.Text
+	p.Title.Text = title
+	p.X.Label.Text = xlabel
+	p.Y.Label.Text = ylabel
 	p.Add(plotter.NewGrid())
 
-	blank := color.RGBA{0, 0, 0, 0}
-
-	for _, graph := range plotCt.Graphs {
-
-		// =============== TEST =================
-		// for _, xys := range graph.XYs {
-		// 	fmt.Printf("%+v\n", xys)
-		// }
-
+	for _, graph := range graphs {
 		l, pt, err := plotter.NewLinePoints(graph.XYs)
 		if err != nil {
 			panic(err)
 		}
 
-		l.LineStyle.Width = vg.Points(1)
-		l.LineStyle.Dashes = []vg.Length{vg.Points(5), vg.Points(5)}
-		pt.Shape = draw.PyramidGlyph{}
-
-		if graph.Color != blank {
-			l.LineStyle.Color = graph.Color
-			pt.Color = graph.Color
+		// Style line
+		if graph.LineStyle != nil {
+			l.LineStyle = *graph.LineStyle
 		} else {
-			l.LineStyle.Color = color.RGBA{B: 255, A: 255}
-			pt.Color = color.RGBA{B: 255, A: 255}
+			l.LineStyle.Width = vg.Points(1)
+			l.LineStyle.Dashes = []vg.Length{vg.Points(5), vg.Points(5)}
 		}
-
-		// lpLine, lpPoints, err := plotter.NewLinePoints(linePointsData)
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// lpLine.Color = color.RGBA{G: 255, A: 255}
-		// lpPoints.Shape = draw.PyramidGlyph{}
-		// lpPoints.Color = color.RGBA{R: 255, A: 255}
+		// Style dots
+		if graph.GlyphStyle != nil {
+			pt.GlyphStyle = *graph.GlyphStyle
+		} else {
+			pt.Shape = draw.PyramidGlyph{}
+		}
 
 		p.Add(l, pt)
 		p.Legend.Add(graph.Name, l, pt)
-
-		// err := plotutil.AddLinePoints(p, names[i], pts)
-		// if err != nil {
-		// 	panic(err)
-		// }
-
 	}
 
-	// Save the plot to a PNG file.
-	if err := p.Save(8*vg.Inch, 8*vg.Inch, save_filename); err != nil {
-		panic(err)
-	}
+	return p
 }

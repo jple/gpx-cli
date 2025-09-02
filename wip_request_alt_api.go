@@ -56,7 +56,7 @@ const AltimetrieApiUrl = "https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/
 
 func main() {
 	gpx := Gpx{}
-	gpx.ParseFile(gpx.Filepath)
+	gpx.Parse(gpx.Filepath)
 
 	lons, lats := gpx.Trks[0].GetLonLat()
 	fmt.Println(len(lons))

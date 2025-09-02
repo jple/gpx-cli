@@ -6,11 +6,11 @@ import (
 	sym "github.com/jple/text-symbol"
 )
 
-// TkrptsSummary summaries either
+// TrkptsSummary summaries either
 // - the whole trk
 // - a section between a trkpt name and the next one (no matter trkseg)
 type TrkptsSummary struct {
-	// Tkr.Name or Trkpt.Name
+	// Trk.Name or Trkpt.Name
 	From string `json:",omitempty"`
 	To   string `json:",omitempty"`
 
@@ -22,6 +22,19 @@ type TrkptsSummary struct {
 	DistanceEffort float64 `json:",omitempty"`
 	DurationHour   int8    `json:",omitempty"`
 	DurationMin    int8    `json:",omitempty"`
+}
+
+func (summary TrkptsSummary) GetFrom() string {
+	return summary.From
+}
+func (summary *TrkptsSummary) SetFrom(s string) {
+	summary.From = s
+}
+func (summary TrkptsSummary) GetTo() string {
+	return summary.To
+}
+func (summary *TrkptsSummary) SetTo(s string) {
+	summary.To = s
 }
 
 type TrkSummary struct {

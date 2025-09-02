@@ -26,18 +26,19 @@ func CreateTermPlotCmd() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{}
-			gpx.ParseFile(viper.GetString("filename"))
+			gpx.Parse(viper.GetString("filename"))
 			trk := gpx.Trks[viper.GetInt("trk-id")]
 
-			rollmean := trk.GetRollElevations(5, Mean)
-			varSum := TrendSummary(rollmean)
+			rawXY := XY{trk.GetTrkpts().GetCumulatedDistances(), trk.GetTrkpts().GetElevations()}
+			rollXY := rawXY.CenterRollY(5)
+			varSum := TrendSummary(rollXY.Y, 30)
 
 			var prevInd int
 			var prevVal float64
 			for k, v := range varSum {
 				ind := v.Index
 				val := v.Value
-				dist := trk.GetDistanceFromTo(prevInd, ind)
+				dist := trk.GetTrkpts().GetTotalDistanceFromTo(prevInd, ind)
 				pct := (val - prevVal) / (dist * 1000) * 100
 				if k > 0 {
 					fmt.Printf("%.0f m\t--(%0.2f km)-->\t%.0f m \t(%.0f %%)\n", prevVal, dist, val, pct)

@@ -33,7 +33,7 @@ func CreateMergeTrkCmd() *cobra.Command {
 			}
 
 			gpx := Gpx{}
-			gpx.ParseFile(viper.GetString("filename"))
+			gpx.Parse(viper.GetString("filename"))
 
 			if trkId == len(gpx.Trks)-1 {
 				fmt.Printf("The chosen trkId (%v) is the last one\n", trkId)
@@ -41,7 +41,7 @@ func CreateMergeTrkCmd() *cobra.Command {
 				return
 			}
 			if trkId >= len(gpx.Trks)-1 {
-				fmt.Printf("The chosen trkId (%v) is greater than the number of trk ()\n", trkId, len(gpx.Trks))
+				fmt.Printf("The chosen trkId (%v) is greater than the number of trk (%v)\n", trkId, len(gpx.Trks))
 				fmt.Println("Nothing to do")
 				return
 			}
@@ -80,12 +80,12 @@ func CreateMergeGpxCmd() *cobra.Command {
 			gpx := Gpx{}
 			for i, filename := range args {
 				if i == 0 {
-					gpx.ParseFile(filename)
+					gpx.Parse(filename)
 					continue
 				}
 
 				g := Gpx{}
-				g.ParseFile(filename)
+				g.Parse(filename)
 				gpx.Trks = slices.Concat(gpx.Trks, g.Trks)
 				gpx.Wpts = slices.Concat(gpx.Wpts, g.Wpts)
 			}

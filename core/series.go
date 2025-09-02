@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"math"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -14,6 +13,31 @@ type IndexValue struct {
 }
 type Series []IndexValue
 
+func (s *Series) Add(e IndexValue) Series {
+	*s = append(*s, e)
+	// fmt.Printf("Add new item #%v: %v\n", len(*s)-1, e)
+	return *s
+}
+
+func (s *Series) Update(i int, e IndexValue) Series {
+	(*s)[i] = e
+	// fmt.Printf("Update item #%v: %v\n", i, e)
+	return *s
+}
+
+func NewSeries(idxs []int, values []float64) Series {
+	var s Series
+
+	if len(idxs) != len(values) {
+		panic("idxs and values don't have the same length")
+	}
+
+	for i := range idxs {
+		s.Add(IndexValue{idxs[i], values[i]})
+	}
+	return s
+}
+
 func (s Series) GetValues() []float64 {
 	var values []float64
 	for _, v := range s {
@@ -21,88 +45,87 @@ func (s Series) GetValues() []float64 {
 	}
 	return values
 }
-func (s Series) MinMax() (float64, float64) {
-	var l []float64
-	for _, v := range s {
-		l = append(l, v.Value)
-	}
-	return slices.Min(l), slices.Max(l)
-}
-func (s Series) Min() float64 {
-	var l []float64
-	for _, v := range s {
-		l = append(l, v.Value)
-	}
-	return slices.Min(l)
-}
 
-// TrendSummary returns a list of Series ({Index, Values])
-// The first element is the first value input s[0]
-// The next one is the latest increasing (or decreasing) values
-// The next one is the latest decréasing (or increasing) values
-// And so one until the last element
-func TrendSummary(s []float64) Series {
-	var isHigher bool
-	var prevIsHigher bool
+/*
+TrendSummary returns a Series with global trends of s, ie.
+the most relevant values from s describing s trends
+Each value is the latest value following the same trend (increase or decrease)
+If the change is not sensitive (based on threshold), it is ignored
+
+Threshold values example :
+- 30 is better for large overview
+- 1-6 is better for smoothing elevation gain/loss calculation
+
+The first and last element are always added to the results.
+The last element is either the last trend, or a new trend, that both has to be added
+*/
+func TrendSummary(s []float64, threshold float64) Series {
+	var isHigher, prevIsHigher bool
 	var prevVal float64
-	// Out contains most relevant values from s describing s trends
-	// Each value is the latest value following the same trend (increase or decrease)
-	// If the change is not sensitive, it is ignored
 	var out Series
 
 	for i, v := range s {
-		// Append first value
-		if i == 0 {
-			prevVal = v
-			out = append(out, IndexValue{Index: i, Value: v})
-			continue
-		}
-
 		diff := math.Round(v - prevVal)
+		isHigher = (diff > 0)
 
-		// Init "prevVal" (previous) values
-		if i == 1 {
+		// fmt.Printf(
+		// 	"i (%v), v (%v), prev (%v), diff (%v), higher (%v), prevH (%v)\n",
+		// 	i, v, prevVal, diff, isHigher, prevIsHigher)
+
+		// Init first value
+		if i == 0 {
+			out.Add(IndexValue{Index: i, Value: v})
 			prevVal = v
-			prevIsHigher = diff > 0
 			continue
 		}
-		// Append last value to out
-		if i == len(s)-1 {
-			out = append(out, IndexValue{Index: i, Value: v})
-			break
-		}
 
-		isHigher = (diff > 0)
+		// Init first trend
+		if i == 1 {
+			prevIsHigher = diff > 0
+			prevVal = v
+			continue
+		}
 
 		// Curve is changing dynamics
 		if isHigher != prevIsHigher {
 
-			// If latest "out" value and prevVal is too small
-			// (ignore first value)
-			// The trend is ignored, and the value is not appended in "out"
-			// However, updating the latest "out" value may be needed, if the value
-			// is higher (in increase trend) than the last "out" value. Same if v
-			// is lower (in decrease trend)
-			if math.Abs(out[len(out)-1].Value-prevVal) < 30 && len(out) > 1 {
+			lastTrendValue := out[len(out)-1].Value
+			// If change in value is too small, it is generally ignored,
+			// except if the value is higher (in increasing trend), or lower (in decreasing trend)
+			// than the registered one, so the value is updated
+			if math.Abs(lastTrendValue-prevVal) < threshold && len(out) > 1 {
 
 				// Update latest registered values if v is following the same trend
-				if (isHigher && v > out[len(out)-1].Value) ||
-					(!isHigher && v < out[len(out)-1].Value) {
-					out[len(out)-1] = IndexValue{Index: i, Value: v}
+				if (isHigher && v > lastTrendValue) ||
+					(!isHigher && v < lastTrendValue) {
+					// fmt.Printf("previous value #%v: %v\n", len(out)-1, out[len(out)-1].Value)
+					out.Update(len(out)-1, IndexValue{Index: i, Value: v})
 				}
 
-				// Otherwise, append prevVal to out
+				// If change is sensitive, so append prevVal to out
 			} else {
-				out = append(out, IndexValue{Index: i - 1, Value: prevVal})
+				out.Add(IndexValue{Index: i - 1, Value: prevVal})
 				prevIsHigher = isHigher // register the trend change
 			}
 
 		}
+
+		// Append last value to out
+		// (either the trend is the same, then the last trend is not added yet
+		// or the trend is changing on the last item, then it also has to be added
+		// so it always need to be added)
+		if i == len(s)-1 {
+			out.Add(IndexValue{Index: i, Value: v})
+		}
+
 		prevVal = v
 	}
 
 	return out
 }
+
+// ======
+// TODO: move to term-plot ?
 
 func floor(x float64) int {
 	return int(math.Floor(math.Log10(x)) + 1)
@@ -110,6 +133,31 @@ func floor(x float64) int {
 
 func replaceAtIndex(str string, replacement rune, index int) string {
 	return str[:index] + string(replacement) + str[index+1:]
+}
+
+// TODO: Must not be useful... except for term-plot...
+func (s Series) IndexMinMax() (int, float64, int, float64) {
+	m, M := s[0].Value, s[0].Value
+	imin, imax := s[0].Index, s[0].Index
+	for i := range s {
+		if m > s[i].Value {
+			imin = s[i].Index
+			m = s[i].Value
+		}
+		if M < s[i].Value {
+			imax = s[i].Index
+			M = s[i].Value
+		}
+	}
+	return imin, m, imax, M
+}
+func (s Series) MinMax() (float64, float64) {
+	_, m, _, M := s.IndexMinMax()
+	return m, M
+}
+func (s Series) Min() float64 {
+	_, m, _, _ := s.IndexMinMax()
+	return m
 }
 
 // Print the trend summary based on TrendSummary

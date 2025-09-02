@@ -29,7 +29,7 @@ func CreateSplitTrkCmd() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			gpx := Gpx{}
-			gpx.ParseFile(viper.GetString("filename"))
+			gpx.Parse(viper.GetString("filename"))
 
 			fmt.Println("Before split")
 			gpx.Ls(true).Print(true)

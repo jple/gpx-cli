@@ -24,7 +24,7 @@ func CreateTuiCmd() *cobra.Command {
 				fmt.Println("No GPX file loaded")
 				os.Exit(1)
 			} else {
-				gpx.ParseFile(viper.GetString("filename"))
+				gpx.Parse(viper.GetString("filename"))
 			}
 
 			var m tui.GpxTui = tui.GpxTui{

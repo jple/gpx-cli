@@ -11,6 +11,38 @@ import (
 	"github.com/spf13/viper"
 )
 
+// getClosestTrkpts returns slice of pointers to Trkpt that are closest to p
+// This function is used to add name to trkpt in-place without the need to
+// specify Trk, Trkseg, Trkpt id
+func getClosestTrkpts(gpx Gpx, p Pt) []*Trkpt {
+	var trkpts []*Trkpt
+	var minDist float64
+	// var ind struct{ i, j, k int }
+
+	for i, _ := range gpx.Trks {
+		for j, _ := range gpx.Trks[i].Trksegs {
+			for k, trkpt := range gpx.Trks[i].Trksegs[j].Trkpts {
+				if i == 0 && j == 0 && k == 0 {
+					minDist = Dist(p, trkpt.Pt)
+				}
+
+				d := Dist(p, trkpt.Pt)
+
+				if d == minDist {
+					trkpts = append(trkpts, &gpx.Trks[i].Trksegs[j].Trkpts[k])
+				} else if d < minDist {
+					// Using index to prevent copy value to keep correct address
+					trkpts = []*Trkpt{&gpx.Trks[i].Trksegs[j].Trkpts[k]}
+					// ind = struct{ i, j, k int }{i, j, k}
+					minDist = d
+				}
+			}
+		}
+	}
+
+	return trkpts
+}
+
 func CreateAddNameCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-name [name] [lat] [lon]",
@@ -23,19 +55,18 @@ func CreateAddNameCmd() *cobra.Command {
 					fmt.Println(a)
 				}
 			}
+
 			name := args[0]
 			lat, _ := strconv.ParseFloat(args[1], 64)
 			lon, _ := strconv.ParseFloat(args[2], 64)
 
 			gpx := Gpx{}
-			gpx.ParseFile(viper.GetString("filename"))
+			gpx.Parse(viper.GetString("filename"))
 
-			// gpx.AddWpt(NewWpt(Lat, Lon, 0, name))
-			// closest := gpx.GetClosestTrkpts(Pt{Lat: lat, Lon: lon})
-			// TODO: not tested
 			p := Pt{Lat: lat, Lon: lon}
+			// TODO: add test if already exists
 			gpx.AddWpt(Wpt{Name: &name, Pt: p})
-			closest := gpx.GetClosestTrkpts(p)
+			closest := getClosestTrkpts(gpx, p)
 
 			for i, _ := range closest {
 				// Confirmation if existing name
@@ -46,14 +77,14 @@ func CreateAddNameCmd() *cobra.Command {
 						yn := scanner.Text()
 						if yn == "y" {
 							fmt.Println("Replacing name to", name)
-							closest[i].AddName(name)
+							closest[i].SetName(name)
 							break
 						} else if scanner.Text() == "n" {
 							break
 						}
 					}
 				} else {
-					closest[i].AddName(name)
+					closest[i].SetName(name)
 				}
 			}
 

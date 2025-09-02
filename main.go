@@ -21,8 +21,8 @@ func prettyprint(in any) string {
 func TestNPoints() {
 	vitessePlat := 4.5
 	gpx := Gpx{}
-	// gpx.ParseFile("core/test/data/split.gpx")
-	gpx.ParseFile("core/test/data/npoints.gpx")
+	// gpx.Parse("core/test/data/split.gpx")
+	gpx.Parse("core/test/data/npoints.gpx")
 	gpxSummary := gpx.GetInfo(vitessePlat)
 
 	var countingTrkpt = func(trk Trk) int {
@@ -64,7 +64,7 @@ func TestNPoints() {
 
 func test() {
 	gpx := Gpx{}
-	gpx.ParseFile("core/test/data/npoints.gpx")
+	gpx.Parse("core/test/data/npoints.gpx")
 	trkSummary := gpx.Trks[0].GetInfo(0, 4.5)
 	fmt.Printf("%+v\n", trkSummary)
 	fmt.Println(prettyprint(trkSummary))
@@ -78,7 +78,7 @@ func testDist2Point() {
 	speed := 4.5
 
 	gpx := Gpx{}
-	gpx.ParseFile(filename)
+	gpx.Parse(filename)
 
 	var printArgs PrintArgs = PrintArgs{AsciiFormat: true, PrintFrom: true}
 	fmt.Println(gpx.GetInfoBetweenTrkptsId(0, 4, speed).ToString(printArgs))

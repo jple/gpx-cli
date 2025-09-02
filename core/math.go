@@ -16,26 +16,6 @@ func DegToRad(deg float64) float64 {
 	return 2 * math.Pi / 360 * deg
 }
 
-func Dist(p1 Pt, p2 Pt) float64 {
-	// output: km
-	var R float64 = 6371
-
-	theta2 := DegToRad(p2.Lat)
-	theta1 := DegToRad(p1.Lat)
-	phi2 := DegToRad(p2.Lon)
-	phi1 := DegToRad(p1.Lon)
-
-	h := Haversin(theta2 - theta1)
-	h += math.Cos(theta1) * math.Cos(theta2) * Haversin(phi2-phi1)
-	out := R * Ahaversin(h)
-	return out
-
-}
-
-func DiffElevation(p1 Pt, p2 Pt) float64 {
-	return p2.Ele - p1.Ele
-}
-
 func FloatToHourMin(f float64) (int8, int8) {
 	hour := math.Floor(f)
 	minute := math.Floor((f - hour) * 60)
@@ -56,23 +36,26 @@ func CalcDuration(distance_plat float64, vitesse_plat float64) (float64, int8, i
 	return duration, durationHour, durationMin
 }
 
-type RollCalc func([]float64) float64
-
-func Mean(v []float64) float64 {
+func Sum(v []float64) float64 {
 	var out float64 = 0
 	for _, e := range v {
 		out += e
 	}
-	return out / float64(len(v))
+	return out
 }
 
-func Rolling(v []float64, winSize int, calc RollCalc) []float64 {
+func Mean(v []float64) float64 {
+	return Sum(v) / float64(len(v))
+}
+
+func Rolling(v []float64, winSize int, calc func([]float64) float64) []float64 {
 	var out []float64
 
 	n := len(v)
-	// if n < winSize ?
+	// TODO: if n < winSize ?
 
-	for i, _ := range v {
+	// for i := range v {
+	for i := 0; i < len(v)-winSize+1; i++ {
 		var s []float64
 		for j := 0; j < winSize; j++ {
 			s = append(s, v[i+j])
@@ -85,4 +68,27 @@ func Rolling(v []float64, winSize int, calc RollCalc) []float64 {
 	}
 
 	return out
+}
+
+// SumFunc returns sum of f(s[i], s[i-1])
+func SumFunc(s []float64, f func(curr, prev float64) float64) float64 {
+	var acc, prev float64
+	for i, curr := range s {
+		if i > 0 {
+			acc += f(curr, prev)
+		}
+		prev = curr
+	}
+	return acc
+}
+
+func CumAscent(s []float64) float64 {
+	return SumFunc(s, func(curr, prev float64) float64 {
+		return math.Max(curr-prev, 0)
+	})
+}
+func CumDescent(s []float64) float64 {
+	return SumFunc(s, func(curr, prev float64) float64 {
+		return math.Min(curr-prev, 0)
+	})
 }

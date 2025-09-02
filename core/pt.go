@@ -10,12 +10,32 @@ type Pt struct {
 	Ele float64 `xml:"ele,omitempty"`
 }
 
+func Dist(p1 Pt, p2 Pt) float64 {
+	// output: km
+	var R float64 = 6371
+
+	theta2 := DegToRad(p2.Lat)
+	theta1 := DegToRad(p1.Lat)
+	phi2 := DegToRad(p2.Lon)
+	phi1 := DegToRad(p1.Lon)
+
+	h := Haversin(theta2 - theta1)
+	h += math.Cos(theta1) * math.Cos(theta2) * Haversin(phi2-phi1)
+	out := R * Ahaversin(h)
+	return out
+
+}
+
+func DiffElevation(p1 Pt, p2 Pt) float64 {
+	return p2.Ele - p1.Ele
+}
+
 type Wpt struct {
 	Pt
 
 	// NOTE: innerxml to prevent escaping (more readable, less secure :/)
-	// Name *string `xml:"name,omitempty"`
-	Name *string `xml:",innerxml"`
+	Name *string `xml:"name,omitempty"`
+	// Name *string `xml:",innerxml"` // NOTE: parse not working !
 	Type *string `xml:"type,omitempty"`
 	Cmt  *string `xml:"cmt,omitempty"`
 }
@@ -31,141 +51,95 @@ type Trkpt struct {
 	} `xml:"extensions,omitempty"`
 }
 type Trkpts []Trkpt
-type ListTrkpts []Trkpts
 
 // TODO: create generics for AddName
-func (trkpt *Trkpt) AddName(name string) {
+func (trkpt *Trkpt) SetName(name string) {
 	trkpt.Name = &name
 }
-func (trkpt *Trkpt) AddElevation(ele float64) {
+func (trkpt *Trkpt) SetElevation(ele float64) {
 	trkpt.Ele = ele
 }
 
-// Returns a []float64 containing a specific calculation on each trkpt
-func (trkpts Trkpts) Map(calculation func(posPrev, pos Pt) float64) []float64 {
+// Returns a []float64 containing a specific calculation between each trkpt (first value is 0)
+func (trkpts Trkpts) MapDiff(f func(prev, curr Pt) float64) []float64 {
 	var res []float64
 	if len(trkpts) == 0 {
 		return res
 	}
 
-	posPrev := Pt{
-		Lon: trkpts[0].Lon,
-		Lat: trkpts[0].Lat,
-		Ele: trkpts[0].Ele,
-	}
+	prev := trkpts[0].Pt
 	for _, trkpt := range trkpts {
-		pos := Pt{
-			Lon: trkpt.Lon,
-			Lat: trkpt.Lat,
-			Ele: trkpt.Ele,
-		}
-		res = append(res, calculation(posPrev, pos))
-		posPrev = pos
-	}
-	return res
-}
-
-// Same as Map, but posPrev is replaced by p0
-func (trkpts Trkpts) Map0(calculation func(unusedPos, pos Pt) float64) []float64 {
-	var res []float64
-	pos0 := Pt{
-		Lon: trkpts[0].Lon,
-		Lat: trkpts[0].Lat,
-		Ele: trkpts[0].Ele,
-	}
-	for _, trkpt := range trkpts {
-		pos := Pt{
-			Lon: trkpt.Lon,
-			Lat: trkpt.Lat,
-			Ele: trkpt.Ele,
-		}
-		res = append(res, calculation(pos0, pos))
+		res = append(res, f(prev, trkpt.Pt))
+		prev = trkpt.Pt
 	}
 	return res
 }
 
 // Returns all trkpt Ele
 func (trkpts Trkpts) GetElevations() []float64 {
-	getCurrentEle := func(posPrev, pos Pt) float64 {
-		return pos.Ele
+	getCurrentEle := func(prev, curr Pt) float64 {
+		return curr.Ele
 	}
-	return trkpts.Map(getCurrentEle)
-}
-
-// Returns distance between each trkpt (first value set to 0)
-func (trkpts Trkpts) GetDistances() []float64 {
-	return trkpts.Map(Dist)
+	return trkpts.MapDiff(getCurrentEle)
 }
 
 // Returns distance between each trkpt (first value set to 0)
 func (trkpts Trkpts) GetCumulatedDistances() []float64 {
-	// return trkpts.Map0(Dist)
-
-	var cumdist []float64
-	for i := range trkpts {
-		cumdist = append(cumdist, trkpts[0:i].GetSummary(0).Distance)
+	var cumdist float64
+	getCumDist := func(prev, curr Pt) float64 {
+		cumdist += Dist(prev, curr)
+		return cumdist
 	}
-	return cumdist
-
+	return trkpts.MapDiff(getCumDist)
 }
 
 func (trkpts Trkpts) GetTotalDistance() float64 {
-	var d float64 = 0
-	dists := trkpts.GetDistances()
-	for _, dist := range dists {
-		d += dist
-	}
-	return d
+	return Sum(trkpts.MapDiff(Dist))
 }
 
-func (trkpts Trkpts) GetDiffElevations() []float64 {
-	return trkpts.Map(DiffElevation)
-}
-func (trkpts Trkpts) GetAscents() []float64 {
-	diffElevations := trkpts.GetDiffElevations()
-	var out []float64
-	for _, diffEle := range diffElevations {
-		out = append(out, math.Max(diffEle, 0))
+func checkIndex(i, j, n int) {
+	if i < 0 {
+		panic("i must be > 0")
+	} else if i > j {
+		panic("i must be <= j")
+	} else if j >= n {
+		panic("j must be < n")
 	}
-	return out
 }
-func (trkpts Trkpts) GetDescents() []float64 {
-	diffElevations := trkpts.GetDiffElevations()
-	var out []float64
-	for _, diffEle := range diffElevations {
-		out = append(out, math.Min(diffEle, 0))
-	}
-	return out
+
+// Calculate cumulated distance between two index of trk
+func (trkpts Trkpts) GetTotalDistanceFromTo(i, j int) float64 {
+	checkIndex(i, j, len(trkpts))
+	return trkpts[i : j+1].GetTotalDistance()
 }
 
 func (trkpts Trkpts) GetTotalAscent() float64 {
-	ascents := trkpts.GetAscents()
-	var out float64
-	for _, v := range ascents {
-		out += v
-	}
-	return out
+	// return CumAscent(trkpts.GetElevations())
+	//NOTE: testing
+	return CumAscent(Rolling(trkpts.GetElevations(), 10, Mean))
+	// return CumAscent(TrendSummary(Rolling(trkpts.GetElevations(), 5, Mean), 2).GetValues())
 }
 func (trkpts Trkpts) GetTotalDescent() float64 {
-	descents := trkpts.GetDescents()
-	var out float64
-	for _, v := range descents {
-		out += v
-	}
-	return out
+	// return CumDescent(trkpts.GetElevations())
+	//NOTE: testing
+	return CumDescent(Rolling(trkpts.GetElevations(), 10, Mean))
+	// return CumDescent(TrendSummary(Rolling(trkpts.GetElevations(), 5, Mean), 2).GetValues())
 }
 
-func (summary TrkptsSummary) GetFrom() string {
-	return summary.From
+func (trkpts Trkpts) FindName(name string) int {
+	for i, trkpt := range trkpts {
+		if trkpt.Name != nil && *trkpt.Name == name {
+			return i
+		}
+	}
+	panic(name + " not found in trkpts names")
+	return -1
 }
-func (summary *TrkptsSummary) SetFrom(s string) {
-	summary.From = s
-}
-func (summary TrkptsSummary) GetTo() string {
-	return summary.To
-}
-func (summary *TrkptsSummary) SetTo(s string) {
-	summary.To = s
+
+func (trkpts Trkpts) GetTotalDistanceFromToName(from, to string) float64 {
+	i := trkpts.FindName(from)
+	j := trkpts.FindName(to)
+	return trkpts.GetTotalDistanceFromTo(i, j)
 }
 
 func (trkpts Trkpts) GetSummary(vitessePlat float64) TrkptsSummary {

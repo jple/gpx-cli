@@ -1,9 +1,11 @@
 # Todo
 
+- rename
+    - ascent, uphill ?
+    - vitesse_plat
+    - ...
+
 - features
-    * calculation info between two nammed point
-        * get intersection between trk
-        * ...
     * get closest actual track using OSRM match function
     - **add func to get Ele, if missing**
         * https://geoservices.ign.fr/documentation/services/services-geoplateforme/altimetrie#72671
