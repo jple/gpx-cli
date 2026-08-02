@@ -10,7 +10,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	. "github.com/jple/gpx-cli/internal/gpx"
+	g "github.com/jple/gpx-cli/internal/gpx"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,9 +21,10 @@ func CreateTuiCmd() *cobra.Command {
 		Use:   "tui",
 		Short: "Visualize GPX in TUI mode",
 		Run: func(cmd *cobra.Command, args []string) {
-			flatSpeed := 4.5
+			// TODO: must be defined here
+			// flatSpeed := 4.5
 
-			var gpx Gpx
+			var gpx g.Gpx
 			if viper.GetString("filename") == "" {
 				fmt.Println("No GPX file loaded")
 				os.Exit(1)
@@ -32,14 +33,9 @@ func CreateTuiCmd() *cobra.Command {
 			}
 
 			var m tui.GpxTui = tui.GpxTui{
-<<<<<<< HEAD
-				GpxSummary: gpx.Summarize(flatSpeed),
-=======
-				GpxSummary: gpx.Stats(flatSpeed),
->>>>>>> refacto/reorg_export_stats
-				Gpx:        gpx,
+				Gpx: gpx,
 			}
-			p := tea.NewProgram(m)
+			p := tea.NewProgram(&m)
 			if _, err := p.Run(); err != nil {
 				fmt.Printf("Alas, there's been an error: %v", err)
 				os.Exit(1)

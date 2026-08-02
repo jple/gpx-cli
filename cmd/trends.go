@@ -16,7 +16,7 @@ func CreateTermPlotCmd() *cobra.Command {
 	flagsConf := []FlagConfig{
 		{
 			Name: "trk-id", Shortname: "t", DefaultValue: &trkId,
-			Description: "Details about i-th trk. Value 0 will display all trk summary",
+			Description: "Details about i-th trk. Value 0 will display all trk stat",
 		},
 	}
 

@@ -72,19 +72,18 @@ func TestFindTrkptsId(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
-func TestSummarizeBetweenTrkptsNames(t *testing.T) {
-	gpx := Gpx{}
-	gpx.Parse([]byte(findtrkpts_testset))
-
-	have := int(math.Floor(gpx.SummarizeBetweenTrkptsNames("b", "e", 4.5).Distance))
-=======
 func TestStatsBetweenTrkptsNames(t *testing.T) {
 	gpx := Gpx{}
 	gpx.Parse([]byte(findtrkpts_testset))
 
-	have := int(math.Floor(gpx.StatsBetweenTrkptsNames("b", "e", 4.5).Distance))
->>>>>>> refacto/reorg_export_stats
+	trkpts, err := GpxTrkptsBetweenNames(gpx, "b", "e")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stat := trkpts.Stats(4.5)
+
+	have := int(math.Floor(stat.Distance))
 	want := 50
 	if have != 50 {
 		t.Fatalf("Have distance %v, want %v\n", have, want)

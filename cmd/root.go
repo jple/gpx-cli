@@ -58,13 +58,7 @@ func init() {
 	rootCmd.AddCommand(CreateMergeGpxCmd())
 
 	rootCmd.AddCommand(CreateColorCmd())
-<<<<<<< HEAD
-	rootCmd.AddCommand(CreateHTMLSummaryCmd())
-=======
-	// TODO: reset after summary refacto
-	// rootCmd.AddCommand(CreateTuiCmd())
-	// rootCmd.AddCommand(CreateHTMLSummaryCmd())
->>>>>>> refacto/reorg_export_stats
+	rootCmd.AddCommand(CreateTuiCmd())
 }
 
 func Execute() error {

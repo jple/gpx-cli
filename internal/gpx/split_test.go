@@ -37,10 +37,14 @@ func TestSplitAtName(t *testing.T) {
 	gpx.Parse([]byte(split_trkpts_testset))
 	// gpx.Parse("data/split.gpx")
 <<<<<<< HEAD
+<<<<<<< HEAD
 	// gpx.Summarize(0.0).ToString(PrintArgs{})
 =======
 	// gpx.Stats(0.0).ToString(PrintArgs{})
 >>>>>>> refacto/reorg_export_stats
+=======
+	// gpx.Stats(0.0).ToString(PrintArgs{})
+>>>>>>> refacto/simplify_summary_struct
 
 	gpx1 := gpx
 	gpx2 := gpx

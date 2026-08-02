@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// TODO: change fmt.Print into log
 type Gpx struct {
 	XMLName xml.Name `xml:"gpx"`
 	// XMLName xml.Name `xml:"http://www.topografix.com/GPX/1/1 gpx"`
@@ -167,8 +168,6 @@ func (gpx Gpx) FindTrkptsIdByName(name string) (int, error) {
 	return -1, errors.New("Name not found")
 }
 
-<<<<<<< HEAD
-=======
 func GpxTrkptsBetweenIndex(gpx Gpx, i1, i2 int) (Trkpts, error) {
 	allTrkpts := gpx.AllTrkpts()
 	if i1 < 0 || i2 < 0 {
@@ -202,7 +201,10 @@ func GpxTrkptsBetweenNames(gpx Gpx, name1, name2 string) (Trkpts, error) {
 	return GpxTrkptsBetweenIndex(gpx, i1, i2)
 }
 
+<<<<<<< HEAD
 >>>>>>> refacto/reorg_export_stats
+=======
+>>>>>>> refacto/simplify_summary_struct
 // ------------------- Modifications ------------------------
 func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
 	gpx.Wpts = append(gpx.Wpts, wpt)
@@ -266,7 +268,11 @@ func (gpx *Gpx) Split(trkId, trksegId, trkptId int) {
 	if trksegId < 0 || trksegId >= len(gpx.Trks[trkId].Trksegs) {
 		return
 	}
+<<<<<<< HEAD
 	if trkptId < 0 || trkptId > len(gpx.Trks[trkId].Trksegs[trksegId].Trkpts) {
+=======
+	if trkptId < 0 || trkptId >= len(gpx.Trks[trkId].Trksegs[trksegId].Trkpts) {
+>>>>>>> refacto/simplify_summary_struct
 		return
 	}
 
@@ -286,7 +292,7 @@ func (gpx *Gpx) Split(trkId, trksegId, trkptId int) {
 		if len(trkseg_last.Trkpts) > 0 { // TODO: check
 			// if trkptId > 0 { // if non-empty
 			// out.Trksegs = slices.Concat(out.Trksegs, trksegs_aft)
-			out.Trksegs = append(out.Trksegs, trkseg_last)
+			out.Trksegs = slices.Concat(out.Trksegs, []Trkseg{trkseg_last}) // NOTE: using append would modify gpx, which is not wanted
 		}
 
 		return out
@@ -339,7 +345,10 @@ func (gpx *Gpx) Split(trkId, trksegId, trkptId int) {
 func (gpx *Gpx) SplitAtName(name string) {
 	found := false
 
+<<<<<<< HEAD
 	// out:
+=======
+>>>>>>> refacto/simplify_summary_struct
 	for i, trk := range gpx.Trks {
 		for j, trkseg := range trk.Trksegs {
 			for k, trkpt := range trkseg.Trkpts {
@@ -352,14 +361,22 @@ func (gpx *Gpx) SplitAtName(name string) {
 					gpx.Split(i, j, k)
 					return
 
+<<<<<<< HEAD
 					// break out
+=======
+>>>>>>> refacto/simplify_summary_struct
 				}
 			}
 		}
 	}
 
 	if !found {
+<<<<<<< HEAD
 		fmt.Printf("Name '%v' not found in gpx\n", name)
+=======
+		// TODO: this print is a pb in tui module
+		// fmt.Printf("Name '%v' not found in gpx\n", name)
+>>>>>>> refacto/simplify_summary_struct
 	}
 	return
 }

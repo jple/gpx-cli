@@ -6,11 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-<<<<<<< HEAD
-	. "github.com/jple/gpx-cli/internal/gpx"
-=======
 	"github.com/jple/gpx-cli/internal/gpx"
->>>>>>> refacto/reorg_export_stats
 )
 
 func CreateInfoCmd() *cobra.Command {
@@ -63,39 +59,12 @@ func CreateInfoCmd() *cobra.Command {
 			bindFlags(cmd, flagsConf)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-<<<<<<< HEAD
-			gpx := Gpx{}
-			gpx.Parse(viper.GetString("filename"))
-=======
 			g := gpx.Gpx{}
 			g.Parse(viper.GetString("filename"))
->>>>>>> refacto/reorg_export_stats
 
 			trkid := viper.GetInt("trk-id")
 			from := viper.GetString("from")
 			to := viper.GetString("to")
-<<<<<<< HEAD
-			if from != "" && to != "" {
-				// TODO: pouvoir afficher les name intermédiaires entre from et to avec un argument detail
-				fmt.Printf(
-					gpx.SummarizeBetweenTrkptsNames(
-						viper.GetString("from"),
-						viper.GetString("to"),
-						viper.GetFloat64("speed"),
-					).ToString())
-				return
-			}
-			if trkid > -1 {
-				fmt.Printf("[%v] ", trkid)
-				fmt.Println(
-					gpx.
-						Trks[trkid].
-						Summarize(trkid, viper.GetFloat64("speed")).
-						ToString(detail.Value()))
-				return
-			}
-			fmt.Println(gpx.Summarize(viper.GetFloat64("speed")).ToString(detail.Value()))
-=======
 
 			switch {
 			// Defaut case : User wants to display stat of all trks
@@ -104,7 +73,8 @@ func CreateInfoCmd() *cobra.Command {
 					g.Trks,
 					viper.GetFloat64("speed"),
 					detail.Value(),
-					viper.GetString("kind"))
+					viper.GetString("kind"),
+					nil)
 
 			// Case 1 : User wants to display stat between two named points
 			case from != "" && to != "":
@@ -124,7 +94,8 @@ func CreateInfoCmd() *cobra.Command {
 								gpx.Trkseg{trkpts}}}},
 					viper.GetFloat64("speed"),
 					true, // always show detail here
-					viper.GetString("kind"))
+					viper.GetString("kind"),
+					nil)
 
 			// Case 2 : User wants to display stat of a selected trk
 			case trkid >= 0:
@@ -132,10 +103,11 @@ func CreateInfoCmd() *cobra.Command {
 					[]gpx.Trk{g.Trks[trkid]},
 					viper.GetFloat64("speed"),
 					true, // always show detail here
-					viper.GetString("kind"))
+					viper.GetString("kind"),
+					nil)
 
 			}
->>>>>>> refacto/reorg_export_stats
+>>>>>>> refacto/simplify_summary_struct
 
 		},
 	}

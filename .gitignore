@@ -8,7 +8,7 @@ gpx-cli
 .envrc
 
 out/
-plot/
+# plot/
 src/
 wip/
 *.save

@@ -71,7 +71,7 @@ func (trk *Trk) Reverse() {
 
 // SplitByTrkptName creates TrkSections
 // where each Section is a []Trkpt from named item to next named item (included)
-// NOTE: the next named item is included in order to correctly calculate summary of Trkpts
+// NOTE: the next named item is included in order to correctly calculate geostatistic of Trkpts
 // Without it, the calculation would skip the calculation between TrkSections[i].Section[-1] and
 // TrkSections[i+1].Section[0]
 func (trk Trk) SplitByTrkptName() TrkSections {

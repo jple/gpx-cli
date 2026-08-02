@@ -1,14 +1,10 @@
 # Todo
 
-<<<<<<< HEAD
-=======
 - rename Trkpts to Section ?
 
 - refacto :
     * simplify summary struct... how ?
         + or split gpx, trk, trpt package ? each containing summary
-
->>>>>>> refacto/reorg_export_stats
 - features
     * get closest actual track using OSRM match function
 

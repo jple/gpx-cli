@@ -85,8 +85,6 @@ func (trkpts Trkpts) FindName(name string) int {
 	panic(name + " not found in trkpts names")
 	return -1
 }
-<<<<<<< HEAD
-=======
 
 const RollingWindowSize = 10
 
@@ -123,4 +121,3 @@ func (trkpts Trkpts) TotalAscent(rollingWindowSize int) float64 {
 func (trkpts Trkpts) TotalDescent(rollingWindowSize int) float64 {
 	return geo.TotalDescent(geo.Rolling(trkpts.Elevations(), rollingWindowSize, geo.Mean))
 }
->>>>>>> refacto/reorg_export_stats
