@@ -1,0 +1,47 @@
+{{ define "HTMLTop" }}
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="#" />
+    <title>HTML summary</title>
+    <style type="text/css">
+    table, th, td  {
+        border: 2px solid lightgrey;
+        border-collapse: collapse;
+    }
+    thead th {
+        border: 2px double black;
+        font-weight: bold;
+    }
+    tfoot td {
+        border: 2px double black;
+        font-weight: bold;
+    }
+    </style>
+    </head>
+<body>
+    <table>
+            {{ template "TableHeaderRows" . }}
+        <tbody>
+{{ end }}
+            {{ template "TableBodyRows" . }}
+{{ define "HTMLBottom" }}
+        </tbody>
+        <!-- <tfoot> -->
+            <!-- <tr> -->
+                <!-- <td>TOTAL</td> -->
+                <!-- <td></td> -->
+                <!-- <td></td> -->
+                <!-- <td></td> -->
+                <!-- <td>%.0f</td> -->
+                <!-- <td>%.0f</td> -->
+                <!-- <td>%.0f</td> -->
+                <!-- <td>%.0f</td> -->
+                <!-- <td></td> -->
+            <!-- </tr> -->
+        <!-- </tfoot> -->
+    </table>
+</body>
+</html>
+{{ end }}

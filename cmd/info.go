@@ -1,12 +1,16 @@
 package cmd
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+<<<<<<< HEAD
 	. "github.com/jple/gpx-cli/internal/gpx"
+=======
+	"github.com/jple/gpx-cli/internal/gpx"
+>>>>>>> refacto/reorg_export_stats
 )
 
 func CreateInfoCmd() *cobra.Command {
@@ -14,6 +18,7 @@ func CreateInfoCmd() *cobra.Command {
 	var speed FloatValue = 4.5
 	var trkId IntValue = -1
 	var from, to StringValue
+	var kind StringValue = "string"
 
 	flagsConf := []FlagConfig{
 		{
@@ -25,13 +30,16 @@ func CreateInfoCmd() *cobra.Command {
 			Description: "Hiking speed on flat (km/h)",
 		}, {
 			Name: "trk-id", Shortname: "t", DefaultValue: &trkId,
-			Description: "Details about i-th trk. Value -1 will display all trk summary",
+			Description: "Details about i-th trk. Value -1 will display all trk stat",
 		}, {
 			Name: "from", Shortname: "a", DefaultValue: &from,
 			Description: "Name from",
 		}, {
 			Name: "to", Shortname: "b", DefaultValue: &to,
 			Description: "Name to",
+		}, {
+			Name: "kind", Shortname: "k", DefaultValue: &kind,
+			Description: "Export type: string, csv, html",
 		},
 	}
 
@@ -55,12 +63,18 @@ func CreateInfoCmd() *cobra.Command {
 			bindFlags(cmd, flagsConf)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+<<<<<<< HEAD
 			gpx := Gpx{}
 			gpx.Parse(viper.GetString("filename"))
+=======
+			g := gpx.Gpx{}
+			g.Parse(viper.GetString("filename"))
+>>>>>>> refacto/reorg_export_stats
 
 			trkid := viper.GetInt("trk-id")
 			from := viper.GetString("from")
 			to := viper.GetString("to")
+<<<<<<< HEAD
 			if from != "" && to != "" {
 				// TODO: pouvoir afficher les name intermédiaires entre from et to avec un argument detail
 				fmt.Printf(
@@ -81,6 +95,47 @@ func CreateInfoCmd() *cobra.Command {
 				return
 			}
 			fmt.Println(gpx.Summarize(viper.GetFloat64("speed")).ToString(detail.Value()))
+=======
+
+			switch {
+			// Defaut case : User wants to display stat of all trks
+			default:
+				gpx.ExportStatsTrks(os.Stdout,
+					g.Trks,
+					viper.GetFloat64("speed"),
+					detail.Value(),
+					viper.GetString("kind"))
+
+			// Case 1 : User wants to display stat between two named points
+			case from != "" && to != "":
+				trkpts, err := gpx.GpxTrkptsBetweenNames(
+					g,
+					viper.GetString("from"),
+					viper.GetString("to"),
+				)
+				if err != nil {
+					panic(err)
+				}
+
+				gpx.ExportStatsTrks(os.Stdout,
+					[]gpx.Trk{
+						gpx.Trk{
+							Trksegs: []gpx.Trkseg{
+								gpx.Trkseg{trkpts}}}},
+					viper.GetFloat64("speed"),
+					true, // always show detail here
+					viper.GetString("kind"))
+
+			// Case 2 : User wants to display stat of a selected trk
+			case trkid >= 0:
+				gpx.ExportStatsTrks(os.Stdout,
+					[]gpx.Trk{g.Trks[trkid]},
+					viper.GetFloat64("speed"),
+					true, // always show detail here
+					viper.GetString("kind"))
+
+			}
+>>>>>>> refacto/reorg_export_stats
 
 		},
 	}

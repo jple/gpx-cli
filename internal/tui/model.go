@@ -1,3 +1,7 @@
+//go:build exclude
+
+// TODO: reset after summary refacto
+
 package tui
 
 import (
@@ -6,7 +10,11 @@ import (
 	"os"
 
 	"github.com/jple/gpx-cli/internal/gpx"
+<<<<<<< HEAD
 	"github.com/jple/gpx-cli/internal/summary"
+=======
+	"github.com/jple/gpx-cli/internal/gpx/summary"
+>>>>>>> refacto/reorg_export_stats
 
 	tea "github.com/charmbracelet/bubbletea"
 	sym "github.com/jple/text-symbol"
@@ -25,7 +33,11 @@ func (m GpxTui) Init() tea.Cmd {
 
 // TODO: redondunt name !
 type Section struct {
+<<<<<<< HEAD
 	summary.TrkptsSummary
+=======
+	summary.GeoStatistic
+>>>>>>> refacto/reorg_export_stats
 	TrkId int
 }
 
@@ -38,7 +50,11 @@ func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cursorMax += len(trkSummary.PerSection)
 		for _, section := range trkSummary.PerSection {
 			TrkSections = append(TrkSections,
+<<<<<<< HEAD
 				Section{TrkptsSummary: section, TrkId: i},
+=======
+				Section{GeoStatistic: section, TrkId: i},
+>>>>>>> refacto/reorg_export_stats
 			)
 		}
 	}
@@ -67,12 +83,20 @@ func (m GpxTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			selectedTrkId := TrkSections[m.cursor].TrkId
 			if selectedTrkId > 0 && selectedTrkId < len(m.Gpx.Trks) {
 				m.Gpx = m.Gpx.Merge(selectedTrkId-1, selectedTrkId)
+<<<<<<< HEAD
 				m.GpxSummary = m.Gpx.Summarize(flatSpeed)
+=======
+				m.GpxSummary = m.Gpx.Stats(flatSpeed)
+>>>>>>> refacto/reorg_export_stats
 			}
 			return m, nil
 		case "right":
 			m.Gpx.SplitAtName(TrkSections[m.cursor].To)
+<<<<<<< HEAD
 			m.GpxSummary = m.Gpx.Summarize(flatSpeed)
+=======
+			m.GpxSummary = m.Gpx.Stats(flatSpeed)
+>>>>>>> refacto/reorg_export_stats
 			return m, nil
 		case "s":
 			filename := "tata/0.gpx"
@@ -94,7 +118,11 @@ func FileExists(filename string) bool {
 func (m GpxTui) View() string {
 	var str string
 
+<<<<<<< HEAD
 	var TrkSections []summary.TrkptsSummary
+=======
+	var TrkSections []summary.GeoStatistic
+>>>>>>> refacto/reorg_export_stats
 	// Note: cursor is only going through TrkSections, not track name
 	for _, trkSummary := range m.GpxSummary.TrkSummaries {
 		for _, section := range trkSummary.PerSection {

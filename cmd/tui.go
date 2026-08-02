@@ -1,3 +1,5 @@
+//go:build exclude
+
 package cmd
 
 import (
@@ -30,7 +32,11 @@ func CreateTuiCmd() *cobra.Command {
 			}
 
 			var m tui.GpxTui = tui.GpxTui{
+<<<<<<< HEAD
 				GpxSummary: gpx.Summarize(flatSpeed),
+=======
+				GpxSummary: gpx.Stats(flatSpeed),
+>>>>>>> refacto/reorg_export_stats
 				Gpx:        gpx,
 			}
 			p := tea.NewProgram(m)

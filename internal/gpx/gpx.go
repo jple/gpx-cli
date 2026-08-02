@@ -167,6 +167,42 @@ func (gpx Gpx) FindTrkptsIdByName(name string) (int, error) {
 	return -1, errors.New("Name not found")
 }
 
+<<<<<<< HEAD
+=======
+func GpxTrkptsBetweenIndex(gpx Gpx, i1, i2 int) (Trkpts, error) {
+	allTrkpts := gpx.AllTrkpts()
+	if i1 < 0 || i2 < 0 {
+		return nil, fmt.Errorf("i1 and i2 must be >= 0\n")
+	}
+	if i1 >= len(allTrkpts) || i2 >= len(allTrkpts) {
+		return nil, fmt.Errorf("i1 and i2 must be < the number of all Trkpts\n")
+	}
+
+	var a, b int
+	if i1 <= i2 {
+		a = i1
+		b = i2
+	} else {
+		a = i2
+		b = i1
+	}
+
+	return allTrkpts[a : b+1], nil
+}
+
+func GpxTrkptsBetweenNames(gpx Gpx, name1, name2 string) (Trkpts, error) {
+	var i1, i2 int
+	var err error
+	if i1, err = gpx.FindTrkptsIdByName(name1); err != nil {
+		return nil, err
+	}
+	if i2, err = gpx.FindTrkptsIdByName(name2); err != nil {
+		return nil, err
+	}
+	return GpxTrkptsBetweenIndex(gpx, i1, i2)
+}
+
+>>>>>>> refacto/reorg_export_stats
 // ------------------- Modifications ------------------------
 func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
 	gpx.Wpts = append(gpx.Wpts, wpt)
