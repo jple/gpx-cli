@@ -1,7 +1,9 @@
 *.swp
 *.gpx
+*.html
 *.txt
 *.png
+gpx-cli
 
 .envrc
 

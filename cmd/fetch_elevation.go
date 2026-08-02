@@ -8,8 +8,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	. "github.com/jple/gpx-cli/core"
-	"github.com/jple/gpx-cli/ign"
+	. "github.com/jple/gpx-cli/internal/gpx"
+	"github.com/jple/gpx-cli/internal/ign"
+
+	"github.com/jple/gpx-cli/internal/geo"
 )
 
 func CreateFetchElevationCmd() *cobra.Command {
@@ -20,7 +22,7 @@ func CreateFetchElevationCmd() *cobra.Command {
 			gpx := Gpx{}
 			gpx.Parse(viper.GetString("filename"))
 
-			var pts ign.Points
+			var pts ign.Coords
 			// for _, trk := range gpx.Trks {
 			for i, trk := range gpx.Trks {
 				// for _, trkseg := range trk.Trksegs {
@@ -31,7 +33,7 @@ func CreateFetchElevationCmd() *cobra.Command {
 					for trkchunk := range slices.Chunk(trkseg.Trkpts, chunkSize) {
 						pts = nil
 						for _, trkpt := range trkchunk {
-							pts = append(pts, ign.Point{Lat: trkpt.Lat, Lon: trkpt.Lon})
+							pts = append(pts, geo.Coord{Lat: trkpt.Lat, Lon: trkpt.Lon})
 						}
 
 						queryAgain := true
@@ -52,7 +54,7 @@ func CreateFetchElevationCmd() *cobra.Command {
 						}
 
 						for k, _ := range trkchunk {
-							gpx.Trks[i].Trksegs[j].Trkpts[c*chunkSize+k].Ele = elevations[k]
+							gpx.Trks[i].Trksegs[j].Trkpts[c*chunkSize+k].Elevation = elevations[k]
 						}
 						c++
 					}

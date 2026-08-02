@@ -62,6 +62,10 @@ func (v BoolValue) Type() string {
 	return "BoolValue"
 }
 
+func (v BoolValue) Value() bool {
+	return bool(v)
+}
+
 // =======================
 type FloatValue float64 // int64
 

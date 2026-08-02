@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	. "github.com/jple/gpx-cli/core"
+	"github.com/jple/gpx-cli/internal/geo"
+
 	"github.com/spf13/cobra"
 )
 
@@ -21,9 +22,9 @@ representing 2 GPS coordinates`,
 			lat2, _ := strconv.ParseFloat(args[2], 64)
 			lon2, _ := strconv.ParseFloat(args[3], 64)
 
-			d := Dist(
-				Pt{Lat: lat1, Lon: lon1},
-				Pt{Lat: lat2, Lon: lon2},
+			d := geo.Dist(
+				geo.Coord{Lat: lat1, Lon: lon1},
+				geo.Coord{Lat: lat2, Lon: lon2},
 			)
 
 			fmt.Printf("Distance: %.1f km\n", d)

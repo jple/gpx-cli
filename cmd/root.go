@@ -59,6 +59,7 @@ func init() {
 
 	rootCmd.AddCommand(CreateTuiCmd())
 	rootCmd.AddCommand(CreateColorCmd())
+	rootCmd.AddCommand(CreateHTMLSummaryCmd())
 }
 
 func Execute() error {

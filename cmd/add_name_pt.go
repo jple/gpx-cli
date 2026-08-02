@@ -6,7 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	. "github.com/jple/gpx-cli/core"
+	"github.com/jple/gpx-cli/internal/geo"
+	. "github.com/jple/gpx-cli/internal/gpx"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -14,7 +16,7 @@ import (
 // getClosestTrkpts returns slice of pointers to Trkpt that are closest to p
 // This function is used to add name to trkpt in-place without the need to
 // specify Trk, Trkseg, Trkpt id
-func getClosestTrkpts(gpx Gpx, p Pt) []*Trkpt {
+func getClosestTrkpts(gpx Gpx, p geo.Coord) []*Trkpt {
 	var trkpts []*Trkpt
 	var minDist float64
 	// var ind struct{ i, j, k int }
@@ -23,10 +25,10 @@ func getClosestTrkpts(gpx Gpx, p Pt) []*Trkpt {
 		for j, _ := range gpx.Trks[i].Trksegs {
 			for k, trkpt := range gpx.Trks[i].Trksegs[j].Trkpts {
 				if i == 0 && j == 0 && k == 0 {
-					minDist = Dist(p, trkpt.Pt)
+					minDist = geo.Dist(p, trkpt.Coord)
 				}
 
-				d := Dist(p, trkpt.Pt)
+				d := geo.Dist(p, trkpt.Coord)
 
 				if d == minDist {
 					trkpts = append(trkpts, &gpx.Trks[i].Trksegs[j].Trkpts[k])
@@ -63,9 +65,9 @@ func CreateAddNameCmd() *cobra.Command {
 			gpx := Gpx{}
 			gpx.Parse(viper.GetString("filename"))
 
-			p := Pt{Lat: lat, Lon: lon}
+			p := geo.Coord{Lat: lat, Lon: lon}
 			// TODO: add test if already exists
-			gpx.AddWpt(Wpt{Name: &name, Pt: p})
+			gpx.AddWpt(Wpt{Name: &name, Coord: p})
 			closest := getClosestTrkpts(gpx, p)
 
 			for i, _ := range closest {

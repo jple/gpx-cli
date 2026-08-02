@@ -24,3 +24,11 @@ gpx-cli calc_effort km denivPos denivNeg
 
 
 ```
+
+# External source
+Elevation data are fetched from 
+* https://geoservices.ign.fr/documentation/services/services-geoplateforme/altimetrie#72671
+* https://data.geopf.fr/altimetrie/swagger-ui/index.html#/Resources/get_resources_1_0_resources__get
+
+GPX Documentation:  
+https://www.topografix.com/GPX/1/1/

@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	. "github.com/jple/gpx-cli/core"
+	. "github.com/jple/gpx-cli/internal/gpx"
 )
 
 func CreateSplitTrkCmd() *cobra.Command {
@@ -36,7 +36,7 @@ func CreateSplitTrkCmd() *cobra.Command {
 
 			// Split on name input
 			if name := viper.GetString("name"); name != "" {
-				gpx = gpx.SplitAtName(name)
+				gpx.SplitAtName(name)
 			}
 
 			// Split on closest point (lat, lon) input

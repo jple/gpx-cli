@@ -10,7 +10,9 @@ import (
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 
-	. "github.com/jple/gpx-cli/core"
+	"github.com/jple/gpx-cli/internal/geo"
+	. "github.com/jple/gpx-cli/internal/gpx"
+	"github.com/jple/gpx-cli/internal/plot"
 )
 
 func CreatePlotCmd() *cobra.Command {
@@ -36,13 +38,13 @@ func CreatePlotCmd() *cobra.Command {
 			gpx.Parse(viper.GetString("filename"))
 			trk := gpx.Trks[viper.GetInt("trk-id")]
 
-			rawXY := XY{trk.GetTrkpts().GetCumulatedDistances(), trk.GetTrkpts().GetElevations()}
+			rawXY := plot.XY{trk.AllTrkpts().CumulativeDistances(), trk.AllTrkpts().Elevations()}
 			rollXY := rawXY.CenterRollY(5)
 			trendXY := rollXY.TrendY(2)
 
 			// Create graph
-			graphs := []Graph{
-				CreateGraph(
+			graphs := []plot.Graph{
+				plot.CreateGraph(
 					rawXY,
 					"raw",
 					&draw.LineStyle{
@@ -52,7 +54,7 @@ func CreatePlotCmd() *cobra.Command {
 					&draw.GlyphStyle{},
 				),
 
-				CreateGraph(
+				plot.CreateGraph(
 					rollXY,
 					"rolling mean",
 					&draw.LineStyle{
@@ -63,7 +65,7 @@ func CreatePlotCmd() *cobra.Command {
 					&draw.GlyphStyle{},
 				),
 
-				CreateGraph(
+				plot.CreateGraph(
 					trendXY,
 					"trend",
 					&draw.LineStyle{
@@ -82,7 +84,7 @@ func CreatePlotCmd() *cobra.Command {
 			// Calculate data for subtitle
 			XYs := []struct {
 				Name string
-				This XY
+				This plot.XY
 			}{
 				{"raw", rawXY},
 				{"roll", rollXY},
@@ -91,9 +93,9 @@ func CreatePlotCmd() *cobra.Command {
 			var subtitle string
 			for _, xy := range XYs {
 				subtitle += fmt.Sprintf("[%v] min: %.0f | max: %.0f | ascents: %.0f | descents: %.0f\n",
-					xy.Name, slices.Min(xy.This.Y), slices.Max(xy.This.Y), CumAscent(xy.This.Y), CumDescent(xy.This.Y))
+					xy.Name, slices.Min(xy.This.Y), slices.Max(xy.This.Y), geo.TotalAscent(xy.This.Y), geo.TotalDescent(xy.This.Y))
 			}
-			p := NewPlot(
+			p := plot.NewPlot(
 				trk.Name+"\n"+subtitle,
 				"Distance (km)", "Elevation (m)",
 				graphs)

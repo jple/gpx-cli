@@ -5,7 +5,8 @@ import (
 	"fmt"
 
 	"github.com/jple/gpx-cli/cmd"
-	. "github.com/jple/gpx-cli/core"
+	. "github.com/jple/gpx-cli/internal/gpx"
+	"github.com/jple/gpx-cli/internal/summary"
 )
 
 func prettyprint(in any) string {
@@ -18,12 +19,12 @@ func prettyprint(in any) string {
 }
 
 // TODO: move to test
-func TestNPoints() {
-	vitessePlat := 4.5
+func TestTrkptsLen() {
+	flatSpeed := 4.5
 	gpx := Gpx{}
 	// gpx.Parse("core/test/data/split.gpx")
 	gpx.Parse("core/test/data/npoints.gpx")
-	gpxSummary := gpx.GetInfo(vitessePlat)
+	gpxSummary := gpx.Summarize(flatSpeed)
 
 	var countingTrkpt = func(trk Trk) int {
 		n := 0
@@ -33,31 +34,31 @@ func TestNPoints() {
 		return n
 	}
 
-	var sumTrkNPoints = func(trkSummary TrkSummary) int {
+	var sumTrkptsLen = func(trkSummary summary.TrkSummary) int {
 		var n int
-		for _, section := range trkSummary.ListTrkptsSummary {
-			n += section.NPoints
+		for _, section := range trkSummary.PerSection {
+			n += section.Len()
 		}
 		return n
 	}
 
-	var trackNPoints = func(trkSummary TrkSummary) int {
-		return trkSummary.Track.NPoints
+	var trackLen = func(trkSummary summary.TrkSummary) int {
+		return trkSummary.AllSections.Len()
 	}
 
 	want := countingTrkpt(gpx.Trks[0])
-	have := sumTrkNPoints(gpxSummary.Trks[0].TrkSummary)
-	have2 := trackNPoints(gpxSummary.Trks[0].TrkSummary)
+	have := sumTrkptsLen(gpxSummary.TrkSummaries[0].TrkSummary)
+	have2 := trackLen(gpxSummary.TrkSummaries[0].TrkSummary)
 	if have != want {
 	}
 
 	fmt.Printf("have2: %v\n", have2)
-	fmt.Printf("have : %v trkpts\nwants : %v trkSummary.NPoints\n", have, want)
+	fmt.Printf("have : %v trkpts\nwants : %v trkSummary.Len() \n", have, want)
 
-	for _, section := range gpxSummary.Trks[0].ListTrkptsSummary {
+	for _, section := range gpxSummary.TrkSummaries[0].PerSection {
 		fmt.Println(section.From)
-		fmt.Println(section.NPoints)
-		fmt.Println(section.DenivPos)
+		fmt.Println(section.Len())
+		fmt.Println(section.TotalAscent)
 		// fmt.Printf("seg: %v, pt: %v\n", *section.FromTrksegId, *section.FromTrkptId)
 	}
 }
@@ -65,10 +66,10 @@ func TestNPoints() {
 func test() {
 	gpx := Gpx{}
 	gpx.Parse("core/test/data/npoints.gpx")
-	trkSummary := gpx.Trks[0].GetInfo(0, 4.5)
+	trkSummary := gpx.Trks[0].Summarize(0, 4.5)
 	fmt.Printf("%+v\n", trkSummary)
 	fmt.Println(prettyprint(trkSummary))
-	// fmt.Println(trkSummary.ToString(PrintArgs{PrintFrom: true}))
+	// fmt.Println(trkSummary.ToString(summary.PrintArgs{ShowFromTo: true}))
 }
 
 func testDist2Point() {
@@ -80,25 +81,30 @@ func testDist2Point() {
 	gpx := Gpx{}
 	gpx.Parse(filename)
 
-	var printArgs PrintArgs = PrintArgs{AsciiFormat: true, PrintFrom: true}
-	fmt.Println(gpx.GetInfoBetweenTrkptsId(0, 4, speed).ToString(printArgs))
+	fmt.Println(gpx.SummarizeBetweenTrkptsIndex(0, 4, speed).ToString())
 
 	fmt.Println("============")
 	if from == "" || to == "" {
 		fmt.Println("from and to must be filled")
 	} else {
-		fmt.Println(gpx.GetInfoBetweenName(from, to, speed).ToString(printArgs))
+		fmt.Println(gpx.SummarizeBetweenTrkptsNames(from, to, speed).ToString())
 	}
 
 }
 
 func main() {
 	// test()
-	// TestNPoints()
+	// TestTrkptsLen()
 	// sym.ShowUnicode()
 
 	cmd.Execute()
 
 	// testDist2Point()
+
+	// gpx := Gpx{}
+	// gpx.Parse("testfile/gr54-oisans-argentiere.gpx")
+	// // csv := gpx.Summarize(4.5).ToCsv()
+	// csv := gpx.Summarize(4.5).ToHTML()
+	// fmt.Println(csv)
 
 }

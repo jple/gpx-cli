@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	tea "github.com/charmbracelet/bubbletea"
-	tui "github.com/jple/gpx-cli/tui"
+	tui "github.com/jple/gpx-cli/internal/tui"
 
-	. "github.com/jple/gpx-cli/core"
+	tea "github.com/charmbracelet/bubbletea"
+
+	. "github.com/jple/gpx-cli/internal/gpx"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -17,7 +19,7 @@ func CreateTuiCmd() *cobra.Command {
 		Use:   "tui",
 		Short: "Visualize GPX in TUI mode",
 		Run: func(cmd *cobra.Command, args []string) {
-			vitessePlat := 4.5
+			flatSpeed := 4.5
 
 			var gpx Gpx
 			if viper.GetString("filename") == "" {
@@ -28,7 +30,7 @@ func CreateTuiCmd() *cobra.Command {
 			}
 
 			var m tui.GpxTui = tui.GpxTui{
-				GpxSummary: gpx.GetInfo(vitessePlat),
+				GpxSummary: gpx.Summarize(flatSpeed),
 				Gpx:        gpx,
 			}
 			p := tea.NewProgram(m)

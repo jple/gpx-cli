@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	. "github.com/jple/gpx-cli/core"
+	. "github.com/jple/gpx-cli/internal/gpx"
 )
 
 func CreateInfoCmd() *cobra.Command {
@@ -58,38 +58,29 @@ func CreateInfoCmd() *cobra.Command {
 			gpx := Gpx{}
 			gpx.Parse(viper.GetString("filename"))
 
-			var printArgs PrintArgs = PrintArgs{AsciiFormat: true}
-
 			trkid := viper.GetInt("trk-id")
 			from := viper.GetString("from")
 			to := viper.GetString("to")
 			if from != "" && to != "" {
-				// TODO: pouvoir afficher les name intermédiaires entre from et to 
-				// avec un argument detail
-				var printArgs PrintArgs = PrintArgs{AsciiFormat: true, PrintFrom: true}
-				// NOTE: print car GpxSummary ne print pas
-				// TODO: retirer le print de tous les ToString, et faire un print à l'utilisation
-				fmt.Println(
-					gpx.GetInfoBetweenName(
+				// TODO: pouvoir afficher les name intermédiaires entre from et to avec un argument detail
+				fmt.Printf(
+					gpx.SummarizeBetweenTrkptsNames(
 						viper.GetString("from"),
 						viper.GetString("to"),
 						viper.GetFloat64("speed"),
-					).ToString(printArgs))
+					).ToString())
 				return
 			}
 			if trkid > -1 {
-				printArgs.PrintFrom = true
-
 				fmt.Printf("[%v] ", trkid)
 				fmt.Println(
 					gpx.
 						Trks[trkid].
-						GetInfo(trkid, viper.GetFloat64("speed")).
-						ToString(printArgs))
+						Summarize(trkid, viper.GetFloat64("speed")).
+						ToString(detail.Value()))
 				return
 			}
-			printArgs.PrintFrom = bool(detail)
-			gpx.GetInfo(viper.GetFloat64("speed")).ToString(printArgs)
+			fmt.Println(gpx.Summarize(viper.GetFloat64("speed")).ToString(detail.Value()))
 
 		},
 	}
