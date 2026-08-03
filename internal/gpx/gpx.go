@@ -201,10 +201,6 @@ func GpxTrkptsBetweenNames(gpx Gpx, name1, name2 string) (Trkpts, error) {
 	return GpxTrkptsBetweenIndex(gpx, i1, i2)
 }
 
-<<<<<<< HEAD
->>>>>>> refacto/reorg_export_stats
-=======
->>>>>>> refacto/simplify_summary_struct
 // ------------------- Modifications ------------------------
 func (gpx *Gpx) AddWpt(wpt Wpt) Gpx {
 	gpx.Wpts = append(gpx.Wpts, wpt)
@@ -268,11 +264,7 @@ func (gpx *Gpx) Split(trkId, trksegId, trkptId int) {
 	if trksegId < 0 || trksegId >= len(gpx.Trks[trkId].Trksegs) {
 		return
 	}
-<<<<<<< HEAD
-	if trkptId < 0 || trkptId > len(gpx.Trks[trkId].Trksegs[trksegId].Trkpts) {
-=======
 	if trkptId < 0 || trkptId >= len(gpx.Trks[trkId].Trksegs[trksegId].Trkpts) {
->>>>>>> refacto/simplify_summary_struct
 		return
 	}
 
@@ -345,10 +337,6 @@ func (gpx *Gpx) Split(trkId, trksegId, trkptId int) {
 func (gpx *Gpx) SplitAtName(name string) {
 	found := false
 
-<<<<<<< HEAD
-	// out:
-=======
->>>>>>> refacto/simplify_summary_struct
 	for i, trk := range gpx.Trks {
 		for j, trkseg := range trk.Trksegs {
 			for k, trkpt := range trkseg.Trkpts {
@@ -361,22 +349,14 @@ func (gpx *Gpx) SplitAtName(name string) {
 					gpx.Split(i, j, k)
 					return
 
-<<<<<<< HEAD
-					// break out
-=======
->>>>>>> refacto/simplify_summary_struct
 				}
 			}
 		}
 	}
 
 	if !found {
-<<<<<<< HEAD
-		fmt.Printf("Name '%v' not found in gpx\n", name)
-=======
 		// TODO: this print is a pb in tui module
 		// fmt.Printf("Name '%v' not found in gpx\n", name)
->>>>>>> refacto/simplify_summary_struct
 	}
 	return
 }

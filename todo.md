@@ -1,11 +1,7 @@
 # Todo
 
-- rename Trkpts to Section ?
-
-- refacto :
-    * simplify summary struct... how ?
-        + or split gpx, trk, trpt package ? each containing summary
 - features
+    * get point of interest next to gpx data from OSM
     * get closest actual track using OSRM match function
 
 

@@ -1,10 +1,7 @@
-//go:build exclude
-
 package cmd
 
 import (
 	"fmt"
-	"os"
 
 	tui "github.com/jple/gpx-cli/internal/tui"
 
@@ -27,7 +24,7 @@ func CreateTuiCmd() *cobra.Command {
 			var gpx g.Gpx
 			if viper.GetString("filename") == "" {
 				fmt.Println("No GPX file loaded")
-				os.Exit(1)
+				return
 			} else {
 				gpx.Parse(viper.GetString("filename"))
 			}
@@ -38,7 +35,7 @@ func CreateTuiCmd() *cobra.Command {
 			p := tea.NewProgram(&m)
 			if _, err := p.Run(); err != nil {
 				fmt.Printf("Alas, there's been an error: %v", err)
-				os.Exit(1)
+				return
 			}
 
 		},

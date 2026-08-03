@@ -107,7 +107,6 @@ func CreateInfoCmd() *cobra.Command {
 					nil)
 
 			}
->>>>>>> refacto/simplify_summary_struct
 
 		},
 	}
