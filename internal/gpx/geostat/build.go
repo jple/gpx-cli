@@ -1,6 +1,7 @@
 package geostat
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"io"
@@ -9,8 +10,8 @@ import (
 	"strings"
 )
 
-// TODO: possible to use relative url ?
-const tmplPath string = "internal/gpx/geostat/template/"
+//go:embed template/*.html
+var HTMLtemplates embed.FS
 
 func buildHeaders(opt Option) []string {
 	headers := []string{
@@ -115,12 +116,7 @@ func (s GeoStatistic) writeValuesCsv(w io.Writer, i *int, opt Option) (err error
 // func (s GeoStatistic) writeFooterCsv(w io.Writer) (err error) {}
 
 func loadHTMLTemplate() (*template.Template, error) {
-	// NOTE: table*.html can be merge. Requires setting th/td as argument
-	return template.ParseFiles([]string{
-		tmplPath + "table_header_rows.html",
-		tmplPath + "template.html",
-		tmplPath + "table_body_rows.html",
-	}...)
+	return template.ParseFS(HTMLtemplates, "template/*.html")
 }
 
 func (s GeoStatistic) writeHeaderHTML(w io.Writer, opt Option) (err error) {
